@@ -8,6 +8,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import {
   House,
   User,
@@ -32,11 +33,12 @@ import {
 import { motion } from 'framer-motion'
 import { Drawer } from 'vaul'
 import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { es, enUS } from 'date-fns/locale'
 import { ClipLoader, PulseLoader, BeatLoader } from 'react-spinners'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { LanguageSwitcher } from '@/components/ui/language-switcher'
 
 // Carousel imports
 import useEmblaCarousel from 'embla-carousel-react'
@@ -67,6 +69,9 @@ import {
 
 export default function ShowcasePage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const t = useTranslations('showcase')
+  const locale = useLocale()
+  const dateLocale = locale === 'es' ? es : enUS
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
@@ -76,15 +81,18 @@ export default function ShowcasePage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
-                Components Showcase
+                {t('title')}
               </h1>
               <p className="text-sm text-muted-foreground">
-                Demo de librerías modernas UI/UX
+                {t('description')}
               </p>
             </div>
-            <Badge variant="outline" className="hidden md:flex">
-              {format(new Date(), "PPP", { locale: es })}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
+              <Badge variant="outline" className="hidden md:flex">
+                {format(new Date(), "PPP", { locale: dateLocale })}
+              </Badge>
+            </div>
           </div>
         </div>
       </div>
@@ -95,16 +103,16 @@ export default function ShowcasePage() {
         {/* 1. PHOSPHOR ICONS */}
         <section>
           <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">1. Phosphor Icons</h2>
+            <h2 className="text-3xl font-bold mb-2">1. {t('phosphor.title')}</h2>
             <p className="text-muted-foreground">
-              6,000+ iconos modernos con 6 estilos diferentes (thin, light, regular, bold, fill, duotone)
+              {t('phosphor.description')}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Regular Weight</CardTitle>
+                <CardTitle className="text-lg">{t('phosphor.regular')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-4">
@@ -122,7 +130,7 @@ export default function ShowcasePage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Bold Weight</CardTitle>
+                <CardTitle className="text-lg">{t('phosphor.bold')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-4">
@@ -140,7 +148,7 @@ export default function ShowcasePage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Duotone Weight</CardTitle>
+                <CardTitle className="text-lg">{t('phosphor.duotone')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-4">
@@ -159,33 +167,33 @@ export default function ShowcasePage() {
 
           <Card className="mt-4">
             <CardHeader>
-              <CardTitle className="text-lg">Todos los Pesos Disponibles</CardTitle>
+              <CardTitle className="text-lg">{t('phosphor.allWeights')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
                 <div className="flex flex-col items-center gap-2">
                   <Heart size={48} weight="thin" className="text-red-500" />
-                  <span className="text-sm">Thin</span>
+                  <span className="text-sm">{t('phosphor.thin')}</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                   <Heart size={48} weight="light" className="text-red-500" />
-                  <span className="text-sm">Light</span>
+                  <span className="text-sm">{t('phosphor.light')}</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                   <Heart size={48} weight="regular" className="text-red-500" />
-                  <span className="text-sm">Regular</span>
+                  <span className="text-sm">{t('phosphor.regular')}</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                   <Heart size={48} weight="bold" className="text-red-500" />
-                  <span className="text-sm">Bold</span>
+                  <span className="text-sm">{t('phosphor.bold')}</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                   <Heart size={48} weight="fill" className="text-red-500" />
-                  <span className="text-sm">Fill</span>
+                  <span className="text-sm">{t('phosphor.fill')}</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                   <Heart size={48} weight="duotone" className="text-red-500" />
-                  <span className="text-sm">Duotone</span>
+                  <span className="text-sm">{t('phosphor.duotone')}</span>
                 </div>
               </div>
             </CardContent>
@@ -195,15 +203,15 @@ export default function ShowcasePage() {
         {/* 2. TABLER ICONS */}
         <section>
           <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">2. Tabler Icons</h2>
+            <h2 className="text-3xl font-bold mb-2">2. {t('tabler.title')}</h2>
             <p className="text-muted-foreground">
-              5,000+ iconos outline style, perfecto para dashboards y complemento de Phosphor
+              {t('tabler.description')}
             </p>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Iconos de Tabler</CardTitle>
+              <CardTitle className="text-lg">{t('tabler.icons')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -231,47 +239,47 @@ export default function ShowcasePage() {
         {/* 3. EMBLA CAROUSEL */}
         <section>
           <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">3. Embla Carousel (Swipe)</h2>
+            <h2 className="text-3xl font-bold mb-2">3. {t('carousel.title')}</h2>
             <p className="text-muted-foreground">
-              Carousel ultra ligero (3kb) con gestos táctiles nativos
+              {t('carousel.description')}
             </p>
           </div>
 
-          <CarouselDemo />
+          <CarouselDemo t={t} />
         </section>
 
         {/* 4. RECHARTS */}
         <section>
           <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">4. Recharts - Gráficos</h2>
+            <h2 className="text-3xl font-bold mb-2">4. {t('charts.title')}</h2>
             <p className="text-muted-foreground">
-              Gráficos modernos basados en D3 con componentes React nativos
+              {t('charts.description')}
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ChartsDemo />
+            <ChartsDemo t={t} />
           </div>
         </section>
 
         {/* 5. FRAMER MOTION */}
         <section>
           <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">5. Framer Motion</h2>
+            <h2 className="text-3xl font-bold mb-2">5. {t('motion.title')}</h2>
             <p className="text-muted-foreground">
-              Animaciones fluidas y gestos táctiles
+              {t('motion.description')}
             </p>
           </div>
 
-          <AnimationsDemo />
+          <AnimationsDemo t={t} />
         </section>
 
         {/* 6. VAUL (Bottom Drawer) */}
         <section>
           <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">6. Vaul - Bottom Sheet</h2>
+            <h2 className="text-3xl font-bold mb-2">6. {t('drawer.title')}</h2>
             <p className="text-muted-foreground">
-              Drawer desde abajo con gestos nativos (iOS/Android style)
+              {t('drawer.description')}
             </p>
           </div>
 
@@ -281,7 +289,7 @@ export default function ShowcasePage() {
                 onClick={() => setIsDrawerOpen(true)}
                 className="w-full"
               >
-                Abrir Bottom Sheet
+                {t('drawer.open')}
               </Button>
             </CardContent>
           </Card>
@@ -294,20 +302,19 @@ export default function ShowcasePage() {
                   <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-slate-300 mb-8" />
                   <div className="max-w-md mx-auto">
                     <Drawer.Title className="font-bold text-2xl mb-4">
-                      Bottom Sheet Demo
+                      {t('drawer.demoTitle')}
                     </Drawer.Title>
                     <Drawer.Description className="text-muted-foreground mb-6">
-                      Puedes hacer swipe hacia abajo para cerrar o usar gestos táctiles
+                      {t('drawer.demoDescription')}
                     </Drawer.Description>
                     <div className="space-y-4">
                       <Card>
                         <CardHeader>
-                          <CardTitle>Contenido del Drawer</CardTitle>
+                          <CardTitle>{t('drawer.content')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                           <p className="text-sm text-muted-foreground">
-                            Este componente funciona perfecto en iOS y Android con gestos nativos.
-                            Incluye snap points, momentum scrolling y haptic feedback.
+                            {t('drawer.contentDescription')}
                           </p>
                         </CardContent>
                       </Card>
@@ -316,7 +323,7 @@ export default function ShowcasePage() {
                         variant="outline"
                         className="w-full"
                       >
-                        Cerrar
+                        {t('drawer.close')}
                       </Button>
                     </div>
                   </div>
@@ -329,9 +336,9 @@ export default function ShowcasePage() {
         {/* 7. SPINNERS */}
         <section>
           <div className="mb-6">
-            <h2 className="text-3xl font-bold mb-2">7. React Spinners</h2>
+            <h2 className="text-3xl font-bold mb-2">7. {t('spinners.title')}</h2>
             <p className="text-muted-foreground">
-              Loaders modernos y livianos
+              {t('spinners.description')}
             </p>
           </div>
 
@@ -340,15 +347,15 @@ export default function ShowcasePage() {
               <div className="flex flex-wrap items-center justify-around gap-8">
                 <div className="flex flex-col items-center gap-2">
                   <ClipLoader color="#3b82f6" size={50} />
-                  <span className="text-sm">Clip Loader</span>
+                  <span className="text-sm">{t('spinners.clip')}</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                   <PulseLoader color="#10b981" size={15} />
-                  <span className="text-sm">Pulse Loader</span>
+                  <span className="text-sm">{t('spinners.pulse')}</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                   <BeatLoader color="#f59e0b" size={15} />
-                  <span className="text-sm">Beat Loader</span>
+                  <span className="text-sm">{t('spinners.beat')}</span>
                 </div>
               </div>
             </CardContent>
@@ -360,10 +367,10 @@ export default function ShowcasePage() {
           <CardContent className="pt-6">
             <div className="text-center">
               <h3 className="text-xl font-bold mb-2">
-                ✨ Stack Moderno y Optimizado
+                ✨ {t('footer.title')}
               </h3>
               <p className="text-white/90 mb-4">
-                Todas estas librerías están optimizadas para mobile, Capacitor y desktop
+                {t('footer.description')}
               </p>
               <div className="flex flex-wrap justify-center gap-2">
                 <Badge variant="secondary">Embla Carousel</Badge>
@@ -383,21 +390,21 @@ export default function ShowcasePage() {
 }
 
 // Carousel Component
-function CarouselDemo() {
+function CarouselDemo({ t }: { t: any }) {
   const [emblaRef] = useEmblaCarousel({ loop: true, align: 'start' })
 
   const slides = [
-    { id: 1, color: 'from-blue-400 to-blue-600', title: 'Slide 1', icon: Camera },
-    { id: 2, color: 'from-purple-400 to-purple-600', title: 'Slide 2', icon: Lightning },
-    { id: 3, color: 'from-pink-400 to-pink-600', title: 'Slide 3', icon: Star },
-    { id: 4, color: 'from-orange-400 to-orange-600', title: 'Slide 4', icon: ChatCircle },
+    { id: 1, color: 'from-blue-400 to-blue-600', icon: Camera },
+    { id: 2, color: 'from-purple-400 to-purple-600', icon: Lightning },
+    { id: 3, color: 'from-pink-400 to-pink-600', icon: Star },
+    { id: 4, color: 'from-orange-400 to-orange-600', icon: ChatCircle },
   ]
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Swipe Horizontal</CardTitle>
-        <CardDescription>Desliza hacia los lados (touch o mouse)</CardDescription>
+        <CardTitle>{t('carousel.swipeTitle')}</CardTitle>
+        <CardDescription>{t('carousel.swipeDescription')}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="overflow-hidden" ref={emblaRef}>
@@ -406,8 +413,8 @@ function CarouselDemo() {
               <div key={slide.id} className="flex-[0_0_80%] md:flex-[0_0_45%] lg:flex-[0_0_30%]">
                 <div className={`bg-gradient-to-br ${slide.color} rounded-xl p-8 text-white h-64 flex flex-col items-center justify-center`}>
                   <slide.icon size={64} weight="duotone" />
-                  <h3 className="text-2xl font-bold mt-4">{slide.title}</h3>
-                  <p className="text-white/80 mt-2">Swipe para ver más</p>
+                  <h3 className="text-2xl font-bold mt-4">{t('carousel.slide', { number: slide.id })}</h3>
+                  <p className="text-white/80 mt-2">{t('carousel.swipeMore')}</p>
                 </div>
               </div>
             ))}
@@ -419,7 +426,7 @@ function CarouselDemo() {
 }
 
 // Charts Component
-function ChartsDemo() {
+function ChartsDemo({ t }: { t: any }) {
   const lineData = [
     { name: 'Ene', ventas: 4000, gastos: 2400 },
     { name: 'Feb', ventas: 3000, gastos: 1398 },
@@ -460,7 +467,7 @@ function ChartsDemo() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ChartLine size={24} weight="duotone" />
-            Line Chart
+            {t('charts.line')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -482,7 +489,7 @@ function ChartsDemo() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconChartPie size={24} />
-            Bar Chart
+            {t('charts.bar')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -502,7 +509,7 @@ function ChartsDemo() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconTrendingUp size={24} />
-            Pie Chart
+            {t('charts.pie')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -532,7 +539,7 @@ function ChartsDemo() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Star size={24} weight="duotone" />
-            Radar Chart
+            {t('charts.radar')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -552,12 +559,12 @@ function ChartsDemo() {
 }
 
 // Animations Component
-function AnimationsDemo() {
+function AnimationsDemo({ t }: { t: any }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Hover Scale</CardTitle>
+          <CardTitle className="text-lg">{t('motion.hoverScale')}</CardTitle>
         </CardHeader>
         <CardContent>
           <motion.div
@@ -566,14 +573,14 @@ function AnimationsDemo() {
             whileTap={{ scale: 0.95 }}
           >
             <Lightning size={48} weight="duotone" className="mx-auto" />
-            <p className="mt-2">Hover me!</p>
+            <p className="mt-2">{t('motion.hoverMe')}</p>
           </motion.div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Rotate Animation</CardTitle>
+          <CardTitle className="text-lg">{t('motion.rotate')}</CardTitle>
         </CardHeader>
         <CardContent>
           <motion.div
@@ -582,14 +589,14 @@ function AnimationsDemo() {
             transition={{ duration: 0.5 }}
           >
             <Gear size={48} weight="duotone" className="mx-auto" />
-            <p className="mt-2">Hover me!</p>
+            <p className="mt-2">{t('motion.hoverMe')}</p>
           </motion.div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Drag</CardTitle>
+          <CardTitle className="text-lg">{t('motion.drag')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 h-40 flex items-center justify-center">

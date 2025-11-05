@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations, useLocale } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -48,7 +49,12 @@ type RegisterFormData = RegisterWithEmailInput | RegisterWithPhoneInput
 
 export function RegisterForm() {
   const router = useRouter()
+  const locale = useLocale()
   const { toast } = useToast()
+  const t = useTranslations('auth.register')
+  const tOAuth = useTranslations('auth.oauth')
+  const tCommon = useTranslations('common')
+
   const [isLoading, setIsLoading] = useState(false)
   const [accountType, setAccountType] = useState<'email' | 'phone'>('email')
   const [config, setConfig] = useState<AuthConfig | null>(null)
@@ -86,13 +92,13 @@ export function RegisterForm() {
     setIsLoading(true)
     try {
       await signIn(provider, {
-        callbackUrl: '/dashboard',
+        callbackUrl: `/${locale}/dashboard`,
       })
     } catch (error) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: `Error al registrarse con ${provider}`,
+        title: tCommon('error'),
+        description: t('error.generic'),
       })
       setIsLoading(false)
     }
@@ -115,29 +121,29 @@ export function RegisterForm() {
       if (!response.ok) {
         toast({
           variant: 'destructive',
-          title: 'Error al registrarse',
-          description: result.error || 'Ocurrió un error al crear la cuenta',
+          title: t('error.title'),
+          description: result.error || t('error.description'),
         })
         return
       }
 
       toast({
-        title: 'Cuenta creada',
+        title: t('success.title'),
         description: result.requiresVerification
-          ? 'Verifica tu cuenta para continuar'
-          : 'Tu cuenta ha sido creada exitosamente',
+          ? t('success.verify')
+          : t('success.created'),
       })
 
       if (result.requiresVerification) {
-        router.push(`/auth/verify?userId=${result.user.id}`)
+        router.push(`/${locale}/auth/verify?userId=${result.user.id}`)
       } else {
-        router.push('/auth/login')
+        router.push(`/${locale}/auth/login`)
       }
     } catch (error) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Ocurrió un error al registrarse. Intenta de nuevo.',
+        title: tCommon('error'),
+        description: t('error.generic'),
       })
     } finally {
       setIsLoading(false)
@@ -150,7 +156,7 @@ export function RegisterForm() {
     return (
       <Card className="w-full max-w-md">
         <CardContent className="flex items-center justify-center p-6">
-          <p className="text-muted-foreground">Cargando...</p>
+          <p className="text-muted-foreground">{tCommon('loading')}</p>
         </CardContent>
       </Card>
     )
@@ -159,11 +165,11 @@ export function RegisterForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>Crear Cuenta</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
           {hasOAuthProviders && !showCredentialsForm
-            ? 'Selecciona tu método de registro'
-            : 'Completa el formulario para registrarte'
+            ? t('selectMethod')
+            : t('description')
           }
         </CardDescription>
       </CardHeader>
@@ -198,7 +204,7 @@ export function RegisterForm() {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                     />
                   </svg>
-                  Registrarse con Google
+                  {tOAuth('googleRegister')}
                 </Button>
               )}
 
@@ -212,7 +218,7 @@ export function RegisterForm() {
                   <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
-                  Registrarse con Facebook
+                  {tOAuth('facebookRegister')}
                 </Button>
               )}
             </div>
@@ -224,7 +230,7 @@ export function RegisterForm() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-card px-2 text-muted-foreground">
-                  O
+                  {tCommon('or')}
                 </span>
               </div>
             </div>
@@ -236,7 +242,7 @@ export function RegisterForm() {
                 onClick={() => setShowCredentialsForm(true)}
                 className="w-full"
               >
-                Crear cuenta con Email o Teléfono
+                {t('createWithEmail')}
               </Button>
             )}
           </div>
@@ -255,7 +261,7 @@ export function RegisterForm() {
                   onClick={() => setAccountType('email')}
                   className="flex-1"
                 >
-                  Email
+                  {t('accountType.email')}
                 </Button>
                 <Button
                   type="button"
@@ -263,17 +269,17 @@ export function RegisterForm() {
                   onClick={() => setAccountType('phone')}
                   className="flex-1"
                 >
-                  Teléfono
+                  {t('accountType.phone')}
                 </Button>
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre</Label>
+              <Label htmlFor="name">{t('name')}</Label>
               <Input
                 id="name"
                 type="text"
-                placeholder="Tu nombre completo"
+                placeholder={t('namePlaceholder')}
                 disabled={isLoading}
                 {...register('name')}
               />
@@ -284,11 +290,11 @@ export function RegisterForm() {
 
             {accountType === 'email' ? (
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('email')}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="tu@email.com"
+                  placeholder={t('emailPlaceholder')}
                   disabled={isLoading}
                   {...register('email' as keyof RegisterFormData)}
                 />
@@ -298,11 +304,11 @@ export function RegisterForm() {
               </div>
             ) : (
               <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono</Label>
+                <Label htmlFor="phone">{t('phone')}</Label>
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="+52 1234567890"
+                  placeholder={t('phonePlaceholder')}
                   disabled={isLoading}
                   {...register('phone' as keyof RegisterFormData)}
                 />
@@ -313,11 +319,11 @@ export function RegisterForm() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder={t('passwordPlaceholder')}
                 disabled={isLoading}
                 {...register('password')}
               />
@@ -330,11 +336,11 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+              <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="••••••••"
+                placeholder={t('passwordPlaceholder')}
                 disabled={isLoading}
                 {...register('confirmPassword')}
               />
@@ -346,7 +352,7 @@ export function RegisterForm() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
+              {isLoading ? t('submitting') : t('submit')}
             </Button>
 
             {hasOAuthProviders && showCredentialsForm && (
@@ -356,7 +362,7 @@ export function RegisterForm() {
                 onClick={() => setShowCredentialsForm(false)}
                 className="w-full"
               >
-                Volver a opciones de registro
+                {t('backToOptions')}
               </Button>
             )}
           </form>
@@ -365,13 +371,13 @@ export function RegisterForm() {
 
       <CardFooter className="flex flex-col">
         <div className="text-sm text-center text-muted-foreground">
-          ¿Ya tienes cuenta?{' '}
+          {t('hasAccount')}{' '}
           <Button
             variant="link"
             className="p-0 h-auto font-normal"
-            onClick={() => router.push('/auth/login')}
+            onClick={() => router.push(`/${locale}/auth/login`)}
           >
-            Inicia sesión
+            {t('login')}
           </Button>
         </div>
       </CardFooter>
