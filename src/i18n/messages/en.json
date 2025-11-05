@@ -1,0 +1,181 @@
+{
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "description": "Enter your credentials to access your account",
+      "identifier": "Email or Phone",
+      "identifierPlaceholder": "you@email.com or +52 1234567890",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "forgotPassword": "Forgot your password?",
+      "noAccount": "Don't have an account?",
+      "register": "Sign up",
+      "orContinueWith": "Or continue with",
+      "continueWithEmail": "Sign in with Email or Phone",
+      "backToOptions": "Back to sign in options",
+      "error": {
+        "title": "Sign In Error",
+        "invalidCredentials": "Invalid credentials. Please check your data.",
+        "generic": "An error occurred while signing in. Please try again."
+      },
+      "success": {
+        "title": "Welcome",
+        "description": "Sign in successful"
+      }
+    },
+    "register": {
+      "title": "Create Account",
+      "description": "Complete the form to register",
+      "selectMethod": "Select your registration method",
+      "name": "Full Name",
+      "namePlaceholder": "Your full name",
+      "email": "Email",
+      "emailPlaceholder": "you@email.com",
+      "phone": "Phone",
+      "phonePlaceholder": "+52 1234567890",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "confirmPassword": "Confirm Password",
+      "submit": "Create Account",
+      "submitting": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "login": "Sign in",
+      "orRegisterWith": "Or register with",
+      "createWithEmail": "Create account with Email or Phone",
+      "backToOptions": "Back to registration options",
+      "accountType": {
+        "email": "Email",
+        "phone": "Phone"
+      },
+      "error": {
+        "title": "Registration Error",
+        "description": "An error occurred while creating the account",
+        "generic": "An error occurred while registering. Please try again."
+      },
+      "success": {
+        "title": "Account Created",
+        "verify": "Verify your account to continue",
+        "created": "Your account has been created successfully"
+      }
+    },
+    "oauth": {
+      "google": "Continue with Google",
+      "facebook": "Continue with Facebook",
+      "googleRegister": "Register with Google",
+      "facebookRegister": "Register with Facebook"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome, {name}",
+    "signOut": "Sign Out",
+    "userInfo": {
+      "title": "User Information",
+      "description": "Your account data",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "accountType": "Account Type"
+    },
+    "stats": {
+      "title": "Statistics",
+      "description": "Your activity",
+      "comingSoon": "Statistics panel coming soon..."
+    },
+    "actions": {
+      "title": "Quick Actions",
+      "description": "Common tasks",
+      "showcase": "View Components Showcase",
+      "settings": "Settings",
+      "help": "Help"
+    },
+    "config": {
+      "title": "Project Configuration",
+      "description": "Technical information",
+      "framework": "Framework",
+      "database": "Database",
+      "auth": "Authentication",
+      "ui": "UI",
+      "validation": "Validation",
+      "mobile": "Mobile"
+    }
+  },
+  "showcase": {
+    "title": "Components Showcase",
+    "description": "Demo of modern UI/UX libraries",
+    "phosphor": {
+      "title": "Phosphor Icons",
+      "description": "6,000+ modern icons with 6 different styles (thin, light, regular, bold, fill, duotone)",
+      "regular": "Regular Weight",
+      "bold": "Bold Weight",
+      "duotone": "Duotone Weight",
+      "allWeights": "All Available Weights",
+      "thin": "Thin",
+      "light": "Light",
+      "fill": "Fill"
+    },
+    "tabler": {
+      "title": "Tabler Icons",
+      "description": "5,000+ outline style icons, perfect for dashboards and complement to Phosphor",
+      "icons": "Tabler Icons"
+    },
+    "carousel": {
+      "title": "Embla Carousel (Swipe)",
+      "description": "Ultra-lightweight carousel (3kb) with native touch gestures",
+      "swipeTitle": "Horizontal Swipe",
+      "swipeDescription": "Swipe left or right (touch or mouse)",
+      "slide": "Slide {number}",
+      "swipeMore": "Swipe to see more"
+    },
+    "charts": {
+      "title": "Recharts - Charts",
+      "description": "Modern D3-based charts with native React components",
+      "line": "Line Chart",
+      "bar": "Bar Chart",
+      "pie": "Pie Chart",
+      "radar": "Radar Chart"
+    },
+    "motion": {
+      "title": "Framer Motion",
+      "description": "Fluid animations and touch gestures",
+      "hoverScale": "Hover Scale",
+      "rotate": "Rotate Animation",
+      "drag": "Drag",
+      "hoverMe": "Hover me!"
+    },
+    "drawer": {
+      "title": "Vaul - Bottom Sheet",
+      "description": "Bottom drawer with native gestures (iOS/Android style)",
+      "open": "Open Bottom Sheet",
+      "demoTitle": "Bottom Sheet Demo",
+      "demoDescription": "You can swipe down to close or use touch gestures",
+      "content": "Drawer Content",
+      "contentDescription": "This component works perfectly on iOS and Android with native gestures. Includes snap points, momentum scrolling and haptic feedback.",
+      "close": "Close"
+    },
+    "spinners": {
+      "title": "React Spinners",
+      "description": "Modern and lightweight loaders",
+      "clip": "Clip Loader",
+      "pulse": "Pulse Loader",
+      "beat": "Beat Loader"
+    },
+    "footer": {
+      "title": "Modern and Optimized Stack",
+      "description": "All these libraries are optimized for mobile, Capacitor and desktop"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "or": "Or"
+  }
+}

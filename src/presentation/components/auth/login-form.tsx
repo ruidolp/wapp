@@ -2,6 +2,7 @@
  * Login Form Component
  *
  * Formulario de inicio de sesión con validación y manejo de errores
+ * Soporte multilenguaje con next-intl
  */
 
 'use client'
@@ -11,6 +12,7 @@ import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations, useLocale } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -41,7 +43,12 @@ interface AuthConfig {
 
 export function LoginForm() {
   const router = useRouter()
+  const locale = useLocale()
   const { toast } = useToast()
+  const t = useTranslations('auth.login')
+  const tOAuth = useTranslations('auth.oauth')
+  const tCommon = useTranslations('common')
+
   const [isLoading, setIsLoading] = useState(false)
   const [config, setConfig] = useState<AuthConfig | null>(null)
   const [showCredentialsForm, setShowCredentialsForm] = useState(false)
@@ -80,22 +87,22 @@ export function LoginForm() {
       if (result?.error) {
         toast({
           variant: 'destructive',
-          title: 'Error al iniciar sesión',
-          description: 'Credenciales inválidas. Por favor verifica tus datos.',
+          title: t('error.title'),
+          description: t('error.invalidCredentials'),
         })
       } else if (result?.ok) {
         toast({
-          title: 'Bienvenido',
-          description: 'Inicio de sesión exitoso',
+          title: t('success.title'),
+          description: t('success.description'),
         })
-        router.push('/dashboard')
+        router.push(`/${locale}/dashboard`)
         router.refresh()
       }
     } catch (error) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Ocurrió un error al iniciar sesión. Intenta de nuevo.',
+        title: tCommon('error'),
+        description: t('error.generic'),
       })
     } finally {
       setIsLoading(false)
@@ -106,13 +113,13 @@ export function LoginForm() {
     setIsLoading(true)
     try {
       await signIn(provider, {
-        callbackUrl: '/dashboard',
+        callbackUrl: `/${locale}/dashboard`,
       })
     } catch (error) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: `Error al iniciar sesión con ${provider}`,
+        title: tCommon('error'),
+        description: t('error.generic'),
       })
       setIsLoading(false)
     }
@@ -124,7 +131,7 @@ export function LoginForm() {
     return (
       <Card className="w-full max-w-md">
         <CardContent className="flex items-center justify-center p-6">
-          <p className="text-muted-foreground">Cargando...</p>
+          <p className="text-muted-foreground">{tCommon('loading')}</p>
         </CardContent>
       </Card>
     )
@@ -133,11 +140,11 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>Iniciar Sesión</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
           {hasOAuthProviders && !showCredentialsForm
-            ? 'Selecciona tu método de inicio de sesión'
-            : 'Ingresa tus credenciales para acceder a tu cuenta'
+            ? t('selectMethod')
+            : t('description')
           }
         </CardDescription>
       </CardHeader>
@@ -172,7 +179,7 @@ export function LoginForm() {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                     />
                   </svg>
-                  Continuar con Google
+                  {tOAuth('google')}
                 </Button>
               )}
 
@@ -186,7 +193,7 @@ export function LoginForm() {
                   <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
-                  Continuar con Facebook
+                  {tOAuth('facebook')}
                 </Button>
               )}
             </div>
@@ -198,7 +205,7 @@ export function LoginForm() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-card px-2 text-muted-foreground">
-                  O
+                  {tCommon('or')}
                 </span>
               </div>
             </div>
@@ -210,7 +217,7 @@ export function LoginForm() {
                 onClick={() => setShowCredentialsForm(true)}
                 className="w-full"
               >
-                Iniciar sesión con Email o Teléfono
+                {t('continueWithEmail')}
               </Button>
             )}
           </div>
@@ -220,11 +227,11 @@ export function LoginForm() {
         {(showCredentialsForm || !hasOAuthProviders) && (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="identifier">Email o Teléfono</Label>
+              <Label htmlFor="identifier">{t('identifier')}</Label>
               <Input
                 id="identifier"
                 type="text"
-                placeholder="tu@email.com o +52 1234567890"
+                placeholder={t('identifierPlaceholder')}
                 disabled={isLoading}
                 {...register('identifier')}
               />
@@ -234,11 +241,11 @@ export function LoginForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder={t('passwordPlaceholder')}
                 disabled={isLoading}
                 {...register('password')}
               />
@@ -248,7 +255,7 @@ export function LoginForm() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              {isLoading ? t('submitting') : t('submit')}
             </Button>
 
             {hasOAuthProviders && showCredentialsForm && (
@@ -258,7 +265,7 @@ export function LoginForm() {
                 onClick={() => setShowCredentialsForm(false)}
                 className="w-full"
               >
-                Volver a opciones de inicio de sesión
+                {t('backToOptions')}
               </Button>
             )}
           </form>
@@ -270,21 +277,21 @@ export function LoginForm() {
           <Button
             variant="link"
             className="text-sm"
-            onClick={() => router.push('/auth/recovery')}
+            onClick={() => router.push(`/${locale}/auth/recovery`)}
           >
-            ¿Olvidaste tu contraseña?
+            {t('forgotPassword')}
           </Button>
         )}
 
         {config.auth.registration.allowSelfSignup && (
           <div className="text-sm text-center text-muted-foreground">
-            ¿No tienes cuenta?{' '}
+            {t('noAccount')}{' '}
             <Button
               variant="link"
               className="p-0 h-auto font-normal"
-              onClick={() => router.push('/auth/register')}
+              onClick={() => router.push(`/${locale}/auth/register`)}
             >
-              Regístrate
+              {t('register')}
             </Button>
           </div>
         )}
