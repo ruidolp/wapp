@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker - POC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto 50px;
+        }
+
+        .pie-chart {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .chart-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: white;
+            border-radius: 50%;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-label {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .total-amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .free-percentage {
+            font-size: 18px;
+            color: #4CAF50;
+            margin-top: 5px;
+        }
+
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .category-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .category-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border-color: #667eea;
+        }
+
+        .category-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .category-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .category-percentage {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #da190b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Expense Tracker</h1>
+
+        <div class="chart-container">
+            <svg class="pie-chart" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="#e0e0e0" />
+            </svg>
+            <div class="chart-center">
+                <div class="total-label">Total</div>
+                <div class="total-amount">$0</div>
+                <div class="free-percentage">100% libre</div>
+            </div>
+        </div>
+
+        <div class="categories" id="categories"></div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span id="modal-icon"></span>
+                    <span id="modal-category-name"></span>
+                </div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="expense-form">
+                <div class="form-group">
+                    <label class="form-label" for="amount">Monto</label>
+                    <input type="number" class="form-input" id="amount" placeholder="Ingresa el monto" required min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="comment">Comentario (opcional)</label>
+                    <input type="text" class="form-input" id="comment" placeholder="Agrega un comentario">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="button" class="btn btn-delete" onclick="deleteExpense()" id="delete-btn" style="display: none;">Eliminar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const categories = [
+            { id: 'transporte', name: 'Transporte', icon: '🚗', color: '#FF6B6B' },
+            { id: 'arriendo', name: 'Arriendo', icon: '🏠', color: '#4ECDC4' },
+            { id: 'medicina', name: 'Medicina', icon: '💊', color: '#45B7D1' },
+            { id: 'restaurant', name: 'Restaurant', icon: '🍽️', color: '#FFA07A' },
+            { id: 'deporte', name: 'Deporte', icon: '⚽', color: '#98D8C8' },
+            { id: 'ropa', name: 'Ropa', icon: '👕', color: '#F7B731' },
+            { id: 'ahorro', name: 'Ahorro', icon: '💰', color: '#5F27CD' },
+            { id: 'electronica', name: 'Electrónica', icon: '💻', color: '#00D2D3' }
+        ];
+
+        let expenses = {};
+        let currentCategory = null;
+
+        // Initialize expenses
+        categories.forEach(cat => {
+            expenses[cat.id] = { amount: 0, comment: '' };
+        });
+
+        function renderCategories() {
+            const container = document.getElementById('categories');
+            container.innerHTML = '';
+
+            categories.forEach(category => {
+                const expense = expenses[category.id];
+                const total = getTotalExpenses();
+                const percentage = total > 0 ? ((expense.amount / total) * 100).toFixed(1) : 0;
+
+                const item = document.createElement('div');
+                item.className = 'category-item';
+                item.onclick = () => openModal(category);
+
+                item.innerHTML = `
+                    <div class="category-icon">${category.icon}</div>
+                    <div class="category-name">${category.name}</div>
+                    <div class="category-amount">$${expense.amount.toFixed(2)}</div>
+                    <div class="category-percentage">${percentage}%</div>
+                `;
+
+                container.appendChild(item);
+            });
+        }
+
+        function getTotalExpenses() {
+            return Object.values(expenses).reduce((sum, exp) => sum + exp.amount, 0);
+        }
+
+        function updatePieChart() {
+            const svg = document.querySelector('.pie-chart');
+            const total = getTotalExpenses();
+
+            // Clear existing slices
+            svg.innerHTML = '';
+
+            if (total === 0) {
+                // Show full circle when no expenses
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', '50');
+                circle.setAttribute('cy', '50');
+                circle.setAttribute('r', '45');
+                circle.setAttribute('fill', '#e0e0e0');
+                svg.appendChild(circle);
+            } else {
+                let currentAngle = 0;
+
+                categories.forEach(category => {
+                    const expense = expenses[category.id];
+                    if (expense.amount > 0) {
+                        const percentage = expense.amount / total;
+                        const angle = percentage * 360;
+
+                        const slice = createPieSlice(50, 50, 45, currentAngle, currentAngle + angle, category.color);
+                        svg.appendChild(slice);
+
+                        currentAngle += angle;
+                    }
+                });
+            }
+
+            // Update center info
+            const freePercentage = total > 0 ? 0 : 100;
+            document.querySelector('.total-amount').textContent = `$${total.toFixed(2)}`;
+            document.querySelector('.free-percentage').textContent = `${freePercentage}% libre`;
+        }
+
+        function createPieSlice(cx, cy, r, startAngle, endAngle, color) {
+            const start = polarToCartesian(cx, cy, r, endAngle);
+            const end = polarToCartesian(cx, cy, r, startAngle);
+            const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
+
+            const d = [
+                `M ${cx} ${cy}`,
+                `L ${start.x} ${start.y}`,
+                `A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`,
+                'Z'
+            ].join(' ');
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', d);
+            path.setAttribute('fill', color);
+
+            return path;
+        }
+
+        function polarToCartesian(cx, cy, r, angle) {
+            const radians = (angle - 90) * Math.PI / 180;
+            return {
+                x: cx + r * Math.cos(radians),
+                y: cy + r * Math.sin(radians)
+            };
+        }
+
+        function openModal(category) {
+            currentCategory = category;
+            const modal = document.getElementById('modal');
+            const expense = expenses[category.id];
+
+            document.getElementById('modal-icon').textContent = category.icon;
+            document.getElementById('modal-category-name').textContent = category.name;
+            document.getElementById('amount').value = expense.amount || '';
+            document.getElementById('comment').value = expense.comment || '';
+
+            // Show delete button only if there's an expense
+            document.getElementById('delete-btn').style.display = expense.amount > 0 ? 'block' : 'none';
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+            currentCategory = null;
+            document.getElementById('expense-form').reset();
+        }
+
+        function deleteExpense() {
+            if (currentCategory && confirm('¿Estás seguro de eliminar este gasto?')) {
+                expenses[currentCategory.id] = { amount: 0, comment: '' };
+                updatePieChart();
+                renderCategories();
+                closeModal();
+            }
+        }
+
+        document.getElementById('expense-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            if (currentCategory) {
+                const amount = parseFloat(document.getElementById('amount').value) || 0;
+                const comment = document.getElementById('comment').value;
+
+                expenses[currentCategory.id] = { amount, comment };
+
+                updatePieChart();
+                renderCategories();
+                closeModal();
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
+
+        // Initial render
+        renderCategories();
+        updatePieChart();
+    </script>
+</body>
+</html>
