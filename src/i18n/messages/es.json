@@ -1,0 +1,181 @@
+{
+  "auth": {
+    "login": {
+      "title": "Iniciar Sesión",
+      "description": "Ingresa tus credenciales para acceder a tu cuenta",
+      "identifier": "Email o Teléfono",
+      "identifierPlaceholder": "tu@email.com o +52 1234567890",
+      "password": "Contraseña",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Iniciar Sesión",
+      "submitting": "Iniciando sesión...",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "noAccount": "¿No tienes cuenta?",
+      "register": "Regístrate",
+      "orContinueWith": "O continúa con",
+      "continueWithEmail": "Iniciar sesión con Email o Teléfono",
+      "backToOptions": "Volver a opciones de inicio de sesión",
+      "error": {
+        "title": "Error al iniciar sesión",
+        "invalidCredentials": "Credenciales inválidas. Por favor verifica tus datos.",
+        "generic": "Ocurrió un error al iniciar sesión. Intenta de nuevo."
+      },
+      "success": {
+        "title": "Bienvenido",
+        "description": "Inicio de sesión exitoso"
+      }
+    },
+    "register": {
+      "title": "Crear Cuenta",
+      "description": "Completa el formulario para registrarte",
+      "selectMethod": "Selecciona tu método de registro",
+      "name": "Nombre Completo",
+      "namePlaceholder": "Tu nombre completo",
+      "email": "Email",
+      "emailPlaceholder": "tu@email.com",
+      "phone": "Teléfono",
+      "phonePlaceholder": "+52 1234567890",
+      "password": "Contraseña",
+      "passwordPlaceholder": "••••••••",
+      "confirmPassword": "Confirmar Contraseña",
+      "submit": "Crear Cuenta",
+      "submitting": "Creando cuenta...",
+      "hasAccount": "¿Ya tienes cuenta?",
+      "login": "Inicia sesión",
+      "orRegisterWith": "O regístrate con",
+      "createWithEmail": "Crear cuenta con Email o Teléfono",
+      "backToOptions": "Volver a opciones de registro",
+      "accountType": {
+        "email": "Email",
+        "phone": "Teléfono"
+      },
+      "error": {
+        "title": "Error al registrarse",
+        "description": "Ocurrió un error al crear la cuenta",
+        "generic": "Ocurrió un error al registrarse. Intenta de nuevo."
+      },
+      "success": {
+        "title": "Cuenta creada",
+        "verify": "Verifica tu cuenta para continuar",
+        "created": "Tu cuenta ha sido creada exitosamente"
+      }
+    },
+    "oauth": {
+      "google": "Continuar con Google",
+      "facebook": "Continuar con Facebook",
+      "googleRegister": "Registrarse con Google",
+      "facebookRegister": "Registrarse con Facebook"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Bienvenido, {name}",
+    "signOut": "Cerrar Sesión",
+    "userInfo": {
+      "title": "Información del Usuario",
+      "description": "Datos de tu cuenta",
+      "name": "Nombre",
+      "email": "Email",
+      "phone": "Teléfono",
+      "accountType": "Tipo de Cuenta"
+    },
+    "stats": {
+      "title": "Estadísticas",
+      "description": "Tu actividad",
+      "comingSoon": "Panel de estadísticas próximamente..."
+    },
+    "actions": {
+      "title": "Acciones Rápidas",
+      "description": "Tareas comunes",
+      "showcase": "Ver Showcase de Componentes",
+      "settings": "Configuración",
+      "help": "Ayuda"
+    },
+    "config": {
+      "title": "Configuración del Proyecto",
+      "description": "Información técnica",
+      "framework": "Framework",
+      "database": "Base de Datos",
+      "auth": "Autenticación",
+      "ui": "UI",
+      "validation": "Validación",
+      "mobile": "Mobile"
+    }
+  },
+  "showcase": {
+    "title": "Components Showcase",
+    "description": "Demo de librerías modernas UI/UX",
+    "phosphor": {
+      "title": "Phosphor Icons",
+      "description": "6,000+ iconos modernos con 6 estilos diferentes (thin, light, regular, bold, fill, duotone)",
+      "regular": "Regular Weight",
+      "bold": "Bold Weight",
+      "duotone": "Duotone Weight",
+      "allWeights": "Todos los Pesos Disponibles",
+      "thin": "Thin",
+      "light": "Light",
+      "fill": "Fill"
+    },
+    "tabler": {
+      "title": "Tabler Icons",
+      "description": "5,000+ iconos outline style, perfecto para dashboards y complemento de Phosphor",
+      "icons": "Iconos de Tabler"
+    },
+    "carousel": {
+      "title": "Embla Carousel (Swipe)",
+      "description": "Carousel ultra ligero (3kb) con gestos táctiles nativos",
+      "swipeTitle": "Swipe Horizontal",
+      "swipeDescription": "Desliza hacia los lados (touch o mouse)",
+      "slide": "Slide {number}",
+      "swipeMore": "Swipe para ver más"
+    },
+    "charts": {
+      "title": "Recharts - Gráficos",
+      "description": "Gráficos modernos basados en D3 con componentes React nativos",
+      "line": "Line Chart",
+      "bar": "Bar Chart",
+      "pie": "Pie Chart",
+      "radar": "Radar Chart"
+    },
+    "motion": {
+      "title": "Framer Motion",
+      "description": "Animaciones fluidas y gestos táctiles",
+      "hoverScale": "Hover Scale",
+      "rotate": "Rotate Animation",
+      "drag": "Drag",
+      "hoverMe": "Hover me!"
+    },
+    "drawer": {
+      "title": "Vaul - Bottom Sheet",
+      "description": "Drawer desde abajo con gestos nativos (iOS/Android style)",
+      "open": "Abrir Bottom Sheet",
+      "demoTitle": "Bottom Sheet Demo",
+      "demoDescription": "Puedes hacer swipe hacia abajo para cerrar o usar gestos táctiles",
+      "content": "Contenido del Drawer",
+      "contentDescription": "Este componente funciona perfecto en iOS y Android con gestos nativos. Incluye snap points, momentum scrolling y haptic feedback.",
+      "close": "Cerrar"
+    },
+    "spinners": {
+      "title": "React Spinners",
+      "description": "Loaders modernos y livianos",
+      "clip": "Clip Loader",
+      "pulse": "Pulse Loader",
+      "beat": "Beat Loader"
+    },
+    "footer": {
+      "title": "Stack Moderno y Optimizado",
+      "description": "Todas estas librerías están optimizadas para mobile, Capacitor y desktop"
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "or": "O"
+  }
+}
