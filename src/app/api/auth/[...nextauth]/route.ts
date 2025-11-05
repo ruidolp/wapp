@@ -5,4 +5,6 @@
  * Maneja todas las requests relacionadas con autenticación.
  */
 
-export { GET, POST } from '@/infrastructure/lib/auth'
+import { handlers } from '@/infrastructure/lib/auth'
+
+export const { GET, POST } = handlers

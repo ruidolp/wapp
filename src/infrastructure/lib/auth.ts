@@ -113,10 +113,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     // Callback de JWT
     async jwt({ token, user, account }) {
       // Initial sign in
-      if (user) {
+      if (user && user.id) {
         token.id = user.id
-        token.accountType = user.accountType as string
-        token.phone = user.phone as string
+        token.accountType = (user.accountType as string) || ''
+        token.phone = (user.phone as string) || ''
       }
 
       // OAuth sign in
@@ -149,12 +149,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // OAuth: verificar si el registro está permitido
       if (!appConfig.auth.registration.allowSelfSignup) {
         // Verificar si el usuario ya existe
-        const existingUser = await prisma.user.findUnique({
-          where: { email: user.email || undefined },
-        })
+        if (user.email) {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          })
 
-        if (!existingUser) {
-          return false
+          if (!existingUser) {
+            return false
+          }
         }
       }
 
