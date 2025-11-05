@@ -18,7 +18,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from '@/hooks/use-toast'
 
 import { registerWithEmailSchema, registerWithPhoneSchema, type RegisterWithEmailInput, type RegisterWithPhoneInput } from '@/infrastructure/utils/validation'
-import { appConfig } from '@/config/app.config'
+import { appConfig } from '@/infrastructure/config/app.config'
+import { PasswordValidator } from './password-validator'
 
 type RegisterFormData = RegisterWithEmailInput | RegisterWithPhoneInput
 
@@ -35,9 +36,13 @@ export function RegisterForm() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(schema),
   })
+
+  // Observar el valor de la contraseña para el validador
+  const passwordValue = watch('password') || ''
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true)
@@ -175,6 +180,9 @@ export function RegisterForm() {
             {errors.password && (
               <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
+
+            {/* Validador de contraseña en línea */}
+            <PasswordValidator password={passwordValue} className="mt-3" />
           </div>
 
           <div className="space-y-2">
