@@ -3,6 +3,7 @@
  */
 
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { getSession, signOut } from '@/infrastructure/lib/auth'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -83,9 +84,11 @@ export default async function DashboardPage() {
               <CardDescription>Tareas comunes</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full">
-                Configuración
-              </Button>
+              <Link href="/showcase" className="block">
+                <Button variant="outline" className="w-full">
+                  Ver Showcase de Componentes
+                </Button>
+              </Link>
               <Button variant="outline" className="w-full">
                 Ayuda
               </Button>
