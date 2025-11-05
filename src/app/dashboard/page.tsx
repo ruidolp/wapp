@@ -3,7 +3,7 @@
  */
 
 import { redirect } from 'next/navigation'
-import { getSession } from '@/infrastructure/lib/auth'
+import { getSession, signOut } from '@/infrastructure/lib/auth'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
@@ -12,6 +12,11 @@ export default async function DashboardPage() {
 
   if (!session?.user) {
     redirect('/auth/login')
+  }
+
+  async function handleSignOut() {
+    'use server'
+    await signOut({ redirectTo: '/auth/login' })
   }
 
   return (
@@ -25,7 +30,7 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          <form action="/api/auth/signout" method="POST">
+          <form action={handleSignOut}>
             <Button variant="outline">Cerrar Sesión</Button>
           </form>
         </div>
