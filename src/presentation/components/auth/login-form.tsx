@@ -6,7 +6,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
@@ -25,6 +25,7 @@ export function LoginForm() {
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   const {
     register,
@@ -33,6 +34,11 @@ export function LoginForm() {
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
   })
+
+  // Fix hydration mismatch by only rendering OAuth after client-side mount
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true)
@@ -129,8 +135,8 @@ export function LoginForm() {
           </Button>
         </form>
 
-        {/* OAuth Providers */}
-        {(appConfig.auth.oauth.google.enabled || appConfig.auth.oauth.facebook.enabled) && (
+        {/* OAuth Providers - Only render after client mount to prevent hydration mismatch */}
+        {isMounted && (appConfig.auth.oauth.google.enabled || appConfig.auth.oauth.facebook.enabled) && (
           <>
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">

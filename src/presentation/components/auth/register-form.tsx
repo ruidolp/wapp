@@ -6,8 +6,9 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
@@ -28,6 +29,7 @@ export function RegisterForm() {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [accountType, setAccountType] = useState<'email' | 'phone'>('email')
+  const [isMounted, setIsMounted] = useState(false)
 
   // Use appropriate schema based on account type
   const schema = accountType === 'email' ? registerWithEmailSchema : registerWithPhoneSchema
@@ -43,6 +45,27 @@ export function RegisterForm() {
 
   // Observar el valor de la contraseña para el validador
   const passwordValue = watch('password') || ''
+
+  // Fix hydration mismatch by only rendering OAuth after client-side mount
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
+    setIsLoading(true)
+    try {
+      await signIn(provider, {
+        callbackUrl: appConfig.routes.afterLogin,
+      })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: `Error al registrarse con ${provider}`,
+      })
+      setIsLoading(false)
+    }
+  }
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true)
@@ -205,6 +228,44 @@ export function RegisterForm() {
             {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
           </Button>
         </form>
+
+        {/* OAuth Providers - Only render after client mount to prevent hydration mismatch */}
+        {isMounted && (appConfig.auth.oauth.google.enabled || appConfig.auth.oauth.facebook.enabled) && (
+          <>
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  O regístrate con
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {appConfig.auth.oauth.google.enabled && (
+                <Button
+                  variant="outline"
+                  onClick={() => handleOAuthSignIn('google')}
+                  disabled={isLoading}
+                >
+                  Google
+                </Button>
+              )}
+
+              {appConfig.auth.oauth.facebook.enabled && (
+                <Button
+                  variant="outline"
+                  onClick={() => handleOAuthSignIn('facebook')}
+                  disabled={isLoading}
+                >
+                  Facebook
+                </Button>
+              )}
+            </div>
+          </>
+        )}
       </CardContent>
 
       <CardFooter className="flex flex-col">
