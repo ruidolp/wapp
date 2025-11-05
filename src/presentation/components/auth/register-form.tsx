@@ -143,7 +143,7 @@ export function RegisterForm() {
                 disabled={isLoading}
                 {...register('email' as keyof RegisterFormData)}
               />
-              {errors.email && 'email' in errors && (
+              {'email' in errors && errors.email && (
                 <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
@@ -157,7 +157,7 @@ export function RegisterForm() {
                 disabled={isLoading}
                 {...register('phone' as keyof RegisterFormData)}
               />
-              {errors.phone && 'phone' in errors && (
+              {'phone' in errors && errors.phone && (
                 <p className="text-sm text-destructive">{errors.phone.message}</p>
               )}
             </div>
