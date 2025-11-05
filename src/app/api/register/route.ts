@@ -6,9 +6,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { registerUser } from '@/application/services/auth.service'
 import { registerWithEmailSchema, registerWithPhoneSchema } from '@/infrastructure/utils/validation'
 import { appConfig } from '@/config/app.config'
+import { rateLimit, RateLimitPresets } from '@/infrastructure/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting - Prevenir registro masivo y ataques
+    const rateLimitResult = await rateLimit(request, RateLimitPresets.auth)
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response
+    }
+
     // Verificar que el auto-registro esté habilitado
     if (!appConfig.auth.registration.allowSelfSignup) {
       return NextResponse.json(

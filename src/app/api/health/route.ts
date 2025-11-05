@@ -5,11 +5,18 @@
  * y que la conexión a la base de datos está activa.
  */
 
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/infrastructure/database/prisma'
 import { appConfig } from '@/config/app.config'
+import { rateLimit, RateLimitPresets } from '@/infrastructure/lib/rate-limit'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Rate limiting - Prevenir abuso del endpoint de health check
+  const rateLimitResult = await rateLimit(request, RateLimitPresets.public)
+  if (!rateLimitResult.success) {
+    return rateLimitResult.response
+  }
+
   try {
     // Verificar conexión a la base de datos
     await prisma.$queryRaw`SELECT 1`

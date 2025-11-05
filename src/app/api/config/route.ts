@@ -5,10 +5,17 @@
  * sin exponer secrets o información sensible.
  */
 
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { appConfig } from '@/config/app.config'
+import { rateLimit, RateLimitPresets } from '@/infrastructure/lib/rate-limit'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Rate limiting - Prevenir abuso del endpoint
+  const rateLimitResult = await rateLimit(request, RateLimitPresets.config)
+  if (!rateLimitResult.success) {
+    return rateLimitResult.response
+  }
+
   return NextResponse.json({
     auth: {
       registration: {

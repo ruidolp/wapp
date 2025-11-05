@@ -62,6 +62,40 @@ export default auth((request) => {
   // Agregar headers personalizados
   const response = NextResponse.next()
 
+  // Headers de seguridad (OWASP recomendado)
+  // Prevenir MIME sniffing
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+
+  // Prevenir clickjacking - permitir solo same-origin
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
+
+  // Protección XSS (legacy, pero algunos navegadores aún lo usan)
+  response.headers.set('X-XSS-Protection', '1; mode=block')
+
+  // Política de referrer - no enviar información sensible
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+
+  // Permissions Policy - deshabilitar APIs peligrosas
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(), interest-cohort=()'
+  )
+
+  // Content Security Policy (CSP) - Básico, ajustar según necesidades
+  // NOTA: Next.js tiene su propio sistema de CSP, esto es un fallback
+  if (!response.headers.has('Content-Security-Policy')) {
+    response.headers.set(
+      'Content-Security-Policy',
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "img-src 'self' data: https:; " +
+      "font-src 'self' data:; " +
+      "connect-src 'self' https:; " +
+      "frame-ancestors 'self'"
+    )
+  }
+
   // Headers para Capacitor
   if (isCapacitor) {
     response.headers.set('X-Platform', 'capacitor')
