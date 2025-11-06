@@ -17,7 +17,7 @@ interface UserSubscription {
   isLinked: boolean
   ownerId: string | null
   capabilities: string[]
-  limits: Record<string, number>
+  limits: Record<string, number | null>
   expiresAt: string | null
   trialEndsAt: string | null
 }

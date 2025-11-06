@@ -21,7 +21,6 @@ export async function POST() {
     }
 
     // Verificar que el usuario no está vinculado (solo owners pueden cancelar)
-    // @ts-expect-error - Extended Session type
     if (session.user.subscription.isLinked) {
       return NextResponse.json(
         { error: 'Cannot cancel: you are linked to another user\'s plan. Ask the owner to unlink you.' },

@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar que el usuario tiene un plan que permite invitaciones
-    // @ts-expect-error - Extended Session type
     if (session.user.subscription.planSlug === 'free') {
       return NextResponse.json(
         { error: 'Upgrade to a paid plan to invite users' },
@@ -31,7 +30,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar que el usuario no está vinculado (solo owners pueden invitar)
-    // @ts-expect-error - Extended Session type
     if (session.user.subscription.isLinked) {
       return NextResponse.json(
         { error: 'You cannot invite users while linked to another plan' },

@@ -27,7 +27,6 @@ export async function DELETE(
     }
 
     // Verificar que el usuario no está vinculado (solo owners pueden desvincular)
-    // @ts-expect-error - Extended Session type
     if (session.user.subscription.isLinked) {
       return NextResponse.json(
         { error: 'You cannot unlink users while linked to another plan' },
