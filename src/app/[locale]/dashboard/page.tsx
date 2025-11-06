@@ -3,14 +3,14 @@
  */
 
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { getSession, signOut } from '@/infrastructure/lib/auth'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 
-export default async function DashboardPage({ params: { locale } }: { params: { locale: string } }) {
+export default async function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
   const session = await getSession()
   const t = await getTranslations('dashboard')
 
@@ -90,11 +90,6 @@ export default async function DashboardPage({ params: { locale } }: { params: { 
               <CardDescription>{t('actions.description')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Link href={`/${locale}/showcase`} className="block">
-                <Button variant="outline" className="w-full">
-                  {t('actions.showcase')}
-                </Button>
-              </Link>
               <Button variant="outline" className="w-full">
                 {t('actions.help')}
               </Button>
