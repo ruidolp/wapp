@@ -145,16 +145,23 @@
       "capabilities": {
         "title": "Plan Features",
         "description": "What's included in your current plan",
+        "view_dashboard": "View Dashboard",
+        "create_basic_items": "Create Basic Items",
         "export_data": "Export Data",
         "advanced_reports": "Advanced Reports",
+        "invite_users": "Invite Users",
+        "shared_resources": "Shared Resources",
         "priority_support": "Priority Support",
-        "custom_branding": "Custom Branding"
+        "api_access": "API Access",
+        "admin_controls": "Admin Controls",
+        "bulk_operations": "Bulk Operations"
       },
       "limits": {
         "title": "Usage Limits",
         "projects": "Projects",
         "storage_mb": "Storage (MB)",
-        "team_members": "Team Members"
+        "items_per_project": "Items per Project",
+        "api_calls_per_month": "API Calls per Month"
       }
     },
     "linkedUsers": {
@@ -163,6 +170,101 @@
       "empty": "No linked users yet. Generate an invitation code to share your plan.",
       "generateCode": "Generate Code",
       "viewCodes": "View Codes"
+    },
+    "upgrade": {
+      "title": "Upgrade Your Plan",
+      "description": "Choose the plan that fits your needs",
+      "selectPlan": "Select Plan",
+      "selectPlanDescription": "Choose between Premium or Familiar",
+      "selectPeriod": "Select Billing Period",
+      "selectPeriodDescription": "Save more with annual billing",
+      "plans": {
+        "premium": {
+          "description": "Perfect for individuals"
+        },
+        "familiar": {
+          "description": "Share with up to 3 users"
+        }
+      },
+      "period": {
+        "monthly": "Monthly",
+        "yearly": "Annual",
+        "month": "mo",
+        "year": "yr",
+        "save": "Save"
+      },
+      "features": {
+        "title": "What's Included",
+        "description": "All features in your selected plan",
+        "view_dashboard": "Access to Dashboard",
+        "create_basic_items": "Create Basic Items",
+        "export_data": "Export Data",
+        "advanced_reports": "Advanced Reports",
+        "invite_users": "Invite Users",
+        "shared_resources": "Shared Resources",
+        "priority_support": "Priority Support",
+        "api_access": "API Access",
+        "admin_controls": "Admin Controls",
+        "bulk_operations": "Bulk Operations",
+        "shareWith": "Share with up to {count} users"
+      },
+      "confirmUpgrade": "Upgrade for ${price}",
+      "cancel": "Cancel",
+      "processing": {
+        "title": "Processing...",
+        "description": "Setting up your subscription",
+        "button": "Processing..."
+      },
+      "success": {
+        "title": "Upgrade Successful!",
+        "description": "Your plan has been upgraded"
+      },
+      "error": {
+        "title": "Upgrade Failed",
+        "description": "There was an error upgrading your plan"
+      }
+    },
+    "downgrade": {
+      "title": "Downgrade to FREE",
+      "description": "Are you sure you want to downgrade?",
+      "warning": {
+        "title": "Warning",
+        "description": "This action will immediately cancel your paid subscription"
+      },
+      "willLose": {
+        "title": "What You'll Lose",
+        "description": "By downgrading to FREE, you will lose access to:",
+        "features": "Premium Features",
+        "featuresDescription": "Advanced reports, API access, priority support",
+        "linkedUsers": "User Linking",
+        "linkedUsersDescription": "All linked users will be automatically unlinked",
+        "limits": "Higher Limits",
+        "limitsDescription": "You'll have reduced project and storage limits",
+        "support": "Priority Support",
+        "supportDescription": "You'll return to community support only"
+      },
+      "confirm": {
+        "title": "Confirm Downgrade",
+        "description": "You are about to downgrade from {planName} to FREE",
+        "currentPlan": "Current Plan",
+        "newPlan": "New Plan"
+      },
+      "confirmButton": "Confirm Downgrade to FREE",
+      "processing": "Processing...",
+      "cancel": "Cancel",
+      "help": {
+        "title": "Need Help?",
+        "description": "If you're having issues with your plan, we're here to help",
+        "contact": "Contact support before downgrading to see if we can resolve your concerns"
+      },
+      "success": {
+        "title": "Downgraded Successfully",
+        "description": "Your plan has been changed to FREE"
+      },
+      "error": {
+        "title": "Downgrade Failed",
+        "description": "There was an error downgrading your plan"
+      }
     }
   },
   "showcase": {

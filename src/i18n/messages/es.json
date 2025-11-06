@@ -146,16 +146,23 @@
       "capabilities": {
         "title": "Funcionalidades del Plan",
         "description": "Qué incluye tu plan actual",
+        "view_dashboard": "Ver Dashboard",
+        "create_basic_items": "Crear Items Básicos",
         "export_data": "Exportar Datos",
         "advanced_reports": "Reportes Avanzados",
+        "invite_users": "Invitar Usuarios",
+        "shared_resources": "Recursos Compartidos",
         "priority_support": "Soporte Prioritario",
-        "custom_branding": "Marca Personalizada"
+        "api_access": "Acceso API",
+        "admin_controls": "Controles de Administrador",
+        "bulk_operations": "Operaciones en Lote"
       },
       "limits": {
         "title": "Límites de Uso",
         "projects": "Proyectos",
         "storage_mb": "Almacenamiento (MB)",
-        "team_members": "Miembros del Equipo"
+        "items_per_project": "Items por Proyecto",
+        "api_calls_per_month": "Llamadas API por Mes"
       }
     },
     "linkedUsers": {
@@ -164,6 +171,101 @@
       "empty": "Aún no hay usuarios vinculados. Genera un código de invitación para compartir tu plan.",
       "generateCode": "Generar Código",
       "viewCodes": "Ver Códigos"
+    },
+    "upgrade": {
+      "title": "Mejora Tu Plan",
+      "description": "Elige el plan que mejor se adapte a tus necesidades",
+      "selectPlan": "Seleccionar Plan",
+      "selectPlanDescription": "Elige entre Premium o Familiar",
+      "selectPeriod": "Seleccionar Período de Facturación",
+      "selectPeriodDescription": "Ahorra más con facturación anual",
+      "plans": {
+        "premium": {
+          "description": "Perfecto para individuos"
+        },
+        "familiar": {
+          "description": "Comparte con hasta 3 usuarios"
+        }
+      },
+      "period": {
+        "monthly": "Mensual",
+        "yearly": "Anual",
+        "month": "mes",
+        "year": "año",
+        "save": "Ahorra"
+      },
+      "features": {
+        "title": "Qué Incluye",
+        "description": "Todas las características de tu plan seleccionado",
+        "view_dashboard": "Acceso al Dashboard",
+        "create_basic_items": "Crear Items Básicos",
+        "export_data": "Exportar Datos",
+        "advanced_reports": "Reportes Avanzados",
+        "invite_users": "Invitar Usuarios",
+        "shared_resources": "Recursos Compartidos",
+        "priority_support": "Soporte Prioritario",
+        "api_access": "Acceso API",
+        "admin_controls": "Controles de Administrador",
+        "bulk_operations": "Operaciones en Lote",
+        "shareWith": "Comparte con hasta {count} usuarios"
+      },
+      "confirmUpgrade": "Mejorar por ${price}",
+      "cancel": "Cancelar",
+      "processing": {
+        "title": "Procesando...",
+        "description": "Configurando tu suscripción",
+        "button": "Procesando..."
+      },
+      "success": {
+        "title": "¡Mejora Exitosa!",
+        "description": "Tu plan ha sido mejorado"
+      },
+      "error": {
+        "title": "Error al Mejorar",
+        "description": "Hubo un error al mejorar tu plan"
+      }
+    },
+    "downgrade": {
+      "title": "Bajar a Plan FREE",
+      "description": "¿Estás seguro de que deseas bajar de plan?",
+      "warning": {
+        "title": "Advertencia",
+        "description": "Esta acción cancelará inmediatamente tu suscripción de pago"
+      },
+      "willLose": {
+        "title": "Lo Que Perderás",
+        "description": "Al bajar al plan FREE, perderás acceso a:",
+        "features": "Características Premium",
+        "featuresDescription": "Reportes avanzados, acceso API, soporte prioritario",
+        "linkedUsers": "Vinculación de Usuarios",
+        "linkedUsersDescription": "Todos los usuarios vinculados serán desvinculados automáticamente",
+        "limits": "Límites Superiores",
+        "limitsDescription": "Tendrás límites reducidos de proyectos y almacenamiento",
+        "support": "Soporte Prioritario",
+        "supportDescription": "Volverás solo al soporte de la comunidad"
+      },
+      "confirm": {
+        "title": "Confirmar Bajada de Plan",
+        "description": "Estás a punto de bajar de {planName} a FREE",
+        "currentPlan": "Plan Actual",
+        "newPlan": "Nuevo Plan"
+      },
+      "confirmButton": "Confirmar Bajada a FREE",
+      "processing": "Procesando...",
+      "cancel": "Cancelar",
+      "help": {
+        "title": "¿Necesitas Ayuda?",
+        "description": "Si tienes problemas con tu plan, estamos aquí para ayudar",
+        "contact": "Contacta con soporte antes de bajar de plan para ver si podemos resolver tus inquietudes"
+      },
+      "success": {
+        "title": "Bajada de Plan Exitosa",
+        "description": "Tu plan ha sido cambiado a FREE"
+      },
+      "error": {
+        "title": "Error al Bajar de Plan",
+        "description": "Hubo un error al bajar tu plan"
+      }
     }
   },
   "showcase": {
