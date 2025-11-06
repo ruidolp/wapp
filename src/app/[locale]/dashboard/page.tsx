@@ -110,7 +110,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
               </div>
               <div>
                 <p className="font-medium">{t('config.database')}</p>
-                <p className="text-muted-foreground">PostgreSQL + Prisma</p>
+                <p className="text-muted-foreground">PostgreSQL + Kysely</p>
               </div>
               <div>
                 <p className="font-medium">{t('config.auth')}</p>
