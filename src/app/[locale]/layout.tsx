@@ -13,12 +13,34 @@ import { getMessages, setRequestLocale } from 'next-intl/server'
 import { hasLocale } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { Inter } from 'next/font/google'
+import type { Metadata } from 'next'
 import { routing } from '@/i18n/routing'
 import { SessionProvider } from '@/presentation/providers/session-provider'
 import { Toaster } from '@/components/ui/toaster'
 import '@/app/globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
+
+export const metadata: Metadata = {
+  title: 'WApp - Aplicación Full Stack',
+  description: 'Next.js + Kysely + NextAuth + Capacitor',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'WApp',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
