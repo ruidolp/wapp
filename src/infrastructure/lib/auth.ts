@@ -142,7 +142,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           const activePlan = await getUserActivePlan(session.user.id)
 
-          // @ts-expect-error - Extended Session type with subscription
           session.user.subscription = {
             planSlug: activePlan.planSlug,
             planName: activePlan.planName,
@@ -157,7 +156,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         } catch (error) {
           console.error('Error loading subscription data:', error)
           // Fallback a plan FREE si hay error
-          // @ts-expect-error - Extended Session type with subscription
           session.user.subscription = {
             planSlug: 'free',
             planName: 'Free',

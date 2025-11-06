@@ -21,7 +21,6 @@ export async function GET() {
     }
 
     // Verificar que el usuario no está vinculado (solo owners pueden ver sus vinculados)
-    // @ts-expect-error - Extended Session type
     if (session.user.subscription.isLinked) {
       return NextResponse.json(
         { error: 'You cannot view linked users while linked to another plan' },
