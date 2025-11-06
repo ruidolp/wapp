@@ -38,16 +38,21 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Obtener sesión ANTES de procesamiento
+  const session = await auth()
+  const isAuthenticated = !!session
+
   // Primero aplicar i18n
   const response = handleI18nRouting(request)
+
+  // Si i18n redirige, permitirlo
+  if (response.status === 307 || response.status === 308) {
+    return response
+  }
 
   // Extraer locale del pathname
   const pathnameLocale = pathname.split('/')[1]
   const locale = locales.includes(pathnameLocale as any) ? pathnameLocale : defaultLocale
-
-  // Obtener sesión para autenticación
-  const session = await auth()
-  const isAuthenticated = !!session
 
   // Detectar plataforma
   const isCapacitor = detectCapacitor(request)
