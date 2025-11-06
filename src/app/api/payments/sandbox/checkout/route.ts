@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
   const planSlug = searchParams.get('plan')
   const period = searchParams.get('period')
   const userId = searchParams.get('userId')
+  const locale = searchParams.get('locale') || 'en'
 
   if (!planSlug || !period || !userId) {
     return new NextResponse('Missing required parameters', { status: 400 })
@@ -163,7 +164,7 @@ export async function GET(req: NextRequest) {
             </div>
           \`;
           setTimeout(() => {
-            window.location.href = '/dashboard';
+            window.location.href = '/${locale}/dashboard';
           }, 2000);
         } else {
           resultDiv.innerHTML = \`
