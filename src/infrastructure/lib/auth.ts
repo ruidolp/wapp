@@ -17,6 +17,7 @@ import { appConfig } from '@/config/app.config'
 import { loginUser } from '@/application/services/auth.service'
 import { loginSchema } from '@/infrastructure/utils/validation'
 import { findUserByEmail, updateLastLogin } from '@/infrastructure/database/queries/user.queries'
+import { getUserActivePlan } from '@/application/services/subscriptions'
 
 /**
  * Configuración de NextAuth
@@ -136,6 +137,39 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string
         session.user.accountType = token.accountType as string
         session.user.phone = token.phone as string
+
+        // Obtener información de suscripción del usuario
+        try {
+          const activePlan = await getUserActivePlan(session.user.id)
+
+          // @ts-expect-error - Extended Session type with subscription
+          session.user.subscription = {
+            planSlug: activePlan.planSlug,
+            planName: activePlan.planName,
+            status: activePlan.status,
+            isLinked: activePlan.isLinked,
+            ownerId: activePlan.ownerId,
+            capabilities: activePlan.capabilities,
+            limits: activePlan.limits,
+            expiresAt: activePlan.expiresAt?.toISOString() || null,
+            trialEndsAt: activePlan.trialEndsAt?.toISOString() || null,
+          }
+        } catch (error) {
+          console.error('Error loading subscription data:', error)
+          // Fallback a plan FREE si hay error
+          // @ts-expect-error - Extended Session type with subscription
+          session.user.subscription = {
+            planSlug: 'free',
+            planName: 'Free',
+            status: 'free',
+            isLinked: false,
+            ownerId: null,
+            capabilities: [],
+            limits: {},
+            expiresAt: null,
+            trialEndsAt: null,
+          }
+        }
       }
 
       return session
