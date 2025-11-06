@@ -3,6 +3,7 @@
  */
 
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { getSession, signOut } from '@/infrastructure/lib/auth'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -143,21 +144,21 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
               {/* Acciones de Suscripción */}
               <div className="flex gap-2 pt-4 border-t">
                 {canUpgrade && (
-                  <form action={`/${locale}/dashboard/upgrade`}>
+                  <Link href={`/${locale}/dashboard/upgrade`} className="w-full">
                     <Button variant="default" className="w-full">
                       {subscription.planSlug === 'free'
                         ? t('subscription.upgradeToPremium')
                         : t('subscription.upgradeToFamiliar')}
                     </Button>
-                  </form>
+                  </Link>
                 )}
 
                 {canDowngrade && subscription.status === 'active' && (
-                  <form action={`/${locale}/dashboard/downgrade`}>
+                  <Link href={`/${locale}/dashboard/downgrade`} className="w-full">
                     <Button variant="outline" className="w-full">
                       {t('subscription.downgrade')}
                     </Button>
-                  </form>
+                  </Link>
                 )}
 
                 {subscription.status === 'cancelled' && (
