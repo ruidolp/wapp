@@ -103,7 +103,7 @@ export async function registerUser(
 
 **Contenido**:
 - **Config**: Configuración centralizada
-- **Database**: Cliente Prisma y queries
+- **Database**: Cliente Kysely y query functions
 - **Lib**: Adaptadores a librerías (NextAuth, utils)
 - **Utils**: Utilidades técnicas (validación, crypto)
 - **Middleware**: Middleware de Next.js
@@ -116,8 +116,10 @@ export async function registerUser(
 
 **Ejemplo**:
 ```typescript
-// src/infrastructure/database/prisma.ts
-export const prisma = new PrismaClient()
+// src/infrastructure/database/kysely.ts
+export const db = new Kysely<Database>({
+  dialect: new PostgresDialect({ pool })
+})
 
 // src/infrastructure/config/app.config.ts
 export const appConfig = {
@@ -171,7 +173,7 @@ export function LoginForm() {
    ↓
 4. registerUser() → hashPassword() (Infrastructure Utils)
    ↓
-5. registerUser() → prisma.user.create() (Infrastructure DB)
+5. registerUser() → db.insertInto('users') (Infrastructure DB)
    ↓
 6. registerUser() → Retorna DomainUser (Domain)
    ↓
@@ -185,10 +187,12 @@ export function LoginForm() {
 ### 1. Repository Pattern
 ```typescript
 // Abstraer acceso a datos
-class UserRepository {
-  async findByEmail(email: string): Promise<User | null> {
-    return await prisma.user.findUnique({ where: { email } })
-  }
+export async function findUserByEmail(email: string): Promise<User | null> {
+  return await db
+    .selectFrom('users')
+    .where('email', '=', email)
+    .selectAll()
+    .executeTakeFirst()
 }
 ```
 
@@ -407,7 +411,7 @@ test('user can register and login', async ({ page }) => {
 4. **Password Hashing**: bcrypt con 10 rounds
 5. **CSRF Protection**: NextAuth built-in
 6. **XSS Prevention**: React auto-escaping
-7. **SQL Injection**: Prisma prepared statements
+7. **SQL Injection**: Kysely parameterized queries
 
 ### Checklist de Seguridad
 
@@ -424,12 +428,12 @@ test('user can register and login', async ({ page }) => {
 ### Horizontal Scaling
 
 - Serverless: Next.js API Routes son stateless
-- Database: PostgreSQL con connection pooling
+- Database: PostgreSQL con connection pooling (Kysely)
 - Cache: Redis para sesiones (opcional)
 
 ### Vertical Scaling
 
-- Optimización de queries (Prisma)
+- Optimización de queries (Kysely with type-safe SQL)
 - Lazy loading de componentes
 - Code splitting por rutas
 
@@ -450,7 +454,7 @@ console.log({
 
 - **Sentry**: Error tracking
 - **Vercel Analytics**: Web Vitals
-- **Prisma Insights**: Database performance
+- **PostgreSQL Monitoring**: Database performance
 - **LogRocket**: Session replay
 
 ## Migración y Mantenimiento
@@ -466,8 +470,8 @@ console.log({
 ### Cambiar de Database
 
 1. Cambiar `DATABASE_URL` en `.env`
-2. Actualizar `prisma/schema.prisma`
-3. `npm run db:push`
+2. Ejecutar migraciones SQL en la nueva base de datos
+3. Regenerar tipos: `npm run db:types`
 
 ### Cambiar de Framework UI
 

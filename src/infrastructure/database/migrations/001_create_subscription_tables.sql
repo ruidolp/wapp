@@ -1,6 +1,7 @@
--- Migration: Create Subscription Management Tables (FIXED for TEXT user_id)
+-- Migration: Create Subscription Management Tables
 -- Description: Módulo completo de gestión de suscripciones agnóstico del dominio
 -- Date: 2025-11-06
+-- Important: Usa DEFAULT gen_random_uuid()::TEXT para compatibilidad con mobile
 
 -- =====================================================
 -- ENUMS
@@ -51,7 +52,7 @@ CREATE TYPE subscription_event_type AS ENUM (
 
 -- Planes de suscripción disponibles
 CREATE TABLE subscription_plans (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
   slug VARCHAR(50) NOT NULL UNIQUE,
   name VARCHAR(100) NOT NULL,
   description TEXT,
@@ -69,8 +70,8 @@ COMMENT ON COLUMN subscription_plans.max_linked_users IS 'Máximo de usuarios qu
 
 -- Capacidades habilitadas por plan (features on/off)
 CREATE TABLE plan_capabilities (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  plan_id UUID NOT NULL REFERENCES subscription_plans(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  plan_id TEXT NOT NULL REFERENCES subscription_plans(id) ON DELETE CASCADE,
   capability_key VARCHAR(100) NOT NULL,
   enabled BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -85,8 +86,8 @@ COMMENT ON COLUMN plan_capabilities.capability_key IS 'Clave de la capacidad (ej
 
 -- Límites de recursos por plan
 CREATE TABLE plan_limits (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  plan_id UUID NOT NULL REFERENCES subscription_plans(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  plan_id TEXT NOT NULL REFERENCES subscription_plans(id) ON DELETE CASCADE,
   resource_key VARCHAR(100) NOT NULL,
   max_quantity INTEGER,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -100,14 +101,11 @@ COMMENT ON TABLE plan_limits IS 'Límites cuantitativos de recursos por plan';
 COMMENT ON COLUMN plan_limits.resource_key IS 'Clave del recurso (ej: projects, storage_mb)';
 COMMENT ON COLUMN plan_limits.max_quantity IS 'Cantidad máxima permitida (NULL = ilimitado)';
 
--- Limpiar tabla existente si hay error previo
-DROP TABLE IF EXISTS user_subscriptions CASCADE;
-
--- Suscripciones activas de usuarios (FIXED: user_id como TEXT)
+-- Suscripciones activas de usuarios
 CREATE TABLE user_subscriptions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  plan_id UUID NOT NULL REFERENCES subscription_plans(id) ON DELETE RESTRICT,
+  plan_id TEXT NOT NULL REFERENCES subscription_plans(id) ON DELETE RESTRICT,
   status subscription_status NOT NULL DEFAULT 'free',
   platform subscription_platform,
   platform_subscription_id VARCHAR(255),
@@ -131,12 +129,9 @@ COMMENT ON TABLE user_subscriptions IS 'Suscripción activa de cada usuario (pue
 COMMENT ON COLUMN user_subscriptions.platform_subscription_id IS 'ID de la suscripción en Stripe/Apple/Google';
 COMMENT ON COLUMN user_subscriptions.trial_ends_at IS 'Fecha de fin del trial (NULL si no está en trial)';
 
--- Limpiar tabla existente si hay error previo
-DROP TABLE IF EXISTS linked_users CASCADE;
-
--- Usuarios vinculados a suscripciones de otros (FIXED: user_id como TEXT)
+-- Usuarios vinculados a suscripciones de otros
 CREATE TABLE linked_users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
   owner_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   linked_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   linked_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -152,15 +147,12 @@ COMMENT ON TABLE linked_users IS 'Relación de usuarios vinculados (compartir su
 COMMENT ON COLUMN linked_users.owner_user_id IS 'Usuario propietario que paga el plan';
 COMMENT ON COLUMN linked_users.linked_user_id IS 'Usuario que recibe acceso sin pagar';
 
--- Limpiar tabla existente si hay error previo
-DROP TABLE IF EXISTS invitation_codes CASCADE;
-
--- Códigos de invitación para vincular usuarios (FIXED: user_id como TEXT)
+-- Códigos de invitación para vincular usuarios
 CREATE TABLE invitation_codes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
   code VARCHAR(20) NOT NULL UNIQUE,
   owner_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  plan_id UUID NOT NULL REFERENCES subscription_plans(id) ON DELETE CASCADE,
+  plan_id TEXT NOT NULL REFERENCES subscription_plans(id) ON DELETE CASCADE,
   status invitation_status NOT NULL DEFAULT 'pending',
   max_uses INTEGER NOT NULL DEFAULT 1,
   uses_count INTEGER NOT NULL DEFAULT 0,
@@ -178,16 +170,13 @@ COMMENT ON TABLE invitation_codes IS 'Códigos de invitación para vincular usua
 COMMENT ON COLUMN invitation_codes.code IS 'Código único compartible (ej: ABC123XYZ)';
 COMMENT ON COLUMN invitation_codes.max_uses IS 'Cuántas veces puede usarse el código';
 
--- Limpiar tabla existente si hay error previo
-DROP TABLE IF EXISTS subscription_history CASCADE;
-
--- Historial de eventos de suscripciones (auditoría) (FIXED: user_id como TEXT)
+-- Historial de eventos de suscripciones (auditoría)
 CREATE TABLE subscription_history (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   event_type subscription_event_type NOT NULL,
-  from_plan_id UUID REFERENCES subscription_plans(id) ON DELETE SET NULL,
-  to_plan_id UUID REFERENCES subscription_plans(id) ON DELETE SET NULL,
+  from_plan_id TEXT REFERENCES subscription_plans(id) ON DELETE SET NULL,
+  to_plan_id TEXT REFERENCES subscription_plans(id) ON DELETE SET NULL,
   platform subscription_platform,
   metadata JSONB,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -202,8 +191,8 @@ COMMENT ON COLUMN subscription_history.metadata IS 'Datos adicionales en formato
 
 -- Productos de pago por plan/plataforma/moneda
 CREATE TABLE payment_products (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  plan_id UUID NOT NULL REFERENCES subscription_plans(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  plan_id TEXT NOT NULL REFERENCES subscription_plans(id) ON DELETE CASCADE,
   platform subscription_platform NOT NULL,
   period subscription_period NOT NULL,
   currency VARCHAR(3) NOT NULL,
@@ -227,15 +216,7 @@ COMMENT ON COLUMN payment_products.price IS 'Precio en la moneda especificada';
 -- TRIGGERS
 -- =====================================================
 
--- Trigger para actualizar updated_at automáticamente
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
+-- Triggers para actualizar updated_at automáticamente
 CREATE TRIGGER update_subscription_plans_updated_at
   BEFORE UPDATE ON subscription_plans
   FOR EACH ROW

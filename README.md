@@ -1,6 +1,6 @@
 # WApp - Next.js Full Stack Application
 
-Aplicación fullstack moderna con Next.js 15, Prisma, NextAuth, Tailwind CSS, shadcn/ui y preparada para Capacitor.
+Aplicación fullstack moderna con Next.js 15, Kysely, NextAuth, Tailwind CSS, shadcn/ui y preparada para Capacitor.
 
 ## 📋 Tabla de Contenidos
 
@@ -39,7 +39,7 @@ Aplicación fullstack moderna con Next.js 15, Prisma, NextAuth, Tailwind CSS, sh
 
 ### Backend
 - **Next.js API Routes** - Backend serverless
-- **Prisma 5** - ORM
+- **Kysely** - Type-safe SQL query builder
 - **PostgreSQL** - Base de datos
 - **NextAuth v5** - Autenticación
 - **bcryptjs** - Hash de contraseñas
@@ -65,7 +65,7 @@ src/
 │
 ├── infrastructure/     # Detalles de implementación
 │   ├── config/         # Configuración centralizada
-│   ├── database/       # Cliente Prisma
+│   ├── database/       # Cliente Kysely y queries
 │   ├── lib/            # Librerías (NextAuth, utils)
 │   ├── middleware/     # Middleware de Next.js
 │   └── utils/          # Utilidades (validación, crypto)
@@ -190,16 +190,19 @@ npm install
 # 2. Configurar base de datos
 # Edita .env con tu connection string de PostgreSQL
 
-# 3. Generar cliente Prisma y ejecutar migraciones
-npm run db:push
+# 3. Ejecutar migraciones SQL en tu base de datos
+# Ver: src/infrastructure/database/migrations/
 
-# 4. Generar NEXTAUTH_SECRET
+# 4. Generar tipos de Kysely desde el esquema
+npm run db:types
+
+# 5. Generar NEXTAUTH_SECRET
 openssl rand -base64 32
 
-# 5. Agregar el secret a .env
+# 6. Agregar el secret a .env
 echo "NEXTAUTH_SECRET=<tu-secret>" >> .env
 
-# 6. Iniciar servidor de desarrollo
+# 7. Iniciar servidor de desarrollo
 npm run dev
 ```
 
@@ -213,11 +216,8 @@ npm run build        # Build de producción
 npm start            # Servidor de producción
 npm run lint         # Linter
 
-# Prisma
-npm run db:generate  # Generar cliente Prisma
-npm run db:push      # Push schema a DB (dev)
-npm run db:migrate   # Crear migración
-npm run db:studio    # Abrir Prisma Studio
+# Kysely
+npm run db:types     # Generar tipos TypeScript desde el esquema de la base de datos
 ```
 
 ## 🌐 Deploy en Vercel
@@ -258,8 +258,12 @@ Configura estas variables en el dashboard de Vercel:
 ### Paso 3: Ejecutar Migraciones
 
 ```bash
-# Desde tu máquina local
-DATABASE_URL="<production-url>" npm run db:push
+# Ejecuta las migraciones SQL manualmente en tu base de datos de producción
+# Archivos de migración: src/infrastructure/database/migrations/
+# Puedes usar psql, pgAdmin, o el SQL Editor de tu proveedor
+
+# Luego genera los tipos TypeScript (opcional, si DATABASE_URL está configurado)
+DATABASE_URL="<production-url>" npm run db:types
 ```
 
 ## 📱 Capacitor (Mobile)
@@ -332,10 +336,14 @@ export const appConfig = {
 
 ```
 wapp/
-├── prisma/
-│   └── schema.prisma           # Schema de base de datos
-│
 ├── src/
+│   ├── infrastructure/
+│   │   └── database/
+│   │       ├── migrations/     # SQL migrations
+│   │       ├── kysely.ts       # Kysely client
+│   │       ├── types.ts        # Generated types
+│   │       └── queries/        # Query functions
+│
 │   ├── app/                    # Next.js App Router
 │   │   ├── api/               # API Routes
 │   │   │   ├── auth/         # NextAuth endpoints
@@ -366,7 +374,10 @@ wapp/
 │   │   ├── config/         # Configuración
 │   │   │   └── app.config.ts  # ⭐ Configuración centralizada
 │   │   ├── database/       # Base de datos
-│   │   │   └── prisma.ts
+│   │   │   ├── kysely.ts   # Kysely client
+│   │   │   ├── types.ts    # Generated types
+│   │   │   ├── queries/    # Query functions
+│   │   │   └── migrations/ # SQL migrations
 │   │   ├── lib/           # Librerías
 │   │   │   ├── auth.ts    # NextAuth config
 │   │   │   ├── utils.ts   # Utilidades generales
@@ -434,7 +445,7 @@ Para cambiar colores, edita las variables CSS o usa Tailwind classes.
 - ✅ Validación de inputs (Zod)
 - ✅ Middleware de protección de rutas
 - ✅ Headers de seguridad
-- ✅ Rate limiting (configuración lista)
+- ✅ SQL injection protection (Kysely parameterized queries)
 
 ### Recomendaciones Adicionales
 - Habilitar HTTPS en producción
@@ -520,7 +531,7 @@ Este proyecto es de código abierto y está disponible bajo la licencia MIT.
 ## 🙏 Agradecimientos
 
 - [Next.js](https://nextjs.org/)
-- [Prisma](https://www.prisma.io/)
+- [Kysely](https://kysely.dev/)
 - [NextAuth](https://next-auth.js.org/)
 - [shadcn/ui](https://ui.shadcn.com/)
 - [Tailwind CSS](https://tailwindcss.com/)

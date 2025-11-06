@@ -65,6 +65,26 @@
       "facebook": "Continue with Facebook",
       "googleRegister": "Register with Google",
       "facebookRegister": "Register with Facebook"
+    },
+    "error": {
+      "title": "Authentication Error",
+      "description": "An error occurred during authentication",
+      "backToLogin": "Back to Login",
+      "errors": {
+        "Configuration": "There is a problem with the server configuration.",
+        "AccessDenied": "Access denied. You do not have permission to access this resource.",
+        "Verification": "The verification token has expired or has already been used.",
+        "OAuthSignin": "Error starting OAuth sign in.",
+        "OAuthCallback": "Error during OAuth authentication.",
+        "OAuthCreateAccount": "Could not create OAuth account.",
+        "EmailCreateAccount": "Could not create email account.",
+        "Callback": "Error during authentication callback.",
+        "OAuthAccountNotLinked": "To confirm your identity, sign in with the same account you used originally.",
+        "EmailSignin": "Could not send authentication email.",
+        "CredentialsSignin": "Invalid credentials. Check your email and password.",
+        "SessionRequired": "Please sign in to access this page.",
+        "Default": "An unexpected authentication error occurred."
+      }
     }
   },
   "dashboard": {
