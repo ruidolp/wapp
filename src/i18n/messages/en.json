@@ -120,6 +120,48 @@
       "ui": "UI",
       "validation": "Validation",
       "mobile": "Mobile"
+    },
+    "subscription": {
+      "title": "Your Subscription",
+      "description": "Manage your plan and billing",
+      "currentPlan": "Current Plan",
+      "linkedAccount": "Linked Account",
+      "linkedToOwner": "Shared by another user",
+      "trialEnds": "Trial Ends",
+      "expiresAt": "Expires At",
+      "upgradeToPremium": "Upgrade to Premium",
+      "upgradeToFamiliar": "Upgrade to Familiar",
+      "downgrade": "Downgrade Plan",
+      "reactivate": "Reactivate Subscription",
+      "status": {
+        "free": "Free",
+        "trial": "Trial",
+        "active": "Active",
+        "expired": "Expired",
+        "cancelled": "Cancelled",
+        "payment_failed": "Payment Failed"
+      },
+      "capabilities": {
+        "title": "Plan Features",
+        "description": "What's included in your current plan",
+        "export_data": "Export Data",
+        "advanced_reports": "Advanced Reports",
+        "priority_support": "Priority Support",
+        "custom_branding": "Custom Branding"
+      },
+      "limits": {
+        "title": "Usage Limits",
+        "projects": "Projects",
+        "storage_mb": "Storage (MB)",
+        "team_members": "Team Members"
+      }
+    },
+    "linkedUsers": {
+      "title": "Linked Users",
+      "description": "Share your subscription with family or team",
+      "empty": "No linked users yet. Generate an invitation code to share your plan.",
+      "generateCode": "Generate Code",
+      "viewCodes": "View Codes"
     }
   },
   "showcase": {

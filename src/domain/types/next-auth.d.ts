@@ -7,6 +7,21 @@
 import { DefaultSession, DefaultUser } from 'next-auth'
 import { JWT, DefaultJWT } from 'next-auth/jwt'
 
+/**
+ * Información de suscripción del usuario
+ */
+interface UserSubscription {
+  planSlug: string
+  planName: string
+  status: string
+  isLinked: boolean
+  ownerId: string | null
+  capabilities: string[]
+  limits: Record<string, number>
+  expiresAt: string | null
+  trialEndsAt: string | null
+}
+
 declare module 'next-auth' {
   /**
    * Extensión de Session
@@ -16,6 +31,7 @@ declare module 'next-auth' {
       id: string
       accountType: string
       phone?: string | null
+      subscription: UserSubscription
     } & DefaultSession['user']
   }
 

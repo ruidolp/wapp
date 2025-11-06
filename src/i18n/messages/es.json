@@ -120,6 +120,48 @@
       "ui": "UI",
       "validation": "Validación",
       "mobile": "Mobile"
+    },
+    "subscription": {
+      "title": "Tu Suscripción",
+      "description": "Gestiona tu plan y facturación",
+      "currentPlan": "Plan Actual",
+      "linkedAccount": "Cuenta Vinculada",
+      "linkedToOwner": "Compartido por otro usuario",
+      "trialEnds": "Prueba Termina",
+      "expiresAt": "Expira el",
+      "upgradeToPremium": "Subir a Premium",
+      "upgradeToFamiliar": "Subir a Familiar",
+      "downgrade": "Bajar de Plan",
+      "reactivate": "Reactivar Suscripción",
+      "status": {
+        "free": "Gratis",
+        "trial": "Prueba",
+        "active": "Activo",
+        "expired": "Expirado",
+        "cancelled": "Cancelado",
+        "payment_failed": "Pago Fallido"
+      },
+      "capabilities": {
+        "title": "Funcionalidades del Plan",
+        "description": "Qué incluye tu plan actual",
+        "export_data": "Exportar Datos",
+        "advanced_reports": "Reportes Avanzados",
+        "priority_support": "Soporte Prioritario",
+        "custom_branding": "Marca Personalizada"
+      },
+      "limits": {
+        "title": "Límites de Uso",
+        "projects": "Proyectos",
+        "storage_mb": "Almacenamiento (MB)",
+        "team_members": "Miembros del Equipo"
+      }
+    },
+    "linkedUsers": {
+      "title": "Usuarios Vinculados",
+      "description": "Comparte tu suscripción con familia o equipo",
+      "empty": "Aún no hay usuarios vinculados. Genera un código de invitación para compartir tu plan.",
+      "generateCode": "Generar Código",
+      "viewCodes": "Ver Códigos"
     }
   },
   "showcase": {
