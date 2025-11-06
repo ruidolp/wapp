@@ -87,6 +87,7 @@ export function UpgradeForm({ currentPlanSlug, locale }: UpgradeFormProps) {
           planSlug: selectedPlan,
           period: selectedPeriod,
           platform: 'web',
+          locale,
         }),
       })
 
@@ -96,25 +97,12 @@ export function UpgradeForm({ currentPlanSlug, locale }: UpgradeFormProps) {
         throw new Error(data.error || 'Upgrade failed')
       }
 
-      // If sandbox mode, redirect to checkout URL
+      // Redirect to checkout URL (sandbox or production)
       if (data.checkoutUrl) {
-        toast({
-          title: t('processing.title'),
-          description: t('processing.description'),
-        })
-
-        // In production, this would redirect to Stripe/Apple/Google
-        // For now, simulate payment success after 2 seconds
-        setTimeout(() => {
-          toast({
-            title: t('success.title'),
-            description: t('success.description'),
-          })
-          router.push(`/${locale}/dashboard`)
-        }, 2000)
-      } else {
-        // Production payment flow
+        // Redirect to checkout page (sandbox shows mock payment page, production goes to Stripe/etc)
         window.location.href = data.checkoutUrl
+      } else {
+        throw new Error('No checkout URL received')
       }
     } catch (error: any) {
       console.error('Upgrade error:', error)

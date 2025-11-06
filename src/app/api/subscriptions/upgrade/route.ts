@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     // Parse request body
     const body = await req.json()
-    const { planSlug, period, platform = 'web' } = body
+    const { planSlug, period, platform = 'web', locale = 'en' } = body
 
     // Validar datos
     if (!planSlug || !period) {
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     // Si está en modo sandbox, retornar URL de sandbox
     if (SUBSCRIPTION_CONFIG.paymentMode === 'sandbox') {
-      const checkoutUrl = `/api/payments/sandbox/checkout?plan=${planSlug}&period=${period}&userId=${session.user.id}`
+      const checkoutUrl = `/api/payments/sandbox/checkout?plan=${planSlug}&period=${period}&userId=${session.user.id}&locale=${locale}`
 
       return NextResponse.json({
         checkoutUrl,
