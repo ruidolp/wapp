@@ -30,7 +30,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
           <div>
             <h1 className="text-4xl font-bold">{t('title')}</h1>
             <p className="text-muted-foreground mt-2">
-              {t('welcome', { name: session.user.name })}
+              {t('welcome', { name: session.user.name || 'User' })}
             </p>
           </div>
 
@@ -51,7 +51,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
             <CardContent className="space-y-2">
               <div>
                 <p className="text-sm font-medium">{t('userInfo.name')}</p>
-                <p className="text-sm text-muted-foreground">{session.user.name}</p>
+                <p className="text-sm text-muted-foreground">{session.user.name || 'N/A'}</p>
               </div>
               {session.user.email && (
                 <div>
