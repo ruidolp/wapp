@@ -95,10 +95,14 @@ export async function findUserByEmailOrPhone(email?: string, phone?: string) {
 /**
  * Crear nuevo usuario
  */
+/**
+ * Crear nuevo usuario
+ */
 export async function createUser(userData: CreateUserData) {
   return await db
     .insertInto('users')
     .values({
+      id: crypto.randomUUID(),  // Generate UUID for user
       ...userData,
       updated_at: new Date(),
     })
