@@ -3,10 +3,13 @@
  *
  * Endpoint simple para verificar que la API está funcionando
  * y que la conexión a la base de datos está activa.
+ *
+ * Migrado a Kysely para mejor performance.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/infrastructure/database/prisma'
+import { db } from '@/infrastructure/database/kysely'
+import { sql } from 'kysely'
 import { appConfig } from '@/config/app.config'
 import { rateLimit, RateLimitPresets } from '@/infrastructure/lib/rate-limit'
 
@@ -19,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Verificar conexión a la base de datos
-    await prisma.$queryRaw`SELECT 1`
+    await sql`SELECT 1`.execute(db)
 
     return NextResponse.json({
       status: 'ok',
