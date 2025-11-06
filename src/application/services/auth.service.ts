@@ -3,9 +3,27 @@
  *
  * Contiene la lógica de negocio para autenticación, registro,
  * verificación y recuperación de cuenta.
+ *
+ * Migrado a Kysely para mejor performance y type-safety.
  */
 
-import { prisma } from '@/infrastructure/database/prisma'
+import {
+  createUser,
+  findUserByEmailOrPhone,
+  updateLastLogin,
+  findUserById,
+  verifyUserEmail,
+  verifyUserPhone,
+  updateUserPassword,
+  userExistsByEmailOrPhone,
+} from '@/infrastructure/database/queries/user.queries'
+import {
+  createVerificationCode,
+  findPendingVerificationCode,
+  invalidatePendingCodes,
+  markCodeAsUsed,
+  markCodeAsExpired,
+} from '@/infrastructure/database/queries/verification.queries'
 import { hashPassword, verifyPassword, generateVerificationCode, generateCodeExpiration, sanitizeEmail, sanitizePhone } from '@/infrastructure/utils/crypto'
 import { detectIdentifierType } from '@/infrastructure/utils/validation'
 import { appConfig } from '@/config/app.config'
@@ -18,6 +36,7 @@ import type {
   ResetPasswordRequest,
   VerifyAccountRequest,
 } from '@/domain/types/auth.types'
+import type { UsersTable } from '@/infrastructure/database/types'
 
 /**
  * Registrar un nuevo usuario
@@ -46,16 +65,9 @@ export async function registerUser(
     const phone = credentials.phone ? sanitizePhone(credentials.phone) : undefined
 
     // Verificar si el usuario ya existe
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          email ? { email } : {},
-          phone ? { phone } : {},
-        ],
-      },
-    })
+    const exists = await userExistsByEmailOrPhone(email, phone)
 
-    if (existingUser) {
+    if (exists) {
       return {
         success: false,
         error: 'El usuario ya existe',
@@ -66,14 +78,16 @@ export async function registerUser(
     const hashedPassword = await hashPassword(credentials.password)
 
     // Crear usuario
-    const user = await prisma.user.create({
-      data: {
-        name: credentials.name,
-        email,
-        phone,
-        password: hashedPassword,
-        accountType: credentials.accountType,
-      },
+    const user = await createUser({
+      name: credentials.name,
+      email: email || null,
+      phone: phone || null,
+      password: hashedPassword,
+      account_type: credentials.accountType,
+      email_verified: null,
+      phone_verified: null,
+      image: null,
+      last_login_at: null,
     })
 
     // Generar código de verificación si está habilitado
@@ -81,13 +95,12 @@ export async function registerUser(
       const code = generateVerificationCode(appConfig.auth.confirmation.codeLength)
       const expiresAt = generateCodeExpiration(appConfig.auth.confirmation.codeExpirationHours * 60)
 
-      await prisma.verificationCode.create({
-        data: {
-          userId: user.id,
-          code,
-          type: credentials.accountType === 'EMAIL' ? 'EMAIL_CONFIRMATION' : 'PHONE_CONFIRMATION',
-          expiresAt,
-        },
+      await createVerificationCode({
+        user_id: user.id,
+        code,
+        type: credentials.accountType === 'EMAIL' ? 'EMAIL_CONFIRMATION' : 'PHONE_CONFIRMATION',
+        expires_at: expiresAt,
+        used_at: null,
       })
 
       // TODO: Enviar código por email o SMS
@@ -133,14 +146,10 @@ export async function loginUser(
       : sanitizePhone(credentials.identifier)
 
     // Buscar usuario
-    const user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          identifierType === 'email' ? { email: identifier } : {},
-          identifierType === 'phone' ? { phone: identifier } : {},
-        ],
-      },
-    })
+    const user = await findUserByEmailOrPhone(
+      identifierType === 'email' ? identifier : undefined,
+      identifierType === 'phone' ? identifier : undefined
+    )
 
     if (!user || !user.password) {
       return {
@@ -162,8 +171,8 @@ export async function loginUser(
     // Verificar si requiere confirmación
     if (appConfig.auth.confirmation.enabled && !appConfig.auth.confirmation.allowUnverifiedLogin) {
       const isVerified = identifierType === 'email'
-        ? user.emailVerified
-        : user.phoneVerified
+        ? user.email_verified
+        : user.phone_verified
 
       if (!isVerified) {
         return {
@@ -175,10 +184,7 @@ export async function loginUser(
     }
 
     // Actualizar última fecha de login
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
-    })
+    await updateLastLogin(user.id)
 
     const domainUser = mapToDomainUser(user)
 
@@ -225,14 +231,10 @@ export async function requestPasswordRecovery(
       : sanitizePhone(request.identifier)
 
     // Buscar usuario
-    const user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          identifierType === 'email' ? { email: identifier } : {},
-          identifierType === 'phone' ? { phone: identifier } : {},
-        ],
-      },
-    })
+    const user = await findUserByEmailOrPhone(
+      identifierType === 'email' ? identifier : undefined,
+      identifierType === 'phone' ? identifier : undefined
+    )
 
     // Por seguridad, siempre retornar éxito aunque el usuario no exista
     if (!user) {
@@ -240,28 +242,18 @@ export async function requestPasswordRecovery(
     }
 
     // Invalidar códigos anteriores
-    await prisma.verificationCode.updateMany({
-      where: {
-        userId: user.id,
-        type: 'PASSWORD_RESET',
-        status: 'PENDING',
-      },
-      data: {
-        status: 'EXPIRED',
-      },
-    })
+    await invalidatePendingCodes(user.id, 'PASSWORD_RESET')
 
     // Generar nuevo código
     const code = generateVerificationCode(appConfig.auth.recovery.codeLength)
     const expiresAt = generateCodeExpiration(appConfig.auth.recovery.codeExpirationMinutes)
 
-    await prisma.verificationCode.create({
-      data: {
-        userId: user.id,
-        code,
-        type: 'PASSWORD_RESET',
-        expiresAt,
-      },
+    await createVerificationCode({
+      user_id: user.id,
+      code,
+      type: 'PASSWORD_RESET',
+      expires_at: expiresAt,
+      used_at: null,
     })
 
     // TODO: Enviar código por email o SMS
@@ -292,14 +284,11 @@ export async function resetPassword(
     }
 
     // Buscar código de verificación
-    const verificationCode = await prisma.verificationCode.findFirst({
-      where: {
-        userId: request.userId,
-        code: request.code,
-        type: 'PASSWORD_RESET',
-        status: 'PENDING',
-      },
-    })
+    const verificationCode = await findPendingVerificationCode(
+      request.userId,
+      request.code,
+      'PASSWORD_RESET'
+    )
 
     if (!verificationCode) {
       return {
@@ -309,11 +298,8 @@ export async function resetPassword(
     }
 
     // Verificar si el código ha expirado
-    if (new Date() > verificationCode.expiresAt) {
-      await prisma.verificationCode.update({
-        where: { id: verificationCode.id },
-        data: { status: 'EXPIRED' },
-      })
+    if (new Date() > new Date(verificationCode.expires_at)) {
+      await markCodeAsExpired(verificationCode.id)
 
       return {
         success: false,
@@ -325,19 +311,10 @@ export async function resetPassword(
     const hashedPassword = await hashPassword(request.newPassword)
 
     // Actualizar contraseña
-    await prisma.user.update({
-      where: { id: request.userId },
-      data: { password: hashedPassword },
-    })
+    await updateUserPassword(request.userId, hashedPassword)
 
     // Marcar código como usado
-    await prisma.verificationCode.update({
-      where: { id: verificationCode.id },
-      data: {
-        status: 'USED',
-        usedAt: new Date(),
-      },
-    })
+    await markCodeAsUsed(verificationCode.id)
 
     return { success: true }
   } catch (error) {
@@ -364,14 +341,11 @@ export async function verifyAccount(
     }
 
     // Buscar código
-    const verificationCode = await prisma.verificationCode.findFirst({
-      where: {
-        userId: request.userId,
-        code: request.code,
-        type: request.type,
-        status: 'PENDING',
-      },
-    })
+    const verificationCode = await findPendingVerificationCode(
+      request.userId,
+      request.code,
+      request.type
+    )
 
     if (!verificationCode) {
       return {
@@ -381,11 +355,8 @@ export async function verifyAccount(
     }
 
     // Verificar si ha expirado
-    if (new Date() > verificationCode.expiresAt) {
-      await prisma.verificationCode.update({
-        where: { id: verificationCode.id },
-        data: { status: 'EXPIRED' },
-      })
+    if (new Date() > new Date(verificationCode.expires_at)) {
+      await markCodeAsExpired(verificationCode.id)
 
       return {
         success: false,
@@ -393,27 +364,15 @@ export async function verifyAccount(
       }
     }
 
-    // Actualizar usuario
-    const updateData: any = {}
+    // Actualizar usuario según el tipo de verificación
     if (request.type === 'EMAIL_CONFIRMATION') {
-      updateData.emailVerified = new Date()
+      await verifyUserEmail(request.userId)
     } else if (request.type === 'PHONE_CONFIRMATION') {
-      updateData.phoneVerified = new Date()
+      await verifyUserPhone(request.userId)
     }
 
-    await prisma.user.update({
-      where: { id: request.userId },
-      data: updateData,
-    })
-
     // Marcar código como usado
-    await prisma.verificationCode.update({
-      where: { id: verificationCode.id },
-      data: {
-        status: 'USED',
-        usedAt: new Date(),
-      },
-    })
+    await markCodeAsUsed(verificationCode.id)
 
     return { success: true }
   } catch (error) {
@@ -432,9 +391,7 @@ export async function getUserById(
   userId: string
 ): Promise<DomainUser | null> {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    })
+    const user = await findUserById(userId)
 
     if (!user) {
       return null
@@ -448,20 +405,20 @@ export async function getUserById(
 }
 
 /**
- * Mapear usuario de Prisma a dominio
+ * Mapear usuario de Kysely a dominio
  */
 function mapToDomainUser(user: any): DomainUser {
   return {
     id: user.id,
     name: user.name,
     email: user.email,
-    emailVerified: user.emailVerified,
+    emailVerified: user.email_verified ? new Date(user.email_verified) : null,
     phone: user.phone,
-    phoneVerified: user.phoneVerified,
+    phoneVerified: user.phone_verified ? new Date(user.phone_verified) : null,
     image: user.image,
-    accountType: user.accountType,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
-    lastLoginAt: user.lastLoginAt,
+    accountType: user.account_type,
+    createdAt: new Date(user.created_at),
+    updatedAt: new Date(user.updated_at),
+    lastLoginAt: user.last_login_at ? new Date(user.last_login_at) : null,
   }
 }

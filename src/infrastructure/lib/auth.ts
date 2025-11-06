@@ -3,24 +3,26 @@
  *
  * NextAuth v5 (beta) está optimizado para App Router de Next.js 13+
  * Soporta autenticación con credenciales, OAuth y base de datos.
+ *
+ * Migrado a Kysely para mejor performance.
  */
 
 import NextAuth from 'next-auth'
-import { PrismaAdapter } from '@auth/prisma-adapter'
 import Credentials from 'next-auth/providers/credentials'
 import Google from 'next-auth/providers/google'
 import Facebook from 'next-auth/providers/facebook'
 
-import { prisma } from '@/infrastructure/database/prisma'
+import { KyselyAdapter } from './kysely-adapter'
 import { appConfig } from '@/config/app.config'
 import { loginUser } from '@/application/services/auth.service'
 import { loginSchema } from '@/infrastructure/utils/validation'
+import { findUserByEmail, updateLastLogin } from '@/infrastructure/database/queries/user.queries'
 
 /**
  * Configuración de NextAuth
  */
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: KyselyAdapter(),
 
   // Estrategia de sesión
   session: {
@@ -150,9 +152,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (!appConfig.auth.registration.allowSelfSignup) {
         // Verificar si el usuario ya existe
         if (user.email) {
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email },
-          })
+          const existingUser = await findUserByEmail(user.email)
 
           if (!existingUser) {
             return false
@@ -172,10 +172,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
 
       // Actualizar última fecha de login
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { lastLoginAt: new Date() },
-      })
+      if (user.id) {
+        await updateLastLogin(user.id)
+      }
     },
   },
 
