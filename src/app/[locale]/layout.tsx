@@ -12,19 +12,11 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { hasLocale } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { Inter } from 'next/font/google'
 import type { Metadata } from 'next'
 import { routing } from '@/i18n/routing'
 import { SessionProvider } from '@/presentation/providers/session-provider'
 import { Toaster } from '@/components/ui/toaster'
 import '@/app/globals.css'
-
-// Google Fonts con fallback a system fonts
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  fallback: ['system-ui', 'arial'],
-})
 
 export const metadata: Metadata = {
   title: 'WApp - Aplicación Full Stack',
@@ -73,7 +65,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className="font-sans antialiased">
         <SessionProvider>
           <NextIntlClientProvider messages={messages}>
             {children}
