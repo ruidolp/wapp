@@ -10,11 +10,12 @@ import { locales } from './config'
 
 export default getRequestConfig(async ({ locale }) => {
   // Validar que el locale sea válido
-  if (!locales.includes(locale as any)) {
+  if (!locale || !locales.includes(locale as any)) {
     notFound()
   }
 
   return {
+    locale,
     messages: (await import(`./messages/${locale}.json`)).default,
   }
 })
