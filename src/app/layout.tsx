@@ -1,14 +1,11 @@
 /**
  * Root Layout
  *
- * Layout principal de la aplicación Next.js
+ * Con next-intl, este layout solo pasa children.
+ * El HTML y body se renderizan en [locale]/layout.tsx
  */
 
 import type { Metadata } from 'next'
-import './globals.css'
-
-import { SessionProvider } from '@/presentation/providers/session-provider'
-import { Toaster } from '@/components/ui/toaster'
 
 export const metadata: Metadata = {
   title: 'WApp - Aplicación Full Stack',
@@ -36,14 +33,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return (
-    <html lang="es" suppressHydrationWarning>
-      <body>
-        <SessionProvider>
-          {children}
-          <Toaster />
-        </SessionProvider>
-      </body>
-    </html>
-  )
+  return children
 }
