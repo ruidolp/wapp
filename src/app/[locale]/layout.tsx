@@ -19,7 +19,12 @@ import { SessionProvider } from '@/presentation/providers/session-provider'
 import { Toaster } from '@/components/ui/toaster'
 import '@/app/globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+// Google Fonts con fallback a system fonts
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  fallback: ['system-ui', 'arial'],
+})
 
 export const metadata: Metadata = {
   title: 'WApp - Aplicación Full Stack',
