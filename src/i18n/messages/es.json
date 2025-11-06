@@ -14,6 +14,7 @@
       "register": "Regístrate",
       "orContinueWith": "O continúa con",
       "continueWithEmail": "Iniciar sesión con Email o Teléfono",
+      "selectMethod": "Selecciona tu método de inicio de sesión",
       "backToOptions": "Volver a opciones de inicio de sesión",
       "error": {
         "title": "Error al iniciar sesión",
@@ -36,6 +37,7 @@
       "phone": "Teléfono",
       "phonePlaceholder": "+52 1234567890",
       "password": "Contraseña",
+      "selectMethod": "Selecciona tu método de inicio de sesión",
       "passwordPlaceholder": "••••••••",
       "confirmPassword": "Confirmar Contraseña",
       "submit": "Crear Cuenta",

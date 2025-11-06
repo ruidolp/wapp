@@ -8,6 +8,7 @@
       "password": "Password",
       "passwordPlaceholder": "••••••••",
       "submit": "Sign In",
+      "selectMethod": "Select your login method",
       "submitting": "Signing in...",
       "forgotPassword": "Forgot your password?",
       "noAccount": "Don't have an account?",
