@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 WApp is a modern fullstack Next.js 15 application built with Clean Architecture principles, featuring complete authentication (email/phone + OAuth), mobile-ready design with Capacitor support, and centralized configuration for easy backend migration.
 
-**Tech Stack**: Next.js 15 (App Router), React 19, TypeScript, Prisma (PostgreSQL), NextAuth v5, Tailwind CSS, shadcn/ui, Capacitor 6, next-intl
+**Tech Stack**: Next.js 15 (App Router), React 19, TypeScript, Kysely (PostgreSQL), NextAuth v5, Tailwind CSS, shadcn/ui, Capacitor 6, next-intl
 
 **Node Requirements**: Node.js 18+, npm 9+
 
@@ -17,17 +17,14 @@ WApp is a modern fullstack Next.js 15 application built with Clean Architecture 
 npm run dev                 # Start dev server on http://localhost:3000
 
 # Build & Production
-npm run build              # Generate Prisma client + build for production
+npm run build              # Build for production
 npm start                  # Start production server
 
 # Linting
 npm run lint               # Run Next.js linter
 
-# Database (Prisma)
-npm run db:generate        # Generate Prisma client (auto-runs on postinstall)
-npm run db:push           # Push schema to database (development)
-npm run db:migrate        # Create and run migration (production)
-npm run db:studio         # Open Prisma Studio GUI for database
+# Database (Kysely)
+npm run db:types          # Generate TypeScript types from database schema
 
 # Mobile (Capacitor)
 npx cap add android       # Add Android platform (one-time)
@@ -55,7 +52,7 @@ Business logic orchestration. Contains:
 ### 3. Infrastructure Layer (`src/infrastructure/`)
 Technical implementation details. Contains:
 - **config/app.config.ts**: **CRITICAL** - ALL app configuration centralized here
-- **database/**: Prisma client setup
+- **database/**: Kysely client setup and queries
 - **lib/**: External library adapters (NextAuth, utils)
 - **utils/**: Technical utilities (validation schemas, crypto)
 
@@ -90,15 +87,22 @@ Key configuration sections:
 - OAuth providers are **conditionally enabled** based on `app.config.ts`
 - Session helpers: `getSession()`, `getCurrentUser()`, `isAuthenticated()`
 
-### Prisma Schema (`prisma/schema.prisma`)
-Database models:
-- **User**: Main user model with email/phone support
-- **Account**: OAuth accounts (NextAuth)
-- **Session**: Session tracking (NextAuth)
-- **VerificationCode**: Email/phone verification and password reset codes
-- **Enums**: AccountType, VerificationCodeType, VerificationCodeStatus
+### Database Schema (Kysely)
+Database models (PostgreSQL):
+- **users**: Main user model with email/phone support
+- **accounts**: OAuth accounts (NextAuth)
+- **sessions**: Session tracking (NextAuth)
+- **verification_codes**: Email/phone verification and password reset codes
+- **subscription_plans**: Available subscription plans (FREE, PREMIUM, FAMILIAR)
+- **user_subscriptions**: User's active subscription
+- **linked_users**: User linking relationships
+- **invitation_codes**: Invitation codes for sharing plans
+- **Enums**: AccountType, VerificationCodeType, VerificationCodeStatus, SubscriptionStatus, etc.
 
-**Important**: Always run `npm run db:generate` after schema changes.
+**Important**:
+- Database types are in `src/infrastructure/database/types.ts`
+- Queries are organized in `src/infrastructure/database/queries/`
+- Run `npm run db:types` to regenerate types from schema (when DATABASE_URL is available)
 
 ### Internationalization (`src/i18n/`)
 - Uses `next-intl` for i18n
@@ -133,7 +137,7 @@ Key aliases:
 2. API route validates (`src/app/api/register/route.ts`)
 3. Service handles business logic (`src/application/services/auth.service.ts`)
 4. Password hashed with bcrypt (10 rounds)
-5. User stored in database via Prisma
+5. User stored in database via Kysely queries
 6. Optional: Verification code sent (if enabled in config)
 
 ### Login
@@ -176,23 +180,26 @@ export default async function ProtectedPage() {
 
 ### Development
 ```bash
-# After schema changes
-npm run db:push          # Push schema without creating migration
+# After schema changes in PostgreSQL, regenerate TypeScript types
+npm run db:types         # Generate types from database schema
 
-# View/edit data
-npm run db:studio        # Opens GUI on http://localhost:5555
+# Run SQL migrations manually
+psql -U user -d database -f src/infrastructure/database/migrations/001_migration.sql
 ```
 
 ### Production
 ```bash
-# Create migration
-npm run db:migrate       # Creates migration file and applies it
+# Apply SQL migrations through your deployment pipeline
+# Migrations are in: src/infrastructure/database/migrations/
 
-# Apply existing migrations
-npx prisma migrate deploy
+# Regenerate types if needed (requires DATABASE_URL)
+npm run db:types
 ```
 
-**Important**: `db:push` is for dev only. Always use `db:migrate` for production changes.
+**Important**:
+- Schema changes are done via SQL migrations, not code-first
+- Always create migration files for schema changes
+- Types are generated from the actual database schema
 
 ## Environment Variables
 
@@ -322,15 +329,59 @@ export async function POST(req: NextRequest) {
 }
 ```
 
+### Dynamic Route Parameters (Next.js 15)
+
+**CRITICAL**: In Next.js 15, route parameters are **asynchronous** and must be awaited.
+
+```typescript
+// ❌ WRONG - This will cause build errors
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const id = params.id  // ERROR: params is a Promise
+}
+
+// ✅ CORRECT - Always use this pattern
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params  // Await params first
+
+  // Now you can use id
+  const data = await getData(id)
+  return NextResponse.json(data)
+}
+
+// ✅ CORRECT - For multiple params
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ userId: string; itemId: string }> }
+) {
+  const { userId, itemId } = await context.params
+  // Use params
+}
+```
+
+**Common error message**:
+```
+Type "{ params: { id: string; }; }" is not a valid type for the function's second argument
+```
+
+**Solution**: Change `{ params }` to `context: { params: Promise<...> }` and `await context.params`
+
 ### Adding a New Service
 ```typescript
 // src/application/services/my-service.ts
-import { prisma } from '@/infrastructure/database/prisma'
+import { db } from '@/infrastructure/database/kysely'
+import { findUserById } from '@/infrastructure/database/queries'
 import { appConfig } from '@/config/app.config'
 
 export async function myBusinessLogic(data: MyInput): Promise<MyOutput> {
   // 1. Validate business rules
-  // 2. Interact with database
+  // 2. Interact with database via queries
+  const user = await findUserById(data.userId)
   // 3. Return domain objects
 }
 ```
@@ -368,8 +419,8 @@ All API calls will automatically use the new URL.
 
 ### Database Migration
 1. Change `DATABASE_URL` in `.env`
-2. Update `prisma/schema.prisma` if needed
-3. Run `npm run db:migrate` for production
+2. Run SQL migrations manually or through deployment pipeline
+3. Regenerate types: `npm run db:types` (if DATABASE_URL is available)
 
 ### Changing UI Framework
 Replace components in `src/presentation/components/ui/` while maintaining interfaces. Business logic remains unchanged.
