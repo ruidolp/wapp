@@ -10,9 +10,12 @@ import { unlinkUserFromPlan } from '@/application/services/subscriptions'
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Next.js 15: params es async
+    const { id: linkedUserId } = await context.params
+
     // Verificar autenticación
     const session = await auth()
 
@@ -31,8 +34,6 @@ export async function DELETE(
         { status: 403 }
       )
     }
-
-    const linkedUserId = params.id
 
     // Desvincular usuario
     await unlinkUserFromPlan(session.user.id, linkedUserId)
