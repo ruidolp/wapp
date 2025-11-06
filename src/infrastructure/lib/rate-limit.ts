@@ -80,8 +80,8 @@ function getClientIdentifier(request: NextRequest): string {
   const xRealIp = request.headers.get('x-real-ip')
   if (xRealIp) return xRealIp
 
-  // Fallback a IP del request (desarrollo)
-  return request.ip || 'unknown'
+  // Fallback a unknown si no hay headers de IP
+  return 'unknown'
 }
 
 /**
