@@ -7,7 +7,8 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/infrastructure/lib/auth'
 
-export default async function HomePage({ params: { locale } }: { params: { locale: string } }) {
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
   const session = await getSession()
 
   // Si está autenticado, ir al dashboard
