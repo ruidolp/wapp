@@ -15,7 +15,10 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { routing } from '@/i18n/routing'
 import { SessionProvider } from '@/presentation/providers/session-provider'
+import { ThemeProvider } from '@/presentation/providers/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
+import { getActiveThemes, getUserThemePreference } from '@/infrastructure/database/queries'
+import { auth } from '@/infrastructure/lib/auth'
 import '@/app/globals.css'
 
 export const metadata: Metadata = {
@@ -63,15 +66,50 @@ export default async function LocaleLayout({
   // Obtener las traducciones para este locale
   const messages = await getMessages()
 
+  // Load available themes (with fallback for build time)
+  let themes = []
+  let defaultTheme = 'blanco'
+
+  try {
+    const themesData = await getActiveThemes()
+    themes = themesData.map(t => ({
+      id: t.id,
+      slug: t.slug,
+      name: t.name,
+      description: t.description || undefined,
+      colors: t.colors as any,
+    }))
+
+    // Get user's saved theme preference
+    const session = await auth()
+    if (session?.user) {
+      const preference = await getUserThemePreference(session.user.id)
+      if (preference) {
+        defaultTheme = preference.theme.slug
+      }
+    }
+  } catch (error) {
+    // During build time or when DB is not available, use hardcoded themes
+    // The actual theme colors are defined in globals.css
+    themes = [
+      { id: '1', slug: 'neon', name: 'Neon', colors: {} as any },
+      { id: '2', slug: 'blanco', name: 'Blanco', colors: {} as any },
+      { id: '3', slug: 'negro', name: 'Negro', colors: {} as any },
+      { id: '4', slug: 'rosado', name: 'Rosado', colors: {} as any },
+    ]
+  }
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <SessionProvider>
-          <NextIntlClientProvider messages={messages}>
-            {children}
-            <Toaster />
-          </NextIntlClientProvider>
-        </SessionProvider>
+        <ThemeProvider defaultTheme={defaultTheme} themes={themes}>
+          <SessionProvider>
+            <NextIntlClientProvider messages={messages}>
+              {children}
+              <Toaster />
+            </NextIntlClientProvider>
+          </SessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

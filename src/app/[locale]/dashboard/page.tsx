@@ -9,6 +9,7 @@ import { getSession, signOut } from '@/infrastructure/lib/auth'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
+import { ThemeSelector } from '@/presentation/components/theme/theme-selector'
 import { Badge } from '@/components/ui/badge'
 
 export default async function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -57,6 +58,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
           </div>
 
           <div className="flex items-center gap-2">
+            <ThemeSelector />
             <LanguageSwitcher />
             <form action={handleSignOut}>
               <Button variant="outline">{t('signOut')}</Button>
