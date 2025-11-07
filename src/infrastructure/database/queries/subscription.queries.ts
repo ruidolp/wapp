@@ -20,6 +20,7 @@ export type CreateSubscriptionData = {
 }
 
 export type UpdateSubscriptionData = {
+  plan_id?: string
   status?: SubscriptionStatus
   expires_at?: Date | null
   trial_ends_at?: Date | null

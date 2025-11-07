@@ -348,6 +348,7 @@ export async function upgradePlan(
   if (currentSub) {
     // Actualizar suscripción existente
     subscription = await updateSubscription(currentSub.id, {
+      plan_id: newPlan.id, // ✅ CRITICAL: Cambiar al nuevo plan
       status: 'active',
       expires_at: expiresAt,
       trial_ends_at: null, // Cancelar trial si existía
