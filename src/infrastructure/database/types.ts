@@ -33,6 +33,11 @@ export type SubscriptionEventType =
   | 'unlinked'
 
 /**
+ * Enums de themes
+ */
+export type ThemeCategory = 'preestablished' | 'custom'
+
+/**
  * Helper type para columnas generadas (timestamps, etc)
  */
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
@@ -232,6 +237,33 @@ export interface PaymentProductsTable {
 }
 
 /**
+ * Tabla: themes (Temas del sistema)
+ */
+export interface ThemesTable {
+  id: Generated<string>
+  slug: string
+  name: string
+  description: string | null
+  category: ThemeCategory
+  colors: string // JSON con colores CSS
+  is_active: Generated<boolean>
+  created_at: Generated<Timestamp>
+  updated_at: Timestamp
+}
+
+/**
+ * Tabla: user_theme_preferences (Preferencias de tema por usuario)
+ */
+export interface UserThemePreferencesTable {
+  id: Generated<string>
+  user_id: string
+  theme_id: string
+  custom_colors: string | null // JSON con colores personalizados (opcional)
+  created_at: Generated<Timestamp>
+  updated_at: Timestamp
+}
+
+/**
  * Database interface con todas las tablas
  */
 export interface Database {
@@ -248,4 +280,6 @@ export interface Database {
   invitation_codes: InvitationCodesTable
   subscription_history: SubscriptionHistoryTable
   payment_products: PaymentProductsTable
+  themes: ThemesTable
+  user_theme_preferences: UserThemePreferencesTable
 }
