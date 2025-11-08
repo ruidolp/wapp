@@ -6,7 +6,7 @@
 
 import { db } from '../kysely'
 
-import type { UserConfigTable } from '../types'
+import type { UserConfigTable, TipoPeriodo } from '../types'
 
 /**
  * Tipo para actualización de configuración
@@ -17,7 +17,7 @@ export type UpdateUserConfigData = {
   timezone?: string
   locale?: string
   primer_dia_semana?: number
-  tipo_periodo?: string
+  tipo_periodo?: TipoPeriodo
   dia_inicio_periodo?: number
 }
 
