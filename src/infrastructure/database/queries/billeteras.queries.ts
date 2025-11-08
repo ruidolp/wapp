@@ -5,14 +5,14 @@
  */
 
 import { db } from '../kysely'
-import type { BilleterasTable } from '../types'
+import type { BilleterasTable, TipoBilletera } from '../types'
 
 /**
  * Tipo para creación de billetera
  */
 export type CreateBilleteraData = {
   nombre: string
-  tipo: string // TipoBilletera enum
+  tipo: TipoBilletera
   moneda_principal_id: string
   saldo_real: number
   saldo_proyectado: number

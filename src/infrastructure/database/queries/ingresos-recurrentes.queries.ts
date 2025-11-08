@@ -6,7 +6,7 @@
 
 import { db } from '../kysely'
 
-import type { IngresosRecurrentesTable } from '../types'
+import type { IngresosRecurrentesTable, FrecuenciaIngreso, EstadoIngresoRecurrente } from '../types'
 
 /**
  * Tipo para creación de ingreso recurrente
@@ -15,13 +15,13 @@ export type CreateIngresoRecurrenteData = {
   nombre: string
   monto: number
   moneda_id: string
-  frecuencia: string // FrecuenciaIngreso enum
+  frecuencia: FrecuenciaIngreso
   dia: number
   billetera_id: string
   usuario_id: string
   auto_distribuir: boolean
   distribucion?: any // JSONB
-  estado: string
+  estado: EstadoIngresoRecurrente
   proxima_ejecucion?: Date
 }
 
@@ -35,7 +35,7 @@ export type UpdateIngresoRecurrenteData = {
   dia?: number
   auto_distribuir?: boolean
   distribucion?: any // JSONB
-  estado?: string
+  estado?: EstadoIngresoRecurrente
   proxima_ejecucion?: Date
 }
 

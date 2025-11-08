@@ -6,7 +6,7 @@
 
 import { db } from '../kysely'
 
-import type { TransaccionesTable } from '../types'
+import type { TransaccionesTable, TipoTransaccion } from '../types'
 
 /**
  * Tipo para creación de transacción
@@ -15,7 +15,7 @@ export type CreateTransaccionData = {
   monto: number
   moneda_id: string
   billetera_id: string
-  tipo: string // TipoTransaccion enum
+  tipo: TipoTransaccion
   usuario_id: string
   sobre_id?: string
   categoria_id?: string
@@ -179,7 +179,7 @@ export async function findTransaccionesBySubcategoria(
  */
 export async function findTransaccionesByTipo(
   userId: string,
-  tipo: string,
+  tipo: TipoTransaccion,
   fechaInicio?: Date,
   fechaFin?: Date
 ) {
