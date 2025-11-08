@@ -269,17 +269,3 @@ export async function removeParticipanteFromSobre(sobreId: string, userId: strin
     .where('usuario_id', '=', userId)
     .executeTakeFirst()
 }
-/**
- * Buscar sobres por período
- */
-export async function findSobresByPeriodo(userId: string, periodoId: string) {
-  return await db
-    .selectFrom('sobres')
-    .selectAll()
-    .where('usuario_id', '=', userId)
-    .where('periodo_id', '=', periodoId)
-    .where('deleted_at', 'is', null)
-    .orderBy('created_at', 'desc')
-    .execute()
-}
-
