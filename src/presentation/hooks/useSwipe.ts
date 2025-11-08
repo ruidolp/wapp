@@ -73,11 +73,15 @@ export function useSwipe(options: UseSwipeOptions = {}) {
   }
 
   return {
-    onTouchStart,
-    onTouchMove,
-    onTouchEnd,
-    isDragging: state.isDragging,
-    currentOffset: state.currentOffset,
+    handlers: {
+      onTouchStart,
+      onTouchMove,
+      onTouchEnd,
+    },
+    state: {
+      isDragging: state.isDragging,
+      currentOffset: state.currentOffset,
+    },
   }
 }
 
@@ -121,7 +125,7 @@ export function useCarousel(options: UseCarouselOptions) {
     }
   }
 
-  const swipeHandlers = useSwipe({
+  const swipe = useSwipe({
     onSwipeLeft: goToNext,
     onSwipeRight: goToPrevious,
   })
@@ -134,6 +138,6 @@ export function useCarousel(options: UseCarouselOptions) {
     isTransitioning,
     canGoNext: activeIndex < itemCount - 1,
     canGoPrevious: activeIndex > 0,
-    swipeHandlers,
+    swipeHandlers: swipe.handlers,
   }
 }
