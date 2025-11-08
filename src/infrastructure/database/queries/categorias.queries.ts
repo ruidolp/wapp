@@ -60,7 +60,7 @@ export async function findCategoriaByNombre(userId: string, nombre: string) {
     .selectFrom('categorias')
     .selectAll()
     .where('usuario_id', '=', userId)
-    .where((eb: any) => eb.fn('LOWER', ['nombre']), '=', nombre.toLowerCase())
+    .where((eb: any) => eb(eb.fn('LOWER', ['nombre']), '=', nombre.toLowerCase()))
     .where('deleted_at', 'is', null)
     .executeTakeFirst()
 }

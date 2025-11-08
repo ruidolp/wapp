@@ -82,7 +82,7 @@ export async function findSubcategoriaByNombre(
     .selectAll()
     .where('usuario_id', '=', userId)
     .where('categoria_id', '=', categoriaId)
-    .where((eb: any) => eb.fn('LOWER', ['nombre']), '=', nombre.toLowerCase())
+    .where((eb: any) => eb(eb.fn('LOWER', ['nombre']), '=', nombre.toLowerCase()))
     .where('deleted_at', 'is', null)
     .executeTakeFirst()
 }
