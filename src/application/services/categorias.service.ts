@@ -286,6 +286,7 @@ export async function crearSubcategoria(
 
     // Verificar que no exista otra subcategoría con el mismo nombre en esta categoría
     const existente = await findSubcategoriaByNombre(
+      input.userId,
       input.categoriaId,
       input.nombre.trim()
     )
@@ -413,6 +414,7 @@ export async function actualizarSubcategoria(
     // Verificar que no exista otra subcategoría con el mismo nombre en esta categoría
     if (input.nombre) {
       const existente = await findSubcategoriaByNombre(
+        userId,
         subcategoria.categoria_id,
         input.nombre.trim()
       )
