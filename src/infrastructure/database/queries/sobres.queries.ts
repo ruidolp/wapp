@@ -269,3 +269,55 @@ export async function removeParticipanteFromSobre(sobreId: string, userId: strin
     .where('usuario_id', '=', userId)
     .executeTakeFirst()
 }
+/**
+ * Buscar sobres por período
+ */
+export async function findSobresByPeriodo(userId: string, periodoId: string) {
+  return await db
+    .selectFrom('sobres')
+    .selectAll()
+    .where('usuario_id', '=', userId)
+    .where('periodo_id', '=', periodoId)
+    .where('deleted_at', 'is', null)
+    .orderBy('created_at', 'desc')
+    .execute()
+}
+
+/**
+ * Vincular categorías a un sobre
+ */
+export async function linkCategoriasToSobre(sobreId: string, categoriaIds: string[]) {
+  const values = categoriaIds.map((categoriaId) => ({
+    sobre_id: sobreId,
+    categoria_id: categoriaId,
+  }))
+
+  return await db
+    .insertInto('sobres_categorias')
+    .values(values)
+    .execute()
+}
+
+/**
+ * Desvincular categoría de sobre
+ */
+export async function unlinkCategoriaFromSobre(sobreId: string, categoriaId: string) {
+  return await db
+    .deleteFrom('sobres_categorias')
+    .where('sobre_id', '=', sobreId)
+    .where('categoria_id', '=', categoriaId)
+    .executeTakeFirst()
+}
+
+/**
+ * Obtener categorías vinculadas a un sobre
+ */
+export async function findCategoriasBySobre(sobreId: string) {
+  return await db
+    .selectFrom('sobres_categorias')
+    .innerJoin('categorias', 'categorias.id', 'sobres_categorias.categoria_id')
+    .selectAll('categorias')
+    .where('sobres_categorias.sobre_id', '=', sobreId)
+    .where('categorias.deleted_at', 'is', null)
+    .execute()
+}
