@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast'
 
 import { registerWithEmailSchema, registerWithPhoneSchema, type RegisterWithEmailInput, type RegisterWithPhoneInput } from '@/infrastructure/utils/validation'
 import { PasswordValidator } from './password-validator'
+import { apiClient, getErrorMessage } from '@/infrastructure/lib/api-client'
 
 interface AuthConfig {
   auth: {
@@ -77,8 +78,7 @@ export function RegisterForm() {
 
   // Fetch config from API
   useEffect(() => {
-    fetch('/api/config')
-      .then(res => res.json())
+    apiClient.get<AuthConfig>('/api/config')
       .then(data => {
         setConfig(data)
         // Show credentials form by default if no OAuth providers are available
@@ -108,24 +108,7 @@ export function RegisterForm() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        toast({
-          variant: 'destructive',
-          title: t('error.title'),
-          description: result.error || t('error.description'),
-        })
-        return
-      }
+      const result = await apiClient.post('/api/register', data)
 
       toast({
         title: t('success.title'),
@@ -143,7 +126,7 @@ export function RegisterForm() {
       toast({
         variant: 'destructive',
         title: tCommon('error'),
-        description: t('error.generic'),
+        description: getErrorMessage(error),
       })
     } finally {
       setIsLoading(false)

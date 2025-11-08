@@ -8,6 +8,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { apiClient } from '@/infrastructure/lib/api-client'
 
 export interface ThemeColors {
   background: string
@@ -92,14 +93,11 @@ export function ThemeProvider({
       setThemeState(themeSlug)
 
       // Save to database (backend will handle persistence)
-      await fetch('/api/user/theme', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ themeSlug }),
-      }).catch(err => {
-        console.warn('Failed to save theme preference to database:', err)
-        // Non-blocking: theme still works from localStorage
-      })
+      await apiClient.post('/api/user/theme', { themeSlug })
+        .catch(err => {
+          console.warn('Failed to save theme preference to database:', err)
+          // Non-blocking: theme still works from localStorage
+        })
     } catch (error) {
       console.error('Error setting theme:', error)
     } finally {
