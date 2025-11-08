@@ -8,6 +8,7 @@ interface BilleterasCardProps {
   billeteras: Billetera[]
   onNuevaCuenta?: () => void
   onTransferir?: () => void
+  onCrearSobre?: () => void
   onClickCuenta?: (billetera: Billetera) => void
 }
 
@@ -15,6 +16,7 @@ export function BilleterasCard({
   billeteras,
   onNuevaCuenta,
   onTransferir,
+  onCrearSobre,
   onClickCuenta,
 }: BilleterasCardProps) {
   const billeterasSinInteres = billeteras.filter(b => b.tipo !== 'CREDITO')
@@ -107,13 +109,17 @@ export function BilleterasCard({
       {/* Footer Actions */}
       {billeteras.length > 0 && (
         <div className="relative z-10 px-6 py-4 bg-white/80 backdrop-blur-sm border-t border-slate-200">
-          <div className="grid grid-cols-2 gap-3">
-            <Button onClick={onNuevaCuenta} className="w-full">
-              <Plus className="w-4 h-4 mr-2" />
-              Nueva Cuenta
+          <div className="grid grid-cols-3 gap-2">
+            <Button onClick={onNuevaCuenta} variant="outline" className="w-full text-xs">
+              <Plus className="w-4 h-4 mr-1" />
+              Cuenta
             </Button>
-            <Button onClick={onTransferir} variant="secondary" className="w-full">
-              <ArrowRightLeft className="w-4 h-4 mr-2" />
+            <Button onClick={onCrearSobre} className="w-full text-xs">
+              <Plus className="w-4 h-4 mr-1" />
+              Sobre
+            </Button>
+            <Button onClick={onTransferir} variant="secondary" className="w-full text-xs">
+              <ArrowRightLeft className="w-4 h-4 mr-1" />
               Transferir
             </Button>
           </div>

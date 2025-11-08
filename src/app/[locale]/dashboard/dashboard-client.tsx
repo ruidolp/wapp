@@ -5,6 +5,8 @@ import { Menu, Monitor, Smartphone } from 'lucide-react'
 import { SwipeContainer, SwipeItem, BilleterasCard, SobreCard } from '@/components/swipe'
 import type { CategoriaGasto } from '@/components/swipe'
 import type { Billetera, Sobre, Transaccion } from '@/domain/types'
+import { CrearBilleteraDialog } from '@/components/dialogs/CrearBilleteraDialog'
+import { CrearSobreDialog } from '@/components/dialogs/CrearSobreDialog'
 
 interface User {
   id: string
@@ -34,6 +36,8 @@ export function DashboardClient({
 }: DashboardClientProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
+  const [showCrearBilletera, setShowCrearBilletera] = useState(false)
+  const [showCrearSobre, setShowCrearSobre] = useState(false)
 
   // Detectar si es mobile
   useEffect(() => {
@@ -58,10 +62,8 @@ export function DashboardClient({
       content: (
         <BilleterasCard
           billeteras={billeteras}
-          onNuevaCuenta={() => {
-            console.log('Nueva cuenta')
-            // TODO: Abrir modal/página de nueva cuenta
-          }}
+          onNuevaCuenta={() => setShowCrearBilletera(true)}
+          onCrearSobre={() => setShowCrearSobre(true)}
           onTransferir={() => {
             console.log('Transferir')
             // TODO: Abrir modal/página de transferencia
@@ -159,27 +161,41 @@ export function DashboardClient({
 
   // Vista Mobile: Swipe Navigation
   return (
-    <div className="relative w-full h-screen bg-slate-50">
-      {/* Hamburger Menu Icon - Top Left */}
-      <div className="absolute top-4 left-4 z-50">
-        <button
-          className="w-10 h-10 rounded-lg bg-white/80 backdrop-blur-sm shadow-md border border-slate-200 flex items-center justify-center hover:bg-white transition-all"
-          onClick={() => {
-            console.log('Menu clicked')
-            // TODO: Abrir menú lateral
-          }}
-          aria-label="Menu"
-        >
-          <Menu className="w-5 h-5 text-slate-700" />
-        </button>
+    <>
+      <div className="relative w-full h-screen bg-slate-50">
+        {/* Hamburger Menu Icon - Top Left */}
+        <div className="absolute top-4 left-4 z-50">
+          <button
+            className="w-10 h-10 rounded-lg bg-white/80 backdrop-blur-sm shadow-md border border-slate-200 flex items-center justify-center hover:bg-white transition-all"
+            onClick={() => {
+              console.log('Menu clicked')
+              // TODO: Abrir menú lateral
+            }}
+            aria-label="Menu"
+          >
+            <Menu className="w-5 h-5 text-slate-700" />
+          </button>
+        </div>
+
+        {/* Swipe Container */}
+        <SwipeContainer
+          items={swipeItems}
+          initialIndex={0}
+          onIndexChange={setActiveIndex}
+        />
       </div>
 
-      {/* Swipe Container */}
-      <SwipeContainer
-        items={swipeItems}
-        initialIndex={0}
-        onIndexChange={setActiveIndex}
+      {/* Dialogs */}
+      <CrearBilleteraDialog
+        open={showCrearBilletera}
+        onOpenChange={setShowCrearBilletera}
+        userId={user.id}
       />
-    </div>
+      <CrearSobreDialog
+        open={showCrearSobre}
+        onOpenChange={setShowCrearSobre}
+        userId={user.id}
+      />
+    </>
   )
 }
