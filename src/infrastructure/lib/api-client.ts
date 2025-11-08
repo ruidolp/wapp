@@ -2,15 +2,22 @@
  * Cliente HTTP centralizado para todas las llamadas a la API
  *
  * Este cliente permite separar completamente el frontend del backend.
- * Al usar appConfig.api.baseUrl, podemos migrar el backend a un servidor
- * externo simplemente cambiando la variable de entorno API_BASE_URL.
+ *
+ * Estrategia de URLs:
+ * - En el NAVEGADOR (client-side): Usa URLs relativas (ej: '/api/config')
+ *   El navegador resuelve automáticamente al dominio actual (localhost, Vercel, etc.)
+ *   No requiere configurar API_BASE_URL en variables de entorno.
+ *
+ * - En el SERVIDOR (server-side): Usa URLs absolutas desde appConfig.api.baseUrl
+ *   Permite llamadas internas entre servicios si es necesario.
+ *   Se configura con la variable de entorno API_BASE_URL.
  *
  * Características:
  * - Centraliza todas las llamadas HTTP
  * - Manejo de errores consistente
  * - Soporte para autenticación (headers automáticos)
  * - Tipos TypeScript fuertes
- * - Interceptores de request/response
+ * - Funciona automáticamente en cualquier entorno (localhost, Vercel, custom domain)
  */
 
 import { appConfig } from '@/config/app.config'
@@ -54,14 +61,18 @@ class ApiClient {
   private baseUrl: string
 
   constructor() {
-    this.baseUrl = appConfig.api.baseUrl
+    // En el navegador (client-side), usar URLs relativas
+    // En el servidor (server-side), usar la URL base configurada
+    this.baseUrl = typeof window !== 'undefined' ? '' : appConfig.api.baseUrl
   }
 
   /**
    * Construye la URL completa con query params
    */
   private buildUrl(endpoint: string, params?: Record<string, string | number | boolean>): string {
-    const url = `${this.baseUrl}${endpoint}`
+    // Si baseUrl está vacío (navegador), usar endpoint directamente (URL relativa)
+    // Si baseUrl existe (servidor), construir URL absoluta
+    const url = this.baseUrl ? `${this.baseUrl}${endpoint}` : endpoint
 
     if (!params) return url
 
@@ -193,7 +204,7 @@ class ApiClient {
    */
   async upload<T = any>(endpoint: string, formData: FormData): Promise<T> {
     try {
-      const url = `${this.baseUrl}${endpoint}`
+      const url = this.baseUrl ? `${this.baseUrl}${endpoint}` : endpoint
 
       const response = await fetch(url, {
         method: 'POST',
