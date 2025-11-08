@@ -493,9 +493,9 @@ export async function obtenerGastosSobre(
       data: {
         sobre_id: sobreId,
         total_gastos: totalGastos,
-        presupuesto: sobre.presupuesto_periodo,
-        disponible: Number(sobre.presupuesto_periodo) - totalGastos,
-        porcentaje_usado: (totalGastos / Number(sobre.presupuesto_periodo)) * 100,
+        presupuesto: sobre.presupuesto_asignado,
+        disponible: Number(sobre.presupuesto_asignado) - totalGastos,
+        porcentaje_usado: (totalGastos / Number(sobre.presupuesto_asignado)) * 100,
       },
     }
   } catch (error) {
