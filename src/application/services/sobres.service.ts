@@ -169,7 +169,7 @@ export async function obtenerSobre(
 
     // Verificar que el usuario tiene acceso (es owner o participante)
     const participantes = await findParticipantesBySobre(sobreId)
-    const tieneAcceso = participantes.some(((p: any) => p.usuario_id === userId)
+    const tieneAcceso = participantes.some((p: any) => p.usuario_id === userId)
 
     if (!tieneAcceso) {
       return {
@@ -208,7 +208,7 @@ export async function actualizarSobre(
 
     // Verificar que el usuario es OWNER o ADMIN
     const participantes = await findParticipantesBySobre(sobreId)
-    const participante = participantes.find(((p: any) => p.usuario_id === userId)
+    const participante = participantes.find((p: any) => p.usuario_id === userId)
 
     if (!participante || (participante.rol !== 'OWNER' && participante.rol !== 'ADMIN')) {
       return {
@@ -271,7 +271,7 @@ export async function eliminarSobre(
 
     // Verificar que el usuario es OWNER
     const participantes = await findParticipantesBySobre(sobreId)
-    const participante = participantes.find(((p: any) => p.usuario_id === userId)
+    const participante = participantes.find((p: any) => p.usuario_id === userId)
 
     if (!participante || participante.rol !== 'OWNER') {
       return {
@@ -312,7 +312,7 @@ export async function agregarParticipante(
 
     // Verificar que el usuario es OWNER o ADMIN
     const participantes = await findParticipantesBySobre(sobreId)
-    const participante = participantes.find(((p: any) => p.usuario_id === userId)
+    const participante = participantes.find((p: any) => p.usuario_id === userId)
 
     if (!participante || (participante.rol !== 'OWNER' && participante.rol !== 'ADMIN')) {
       return {
@@ -322,7 +322,7 @@ export async function agregarParticipante(
     }
 
     // Verificar que el participante no existe ya
-    const yaExiste = participantes.some(((p: any) => p.usuario_id === participanteId)
+    const yaExiste = participantes.some((p: any) => p.usuario_id === participanteId)
     if (yaExiste) {
       return {
         success: false,
@@ -384,7 +384,7 @@ export async function eliminarParticipante(
 
     // Verificar que el usuario es OWNER o ADMIN
     const participantes = await findParticipantesBySobre(sobreId)
-    const participante = participantes.find(((p: any) => p.usuario_id === userId)
+    const participante = participantes.find((p: any) => p.usuario_id === userId)
 
     if (!participante || (participante.rol !== 'OWNER' && participante.rol !== 'ADMIN')) {
       return {
@@ -394,7 +394,7 @@ export async function eliminarParticipante(
     }
 
     // No permitir eliminar al OWNER
-    const aEliminar = participantes.find(((p: any) => p.usuario_id === participanteId)
+    const aEliminar = participantes.find((p: any) => p.usuario_id === participanteId)
     if (aEliminar?.rol === 'OWNER') {
       return {
         success: false,
@@ -434,7 +434,7 @@ export async function vincularCategorias(
 
     // Verificar que el usuario es OWNER o ADMIN
     const participantes = await findParticipantesBySobre(sobreId)
-    const participante = participantes.find(((p: any) => p.usuario_id === userId)
+    const participante = participantes.find((p: any) => p.usuario_id === userId)
 
     if (!participante || (participante.rol !== 'OWNER' && participante.rol !== 'ADMIN')) {
       return {
