@@ -15,7 +15,10 @@ export const appConfig = {
    */
   api: {
     // Base URL de la API - cambiar aquí para migrar el backend sin tocar código
-    baseUrl: process.env.API_BASE_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000',
+    // NEXT_PUBLIC_API_BASE_URL: Para usar desde el navegador (frontend externo)
+    // API_BASE_URL: Para usar desde el servidor (server-to-server)
+    // Si no se configura, usa URLs relativas en navegador y NEXTAUTH_URL en servidor
+    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || process.env.API_BASE_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000',
 
     // Timeout para requests (ms)
     timeout: 30000,

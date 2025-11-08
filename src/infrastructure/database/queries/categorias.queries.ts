@@ -5,7 +5,8 @@
  */
 
 import { db } from '../kysely'
-import type { CategoriasTable } from '../types'
+// TODO: Importar CategoriasTable cuando se regeneren los tipos después de la migración
+// import type { CategoriasTable } from '../types'
 
 /**
  * Tipo para creación de categoría

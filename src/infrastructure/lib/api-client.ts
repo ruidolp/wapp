@@ -61,9 +61,17 @@ class ApiClient {
   private baseUrl: string
 
   constructor() {
-    // En el navegador (client-side), usar URLs relativas
-    // En el servidor (server-side), usar la URL base configurada
-    this.baseUrl = typeof window !== 'undefined' ? '' : appConfig.api.baseUrl
+    // Estrategia de URLs:
+    // 1. Si NEXT_PUBLIC_API_BASE_URL está configurada: Usar esa URL (backend separado)
+    // 2. Si estamos en navegador y no hay NEXT_PUBLIC_API_BASE_URL: Usar URLs relativas
+    // 3. Si estamos en servidor: Usar appConfig.api.baseUrl
+    if (typeof window !== 'undefined') {
+      // Navegador (client-side)
+      this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || ''
+    } else {
+      // Servidor (server-side)
+      this.baseUrl = appConfig.api.baseUrl
+    }
   }
 
   /**

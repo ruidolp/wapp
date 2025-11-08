@@ -5,7 +5,8 @@
  */
 
 import { db } from '../kysely'
-import type { TransaccionesTable } from '../types'
+// TODO: Importar TransaccionesTable cuando se regeneren los tipos después de la migración
+// import type { TransaccionesTable } from '../types'
 
 /**
  * Tipo para creación de transacción

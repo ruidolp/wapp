@@ -5,7 +5,8 @@
  */
 
 import { db } from '../kysely'
-import type { IngresosRecurrentesTable } from '../types'
+// TODO: Importar IngresosRecurrentesTable cuando se regeneren los tipos después de la migración
+// import type { IngresosRecurrentesTable } from '../types'
 
 /**
  * Tipo para creación de ingreso recurrente
