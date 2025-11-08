@@ -10,12 +10,15 @@ import {
   TipoSobre,
   TipoTransaccion,
   FrecuenciaIngreso,
+  RolSobreUsuario,
   Billetera,
   Sobre,
   Categoria,
   Subcategoria,
   Transaccion,
   IngresoRecurrente,
+  Moneda,
+  TransaccionConversion,
 } from './core'
 
 /**
@@ -25,25 +28,32 @@ import {
 export interface CrearBilleteraInput {
   nombre: string
   tipo: TipoBilletera
+  moneda_principal_id: string // CLP, USD, EUR, etc.
   saldo_inicial: number
   is_compartida?: boolean
+  color?: string // Hex color: #FF0000
+  emoji?: string // 💳, 💵, etc.
 }
 
 export interface ActualizarBilleteraInput {
   nombre?: string
   saldo_real?: number // Para ajustes/reconciliación
+  color?: string
+  emoji?: string
 }
 
 export interface TransferirBilleterasInput {
   billetera_origen_id: string
   billetera_destino_id: string
   monto: number
+  moneda_id: string // Moneda de la transferencia
   descripcion?: string
 }
 
 export interface DepositarBilleteraInput {
   billetera_id: string
   monto: number
+  moneda_id: string // Moneda del depósito
   concepto?: string
 }
 
@@ -51,16 +61,18 @@ export interface PagarTCInput {
   billetera_tc_id: string
   monto_pagado: number
   monto_usado: number
+  moneda_id: string // Moneda del pago
   billetera_pago_id?: string // Desde qué billetera se paga (opcional)
 }
 
 export interface CompartirBilleteraInput {
   billetera_id: string
-  email_usuario: string
+  usuario_id: string // ID del usuario a invitar (debe estar en linked_users)
 }
 
 export interface BilleteraResponse extends Billetera {
   disponible?: number // Calculado: saldo_proyectado si > 0
+  moneda?: Moneda // Información completa de la moneda principal
 }
 
 /**
@@ -70,13 +82,19 @@ export interface BilleteraResponse extends Billetera {
 export interface CrearSobreInput {
   nombre: string
   tipo: TipoSobre
+  moneda_principal_id: string // CLP, USD, EUR, etc.
   is_compartido?: boolean
+  max_participantes?: number
   categorias_ids?: string[] // IDs de categorías existentes
   nuevas_categorias?: string[] // Nombres para crear inline
+  color?: string // Hex color: #FF0000
+  emoji?: string // 📨, 💰, etc.
 }
 
 export interface ActualizarSobreInput {
   nombre?: string
+  color?: string
+  emoji?: string
 }
 
 export interface AsignarPresupuestoInput {
@@ -84,24 +102,28 @@ export interface AsignarPresupuestoInput {
   asignaciones: {
     billetera_id: string
     monto: number
+    moneda_id: string // Moneda de la asignación
   }[]
 }
 
 export interface AumentarPresupuestoInput {
   sobre_id: string
   monto: number
+  moneda_id: string // Moneda del aumento
   billetera_id: string
 }
 
 export interface DisminuirPresupuestoInput {
   sobre_id: string
   monto: number
+  // No requiere moneda_id, usa la moneda del sobre
 }
 
 export interface TransferirPresupuestoInput {
   sobre_origen_id: string
   sobre_destino_id: string
   monto: number
+  // No requiere moneda_id, validar que ambos sobres tengan misma moneda
 }
 
 export interface AgregarCategoriasInput {
@@ -112,17 +134,20 @@ export interface AgregarCategoriasInput {
 
 export interface InvitarASobreInput {
   sobre_id: string
-  email_usuario: string
+  usuario_id: string // ID del usuario a invitar (debe estar en linked_users)
+  rol?: RolSobreUsuario // OWNER, ADMIN, CONTRIBUTOR, VIEWER (default: CONTRIBUTOR)
 }
 
 export interface SobreResponse extends Sobre {
   disponible?: number // Calculado: presupuesto - gastado
+  moneda?: Moneda // Información completa de la moneda principal
   categorias?: Categoria[]
 
   // Para compartidos
   participantes?: {
     usuario_id: string
     nombre: string
+    rol: RolSobreUsuario
     presupuesto_asignado: number
     gastado: number
     disponible: number
@@ -140,10 +165,14 @@ export interface SobreResponse extends Sobre {
 
 export interface CrearCategoriaInput {
   nombre: string
+  color?: string // Hex color: #FF0000
+  emoji?: string // 🍔, 🚗, 🏠, etc.
 }
 
 export interface ActualizarCategoriaInput {
-  nombre: string
+  nombre?: string
+  color?: string
+  emoji?: string
 }
 
 export interface CategoriaResponse extends Categoria {
@@ -158,11 +187,17 @@ export interface CategoriaResponse extends Categoria {
 export interface CrearSubcategoriaInput {
   nombre: string
   categoria_id: string
+  color?: string // Hex color: #FF0000
+  emoji?: string // Logo o emoji
+  imagen_url?: string // URL del logo de la marca
 }
 
 export interface ActualizarSubcategoriaInput {
   nombre?: string
   categoria_id?: string
+  color?: string
+  emoji?: string
+  imagen_url?: string
 }
 
 export interface SubcategoriaResponse extends Subcategoria {
@@ -176,6 +211,7 @@ export interface SubcategoriaResponse extends Subcategoria {
 
 export interface RegistrarGastoInput {
   monto: number
+  moneda_id: string // Moneda del gasto
   billetera_id: string
   sobre_id?: string
   categoria_id?: string
@@ -186,6 +222,7 @@ export interface RegistrarGastoInput {
 
 export interface RegistrarIngresoInput {
   monto: number
+  moneda_id: string // Moneda del ingreso
   billetera_id: string
   concepto?: string
   fecha?: string
@@ -193,6 +230,7 @@ export interface RegistrarIngresoInput {
 
 export interface ActualizarTransaccionInput {
   monto?: number
+  moneda_id?: string
   sobre_id?: string
   categoria_id?: string
   subcategoria_id?: string
@@ -205,6 +243,8 @@ export interface TransaccionResponse extends Transaccion {
   categoria_nombre?: string
   subcategoria_nombre?: string
   usuario_nombre?: string
+  moneda?: Moneda // Información completa de la moneda
+  conversion_info?: TransaccionConversion // Info de conversión si aplica
 }
 
 /**
@@ -214,6 +254,7 @@ export interface TransaccionResponse extends Transaccion {
 export interface CrearIngresoRecurrenteInput {
   nombre: string
   monto: number
+  moneda_id: string // Moneda del ingreso recurrente
   frecuencia: FrecuenciaIngreso
   dia: number
   billetera_id: string
@@ -227,6 +268,7 @@ export interface CrearIngresoRecurrenteInput {
 export interface ActualizarIngresoRecurrenteInput {
   nombre?: string
   monto?: number
+  moneda_id?: string
   dia?: number
   auto_distribuir?: boolean
   distribucion?: {
@@ -237,6 +279,7 @@ export interface ActualizarIngresoRecurrenteInput {
 
 export interface IngresoRecurrenteResponse extends IngresoRecurrente {
   billetera_nombre?: string
+  moneda?: Moneda // Información completa de la moneda
   distribucion_sobres?: {
     sobre_id: string
     sobre_nombre: string
@@ -256,6 +299,7 @@ export interface EjecutarIngresoRecurrenteInput {
 
 export interface ReporteBilleteraParams {
   billetera_id: string
+  moneda_id?: string // Filtrar por moneda específica (opcional)
   fecha_inicio?: string
   fecha_fin?: string
 }
@@ -269,12 +313,14 @@ export interface ReporteSobreParams {
 export interface ReporteCategoriaParams {
   categoria_id: string
   sobre_id?: string // Si se especifica, solo ese sobre; si no, global
+  moneda_id?: string // Filtrar por moneda específica (opcional)
   fecha_inicio?: string
   fecha_fin?: string
 }
 
 export interface ReporteSubcategoriaParams {
   subcategoria_id: string
+  moneda_id?: string // Filtrar por moneda específica (opcional)
   fecha_inicio?: string
   fecha_fin?: string
 }
@@ -340,22 +386,23 @@ export interface ReporteSubcategoriaResponse {
  */
 
 export interface DashboardResponse {
+  moneda_principal: Moneda // Moneda principal del usuario
   billeteras: {
-    total_real: number
-    total_proyectado: number
+    total_real: number // En moneda principal
+    total_proyectado: number // En moneda principal
     billeteras: BilleteraResponse[]
   }
   sobres: {
-    total_presupuestado: number
-    total_gastado: number
-    total_disponible: number
+    total_presupuestado: number // En moneda principal
+    total_gastado: number // En moneda principal
+    total_disponible: number // En moneda principal
     sobres: SobreResponse[]
   }
   mes_actual: {
-    ingresos: number
-    gastos: number
-    balance: number
-    auto_aumentos: number // Total de auto-aumentos del mes
+    ingresos: number // En moneda principal
+    gastos: number // En moneda principal
+    balance: number // En moneda principal
+    auto_aumentos: number // Total de auto-aumentos del mes en moneda principal
   }
   ultimas_transacciones: TransaccionResponse[]
 }
