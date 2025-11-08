@@ -5,14 +5,14 @@
  */
 
 import { db } from '../kysely'
-import type { SobresTable, SobresUsuariosTable } from '../types'
+import type { SobresTable, SobresUsuariosTable, TipoSobre, RolSobreUsuario } from '../types'
 
 /**
  * Tipo para creación de sobre
  */
 export type CreateSobreData = {
   nombre: string
-  tipo: string // TipoSobre enum
+  tipo: TipoSobre
   moneda_principal_id: string
   presupuesto_asignado?: number
   gastado?: number
@@ -186,7 +186,7 @@ export async function incrementarSobreGastado(sobreId: string, monto: number) {
 export async function addParticipanteToSobre(
   sobreId: string,
   userId: string,
-  rol: string = 'CONTRIBUTOR',
+  rol: RolSobreUsuario = 'CONTRIBUTOR',
   presupuestoAsignado: number = 0
 ) {
   return await db
