@@ -58,8 +58,8 @@ export async function findTransaccionById(transaccionId: string) {
  */
 export async function findTransaccionesByUser(
   userId: string,
-  limit?: number,
-  offset?: number
+  fechaInicio?: Date,
+  fechaFin?: Date
 ) {
   let query = db
     .selectFrom('transacciones')
@@ -68,8 +68,12 @@ export async function findTransaccionesByUser(
     .where('deleted_at', 'is', null)
     .orderBy('fecha', 'desc')
 
-  if (limit) query = query.limit(limit)
-  if (offset) query = query.offset(offset)
+  if (fechaInicio) {
+    query = query.where('fecha', '>=', fechaInicio)
+  }
+  if (fechaFin) {
+    query = query.where('fecha', '<=', fechaFin)
+  }
 
   return await query.execute()
 }
