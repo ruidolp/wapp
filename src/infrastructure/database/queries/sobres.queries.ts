@@ -235,7 +235,7 @@ export async function updateParticipanteTracking(
   presupuestoAsignado?: number,
   gastado?: number
 ) {
-  const updates: Partial<SobresUsuariosTable> = {}
+  const updates: { presupuesto_asignado?: number; gastado?: number } = {}
   if (presupuestoAsignado !== undefined) updates.presupuesto_asignado = presupuestoAsignado
   if (gastado !== undefined) updates.gastado = gastado
 

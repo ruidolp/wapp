@@ -100,6 +100,6 @@ export async function removeMonedaHabilitada(userId: string, monedaId: string) {
 
   const monedasActuales = config.monedas_habilitadas || []
   return await updateUserConfig(userId, {
-    monedas_habilitadas: monedasActuales.filter((id) => id !== monedaId),
+    monedas_habilitadas: monedasActuales.filter((id: string) => id !== monedaId),
   })
 }
