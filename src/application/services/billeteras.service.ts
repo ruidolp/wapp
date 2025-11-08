@@ -1,0 +1,463 @@
+/**
+ * Servicio de Billeteras
+ *
+ * Contiene la lógica de negocio para gestión de billeteras (wallets):
+ * - Crear, actualizar, eliminar billeteras
+ * - Consultar saldos y balance consolidado
+ * - Transferencias entre billeteras
+ * - Validación de reglas de negocio
+ */
+
+import {
+  createBilletera,
+  findBilleteraById,
+  findBilleterasByUser,
+  updateBilletera,
+  softDeleteBilletera,
+  updateBilleteraSaldos,
+} from '@/infrastructure/database/queries/billeteras.queries'
+import { findMonedaById } from '@/infrastructure/database/queries/monedas.queries'
+import { findUserConfig } from '@/infrastructure/database/queries/user-config.queries'
+import { createTransaccion } from '@/infrastructure/database/queries/transacciones.queries'
+import type { TipoBilletera } from '@/infrastructure/database/types'
+import { appConfig } from '@/config/app.config'
+
+/**
+ * Datos para crear una billetera
+ */
+export interface CreateBilleteraInput {
+  nombre: string
+  tipo: TipoBilletera
+  monedaPrincipalId?: string // Si no se pasa, usa la moneda principal del usuario
+  saldoInicial?: number
+  color?: string
+  emoji?: string
+  isCompartida?: boolean
+  userId: string
+}
+
+/**
+ * Datos para actualizar una billetera
+ */
+export interface UpdateBilleteraInput {
+  nombre?: string
+  color?: string
+  emoji?: string
+}
+
+/**
+ * Datos para transferencia entre billeteras
+ */
+export interface TransferenciaBilleterasInput {
+  billeteraOrigenId: string
+  billeteraDestinoId: string
+  monto: number
+  descripcion?: string
+  userId: string
+}
+
+/**
+ * Resultado de operación
+ */
+export interface BilleteraResult {
+  success: boolean
+  data?: any
+  error?: string
+}
+
+/**
+ * Crear una nueva billetera
+ */
+export async function crearBilletera(
+  input: CreateBilleteraInput
+): Promise<BilleteraResult> {
+  try {
+    // Si no se especifica moneda, usar la moneda principal del usuario
+    let monedaPrincipalId: string = input.monedaPrincipalId || ''
+
+    if (!monedaPrincipalId) {
+      const userConfig = await findUserConfig(input.userId)
+      if (!userConfig) {
+        return {
+          success: false,
+          error: 'Configuración de usuario no encontrada',
+        }
+      }
+      monedaPrincipalId = userConfig.moneda_principal_id
+    }
+
+    // Validar que la moneda existe
+    const moneda = await findMonedaById(monedaPrincipalId as string)
+    if (!moneda) {
+      return {
+        success: false,
+        error: 'Moneda no válida',
+      }
+    }
+
+    // Validar nombre (no vacío)
+    if (!input.nombre || input.nombre.trim().length === 0) {
+      return {
+        success: false,
+        error: 'El nombre de la billetera es requerido',
+      }
+    }
+
+    // Validar tipo de billetera
+    const tiposValidos: TipoBilletera[] = [
+      'DEBITO',
+      'CREDITO',
+      'EFECTIVO',
+      'AHORRO',
+      'INVERSION',
+      'PRESTAMO',
+    ]
+    if (!tiposValidos.includes(input.tipo)) {
+      return {
+        success: false,
+        error: 'Tipo de billetera no válido',
+      }
+    }
+
+    const saldoInicial = input.saldoInicial || 0
+
+    // Crear billetera
+    const billetera = await createBilletera({
+      nombre: input.nombre.trim(),
+      tipo: input.tipo,
+      moneda_principal_id: monedaPrincipalId,
+      saldo_real: saldoInicial,
+      saldo_proyectado: saldoInicial,
+      color: input.color,
+      emoji: input.emoji,
+      is_compartida: input.isCompartida || false,
+      usuario_id: input.userId,
+    })
+
+    // Si hay saldo inicial, crear transacción de ajuste
+    if (saldoInicial !== 0) {
+      await createTransaccion({
+        monto: Math.abs(saldoInicial),
+        moneda_id: monedaPrincipalId,
+        billetera_id: billetera.id,
+        tipo: saldoInicial > 0 ? 'DEPOSITO' : 'AJUSTE',
+        descripcion: 'Saldo inicial',
+        fecha: new Date(),
+        usuario_id: input.userId,
+      })
+    }
+
+    return {
+      success: true,
+      data: billetera,
+    }
+  } catch (error) {
+    console.error('Error al crear billetera:', error)
+    return {
+      success: false,
+      error: 'Error al crear la billetera',
+    }
+  }
+}
+
+/**
+ * Obtener todas las billeteras de un usuario
+ */
+export async function obtenerBilleterasUsuario(
+  userId: string
+): Promise<BilleteraResult> {
+  try {
+    const billeteras = await findBilleterasByUser(userId)
+    return {
+      success: true,
+      data: billeteras,
+    }
+  } catch (error) {
+    console.error('Error al obtener billeteras:', error)
+    return {
+      success: false,
+      error: 'Error al obtener las billeteras',
+    }
+  }
+}
+
+/**
+ * Obtener una billetera por ID
+ */
+export async function obtenerBilletera(
+  billeteraId: string,
+  userId: string
+): Promise<BilleteraResult> {
+  try {
+    const billetera = await findBilleteraById(billeteraId)
+
+    if (!billetera) {
+      return {
+        success: false,
+        error: 'Billetera no encontrada',
+      }
+    }
+
+    // Verificar que la billetera pertenece al usuario
+    if (billetera.usuario_id !== userId) {
+      return {
+        success: false,
+        error: 'No tienes permiso para acceder a esta billetera',
+      }
+    }
+
+    return {
+      success: true,
+      data: billetera,
+    }
+  } catch (error) {
+    console.error('Error al obtener billetera:', error)
+    return {
+      success: false,
+      error: 'Error al obtener la billetera',
+    }
+  }
+}
+
+/**
+ * Actualizar una billetera
+ */
+export async function actualizarBilletera(
+  billeteraId: string,
+  userId: string,
+  input: UpdateBilleteraInput
+): Promise<BilleteraResult> {
+  try {
+    // Verificar que la billetera existe y pertenece al usuario
+    const billeteraResult = await obtenerBilletera(billeteraId, userId)
+    if (!billeteraResult.success) {
+      return billeteraResult
+    }
+
+    // Validar nombre si se proporciona
+    if (input.nombre !== undefined && input.nombre.trim().length === 0) {
+      return {
+        success: false,
+        error: 'El nombre no puede estar vacío',
+      }
+    }
+
+    const updateData: any = {}
+    if (input.nombre) updateData.nombre = input.nombre.trim()
+    if (input.color !== undefined) updateData.color = input.color
+    if (input.emoji !== undefined) updateData.emoji = input.emoji
+
+    const billetera = await updateBilletera(billeteraId, updateData)
+
+    return {
+      success: true,
+      data: billetera,
+    }
+  } catch (error) {
+    console.error('Error al actualizar billetera:', error)
+    return {
+      success: false,
+      error: 'Error al actualizar la billetera',
+    }
+  }
+}
+
+/**
+ * Eliminar una billetera (soft delete)
+ */
+export async function eliminarBilletera(
+  billeteraId: string,
+  userId: string
+): Promise<BilleteraResult> {
+  try {
+    // Verificar que la billetera existe y pertenece al usuario
+    const billeteraResult = await obtenerBilletera(billeteraId, userId)
+    if (!billeteraResult.success) {
+      return billeteraResult
+    }
+
+    const billetera = billeteraResult.data
+
+    // Verificar que no tenga saldo
+    if (billetera.saldo_real !== 0) {
+      return {
+        success: false,
+        error: 'No se puede eliminar una billetera con saldo. Transfiere el saldo primero.',
+      }
+    }
+
+    await softDeleteBilletera(billeteraId)
+
+    return {
+      success: true,
+      data: { message: 'Billetera eliminada correctamente' },
+    }
+  } catch (error) {
+    console.error('Error al eliminar billetera:', error)
+    return {
+      success: false,
+      error: 'Error al eliminar la billetera',
+    }
+  }
+}
+
+/**
+ * Transferir dinero entre billeteras
+ */
+export async function transferirEntreBilleteras(
+  input: TransferenciaBilleterasInput
+): Promise<BilleteraResult> {
+  try {
+    const { billeteraOrigenId, billeteraDestinoId, monto, descripcion, userId } = input
+
+    // Validar monto
+    if (monto <= 0) {
+      return {
+        success: false,
+        error: 'El monto debe ser mayor a cero',
+      }
+    }
+
+    // Verificar billetera origen
+    const origenResult = await obtenerBilletera(billeteraOrigenId, userId)
+    if (!origenResult.success) {
+      return {
+        success: false,
+        error: 'Billetera de origen no válida',
+      }
+    }
+    const billeteraOrigen = origenResult.data
+
+    // Verificar billetera destino
+    const destinoResult = await obtenerBilletera(billeteraDestinoId, userId)
+    if (!destinoResult.success) {
+      return {
+        success: false,
+        error: 'Billetera de destino no válida',
+      }
+    }
+    const billeteraDestino = destinoResult.data
+
+    // Verificar que las billeteras sean diferentes
+    if (billeteraOrigenId === billeteraDestinoId) {
+      return {
+        success: false,
+        error: 'No puedes transferir a la misma billetera',
+      }
+    }
+
+    // Verificar que origen tenga saldo suficiente
+    if (billeteraOrigen.saldo_real < monto) {
+      return {
+        success: false,
+        error: 'Saldo insuficiente en la billetera de origen',
+      }
+    }
+
+    // Verificar que ambas billeteras usen la misma moneda
+    if (billeteraOrigen.moneda_principal_id !== billeteraDestino.moneda_principal_id) {
+      return {
+        success: false,
+        error: 'Las billeteras deben usar la misma moneda para transferencias',
+      }
+    }
+
+    const monedaId = billeteraOrigen.moneda_principal_id
+
+    // Crear transacción de salida (origen)
+    await createTransaccion({
+      monto: monto,
+      moneda_id: monedaId,
+      billetera_id: billeteraOrigenId,
+      tipo: 'TRANSFERENCIA',
+      descripcion: descripcion || `Transferencia a ${billeteraDestino.nombre}`,
+      fecha: new Date(),
+      usuario_id: userId,
+      billetera_destino_id: billeteraDestinoId,
+    })
+
+    // Crear transacción de entrada (destino)
+    await createTransaccion({
+      monto: monto,
+      moneda_id: monedaId,
+      billetera_id: billeteraDestinoId,
+      tipo: 'DEPOSITO',
+      descripcion: descripcion || `Transferencia desde ${billeteraOrigen.nombre}`,
+      fecha: new Date(),
+      usuario_id: userId,
+    })
+
+    // Actualizar saldos
+    const nuevoSaldoOrigen = Number(billeteraOrigen.saldo_real) - monto
+    const nuevoSaldoProyectadoOrigen = Number(billeteraOrigen.saldo_proyectado) - monto
+    await updateBilleteraSaldos(billeteraOrigenId, nuevoSaldoOrigen, nuevoSaldoProyectadoOrigen)
+
+    const nuevoSaldoDestino = Number(billeteraDestino.saldo_real) + monto
+    const nuevoSaldoProyectadoDestino = Number(billeteraDestino.saldo_proyectado) + monto
+    await updateBilleteraSaldos(billeteraDestinoId, nuevoSaldoDestino, nuevoSaldoProyectadoDestino)
+
+    return {
+      success: true,
+      data: { message: 'Transferencia realizada correctamente' },
+    }
+  } catch (error) {
+    console.error('Error al transferir entre billeteras:', error)
+    return {
+      success: false,
+      error: 'Error al realizar la transferencia',
+    }
+  }
+}
+
+/**
+ * Obtener balance consolidado de todas las billeteras del usuario
+ */
+export async function obtenerBalanceConsolidado(
+  userId: string
+): Promise<BilleteraResult> {
+  try {
+    const billeteras = await findBilleterasByUser(userId)
+
+    // Agrupar por moneda
+    const balancePorMoneda: Record<
+      string,
+      {
+        moneda_id: string
+        saldo_real_total: number
+        saldo_proyectado_total: number
+        billeteras: number
+      }
+    > = {}
+
+    for (const billetera of billeteras) {
+      const monedaId = billetera.moneda_principal_id
+
+      if (!balancePorMoneda[monedaId]) {
+        balancePorMoneda[monedaId] = {
+          moneda_id: monedaId,
+          saldo_real_total: 0,
+          saldo_proyectado_total: 0,
+          billeteras: 0,
+        }
+      }
+
+      balancePorMoneda[monedaId].saldo_real_total += Number(billetera.saldo_real)
+      balancePorMoneda[monedaId].saldo_proyectado_total += Number(billetera.saldo_proyectado)
+      balancePorMoneda[monedaId].billeteras += 1
+    }
+
+    return {
+      success: true,
+      data: {
+        total_billeteras: billeteras.length,
+        balance_por_moneda: Object.values(balancePorMoneda),
+      },
+    }
+  } catch (error) {
+    console.error('Error al obtener balance consolidado:', error)
+    return {
+      success: false,
+      error: 'Error al obtener el balance',
+    }
+  }
+}
