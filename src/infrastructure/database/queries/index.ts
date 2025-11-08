@@ -25,3 +25,13 @@ export * from './subscription-history.queries'
 
 // Theme queries
 export * from './theme.queries'
+
+// CORE - Financial System queries
+export * from './monedas.queries'
+export * from './user-config.queries'
+export * from './billeteras.queries'
+export * from './sobres.queries'
+export * from './categorias.queries'
+export * from './subcategorias.queries'
+export * from './transacciones.queries'
+export * from './ingresos-recurrentes.queries'
