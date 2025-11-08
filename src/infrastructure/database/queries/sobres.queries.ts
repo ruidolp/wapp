@@ -5,8 +5,7 @@
  */
 
 import { db } from '../kysely'
-// TODO: Importar SobresTable, SobresUsuariosTable cuando se regeneren los tipos después de la migración
-// import type { SobresTable, SobresUsuariosTable } from '../types'
+import type { SobresTable, SobresUsuariosTable } from '../types'
 
 /**
  * Tipo para creación de sobre
@@ -236,7 +235,7 @@ export async function updateParticipanteTracking(
   presupuestoAsignado?: number,
   gastado?: number
 ) {
-  const updates: { presupuesto_asignado?: number; gastado?: number } = {}
+  const updates: Partial<SobresUsuariosTable> = {}
   if (presupuestoAsignado !== undefined) updates.presupuesto_asignado = presupuestoAsignado
   if (gastado !== undefined) updates.gastado = gastado
 

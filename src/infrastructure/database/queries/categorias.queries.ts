@@ -5,8 +5,8 @@
  */
 
 import { db } from '../kysely'
-// TODO: Importar CategoriasTable cuando se regeneren los tipos después de la migración
-// import type { CategoriasTable } from '../types'
+
+import type { CategoriasTable } from '../types'
 
 /**
  * Tipo para creación de categoría
@@ -60,7 +60,7 @@ export async function findCategoriaByNombre(userId: string, nombre: string) {
     .selectFrom('categorias')
     .selectAll()
     .where('usuario_id', '=', userId)
-    .where((eb) => eb.fn('LOWER', ['nombre']), '=', nombre.toLowerCase())
+    .where((eb: any) => eb.fn('LOWER', ['nombre']), '=', nombre.toLowerCase())
     .where('deleted_at', 'is', null)
     .executeTakeFirst()
 }
