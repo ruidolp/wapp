@@ -2,15 +2,22 @@
  * Cliente HTTP centralizado para todas las llamadas a la API
  *
  * Este cliente permite separar completamente el frontend del backend.
- * Al usar appConfig.api.baseUrl, podemos migrar el backend a un servidor
- * externo simplemente cambiando la variable de entorno API_BASE_URL.
+ *
+ * Estrategia de URLs:
+ * - En el NAVEGADOR (client-side): Usa URLs relativas (ej: '/api/config')
+ *   El navegador resuelve automáticamente al dominio actual (localhost, Vercel, etc.)
+ *   No requiere configurar API_BASE_URL en variables de entorno.
+ *
+ * - En el SERVIDOR (server-side): Usa URLs absolutas desde appConfig.api.baseUrl
+ *   Permite llamadas internas entre servicios si es necesario.
+ *   Se configura con la variable de entorno API_BASE_URL.
  *
  * Características:
  * - Centraliza todas las llamadas HTTP
  * - Manejo de errores consistente
  * - Soporte para autenticación (headers automáticos)
  * - Tipos TypeScript fuertes
- * - Interceptores de request/response
+ * - Funciona automáticamente en cualquier entorno (localhost, Vercel, custom domain)
  */
 
 import { appConfig } from '@/config/app.config'
@@ -54,14 +61,26 @@ class ApiClient {
   private baseUrl: string
 
   constructor() {
-    this.baseUrl = appConfig.api.baseUrl
+    // Estrategia de URLs:
+    // 1. Si NEXT_PUBLIC_API_BASE_URL está configurada: Usar esa URL (backend separado)
+    // 2. Si estamos en navegador y no hay NEXT_PUBLIC_API_BASE_URL: Usar URLs relativas
+    // 3. Si estamos en servidor: Usar appConfig.api.baseUrl
+    if (typeof window !== 'undefined') {
+      // Navegador (client-side)
+      this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || ''
+    } else {
+      // Servidor (server-side)
+      this.baseUrl = appConfig.api.baseUrl
+    }
   }
 
   /**
    * Construye la URL completa con query params
    */
   private buildUrl(endpoint: string, params?: Record<string, string | number | boolean>): string {
-    const url = `${this.baseUrl}${endpoint}`
+    // Si baseUrl está vacío (navegador), usar endpoint directamente (URL relativa)
+    // Si baseUrl existe (servidor), construir URL absoluta
+    const url = this.baseUrl ? `${this.baseUrl}${endpoint}` : endpoint
 
     if (!params) return url
 
@@ -193,7 +212,7 @@ class ApiClient {
    */
   async upload<T = any>(endpoint: string, formData: FormData): Promise<T> {
     try {
-      const url = `${this.baseUrl}${endpoint}`
+      const url = this.baseUrl ? `${this.baseUrl}${endpoint}` : endpoint
 
       const response = await fetch(url, {
         method: 'POST',

@@ -5,7 +5,8 @@
  */
 
 import { db } from '../kysely'
-import type { SubcategoriasTable } from '../types'
+// TODO: Importar SubcategoriasTable cuando se regeneren los tipos después de la migración
+// import type { SubcategoriasTable } from '../types'
 
 /**
  * Tipo para creación de subcategoría

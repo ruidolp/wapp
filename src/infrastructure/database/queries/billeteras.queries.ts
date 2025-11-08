@@ -5,7 +5,8 @@
  */
 
 import { db } from '../kysely'
-import type { BilleterasTable } from '../types'
+// TODO: Importar BilleterasTable cuando se regeneren los tipos después de la migración
+// import type { BilleterasTable } from '../types'
 
 /**
  * Tipo para creación de billetera
