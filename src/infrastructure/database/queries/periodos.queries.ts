@@ -11,11 +11,12 @@ import type { PeriodosTable, TipoPeriodo } from '../types'
  * Tipo para crear período
  */
 export type CreatePeriodoData = {
-  nombre: string
+  user_id: string
   tipo: TipoPeriodo
+  dia_inicio?: number
   fecha_inicio: Date
   fecha_fin: Date
-  usuario_id: string
+  activo?: boolean
 }
 
 /**
@@ -26,7 +27,6 @@ export async function findPeriodoById(periodoId: string) {
     .selectFrom('periodos')
     .selectAll()
     .where('id', '=', periodoId)
-    .where('deleted_at', 'is', null)
     .executeTakeFirst()
 }
 
@@ -37,8 +37,20 @@ export async function findPeriodosByUser(userId: string) {
   return await db
     .selectFrom('periodos')
     .selectAll()
-    .where('usuario_id', '=', userId)
-    .where('deleted_at', 'is', null)
+    .where('user_id', '=', userId)
+    .orderBy('fecha_inicio', 'desc')
+    .execute()
+}
+
+/**
+ * Buscar períodos activos por usuario
+ */
+export async function findPeriodosActivosByUser(userId: string) {
+  return await db
+    .selectFrom('periodos')
+    .selectAll()
+    .where('user_id', '=', userId)
+    .where('activo', '=', true)
     .orderBy('fecha_inicio', 'desc')
     .execute()
 }
@@ -52,10 +64,10 @@ export async function findPeriodoActivoByUser(userId: string) {
   return await db
     .selectFrom('periodos')
     .selectAll()
-    .where('usuario_id', '=', userId)
+    .where('user_id', '=', userId)
     .where('fecha_inicio', '<=', now)
     .where('fecha_fin', '>=', now)
-    .where('deleted_at', 'is', null)
+    .where('activo', '=', true)
     .orderBy('fecha_inicio', 'desc')
     .executeTakeFirst()
 }
@@ -68,22 +80,35 @@ export async function createPeriodo(periodoData: CreatePeriodoData) {
     .insertInto('periodos')
     .values({
       ...periodoData,
+      activo: periodoData.activo ?? true,
       created_at: new Date(),
-      updated_at: new Date(),
     })
     .returningAll()
     .executeTakeFirstOrThrow()
 }
 
 /**
- * Soft delete período
+ * Desactivar período
  */
-export async function softDeletePeriodo(periodoId: string) {
+export async function deactivatePeriodo(periodoId: string) {
   return await db
     .updateTable('periodos')
     .set({
-      deleted_at: new Date(),
-      updated_at: new Date(),
+      activo: false,
+    })
+    .where('id', '=', periodoId)
+    .returningAll()
+    .executeTakeFirst()
+}
+
+/**
+ * Activar período
+ */
+export async function activatePeriodo(periodoId: string) {
+  return await db
+    .updateTable('periodos')
+    .set({
+      activo: true,
     })
     .where('id', '=', periodoId)
     .returningAll()
