@@ -5,8 +5,8 @@
  */
 
 import { db } from '../kysely'
-// TODO: Importar UserConfigTable cuando se regeneren los tipos después de la migración
-// import type { UserConfigTable } from '../types'
+
+import type { UserConfigTable } from '../types'
 
 /**
  * Tipo para actualización de configuración

@@ -38,6 +38,20 @@ export type SubscriptionEventType =
 export type ThemeCategory = 'preestablished' | 'custom'
 
 /**
+ * Enums CORE - Financial System
+ */
+export type TipoMoneda = 'FIAT' | 'INDICE' | 'CRYPTO'
+export type TipoBilletera = 'DEBITO' | 'CREDITO' | 'EFECTIVO' | 'AHORRO' | 'INVERSION' | 'PRESTAMO'
+export type TipoSobre = 'GASTO' | 'AHORRO' | 'DEUDA'
+export type TipoTransaccion = 'GASTO' | 'INGRESO' | 'TRANSFERENCIA' | 'DEPOSITO' | 'PAGO_TC' | 'AJUSTE'
+export type FrecuenciaIngreso = 'SEMANAL' | 'QUINCENAL' | 'MENSUAL' | 'ANUAL'
+export type EstadoIngresoRecurrente = 'ACTIVO' | 'PAUSADO' | 'ELIMINADO'
+export type TipoAsignacionPresupuesto = 'INICIAL' | 'AUMENTO' | 'DISMINUCION' | 'TRANSFERENCIA'
+export type EstadoInvitacionSobre = 'PENDIENTE' | 'ACEPTADA' | 'RECHAZADA' | 'CANCELADA'
+export type RolSobreUsuario = 'OWNER' | 'ADMIN' | 'CONTRIBUTOR' | 'VIEWER'
+export type TipoPeriodo = 'SEMANAL' | 'QUINCENAL' | 'MENSUAL' | 'CUSTOM'
+
+/**
  * Helper type para columnas generadas (timestamps, etc)
  */
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
@@ -264,6 +278,233 @@ export interface UserThemePreferencesTable {
 }
 
 /**
+ * CORE - Financial System Tables
+ */
+
+/**
+ * Tabla: monedas (Catálogo de monedas)
+ */
+export interface MonedasTable {
+  id: string // 'CLP', 'USD', 'EUR', 'UF'
+  nombre: string
+  simbolo: string
+  decimales: Generated<number>
+  tipo: Generated<TipoMoneda>
+  activa: Generated<boolean>
+  orden: Generated<number>
+}
+
+/**
+ * Tabla: tipos_cambio (Tasas de cambio)
+ */
+export interface TiposCambioTable {
+  moneda_origen: string
+  moneda_destino: string
+  tasa: number // DECIMAL(18,6)
+  fecha: Timestamp
+  fuente: string | null
+}
+
+/**
+ * Tabla: user_config (Configuración de usuario)
+ */
+export interface UserConfigTable {
+  user_id: string
+  moneda_principal_id: Generated<string>
+  monedas_habilitadas: string[] // JSONB array
+  timezone: Generated<string>
+  locale: Generated<string>
+  primer_dia_semana: Generated<number>
+  tipo_periodo: Generated<TipoPeriodo>
+  dia_inicio_periodo: Generated<number>
+  created_at: Generated<Timestamp>
+  updated_at: Timestamp
+}
+
+/**
+ * Tabla: billeteras (Dinero real)
+ */
+export interface BilleterasTable {
+  id: Generated<string>
+  nombre: string
+  tipo: TipoBilletera
+  moneda_principal_id: Generated<string>
+  saldo_real: Generated<number> // DECIMAL(15,2)
+  saldo_proyectado: Generated<number> // DECIMAL(15,2)
+  saldos_multimoneda: any | null // JSONB
+  color: string | null
+  emoji: string | null
+  is_compartida: Generated<boolean>
+  usuario_id: string
+  created_at: Generated<Timestamp>
+  updated_at: Timestamp
+  deleted_at: Timestamp | null
+}
+
+/**
+ * Tabla: sobres (Presupuesto virtual)
+ */
+export interface SobresTable {
+  id: Generated<string>
+  nombre: string
+  tipo: Generated<TipoSobre>
+  moneda_principal_id: Generated<string>
+  presupuesto_asignado: Generated<number> // DECIMAL(15,2)
+  gastado: Generated<number> // DECIMAL(15,2)
+  presupuestos_multimoneda: any | null // JSONB
+  color: string | null
+  emoji: string | null
+  is_compartido: Generated<boolean>
+  max_participantes: Generated<number>
+  usuario_id: string
+  created_at: Generated<Timestamp>
+  updated_at: Timestamp
+  deleted_at: Timestamp | null
+}
+
+/**
+ * Tabla: sobres_usuarios (Tracking individual en sobres compartidos)
+ */
+export interface SobresUsuariosTable {
+  sobre_id: string
+  usuario_id: string
+  presupuesto_asignado: Generated<number> // DECIMAL(15,2)
+  gastado: Generated<number> // DECIMAL(15,2)
+  rol: Generated<RolSobreUsuario>
+  permisos: any | null // JSONB
+  created_at: Generated<Timestamp>
+}
+
+/**
+ * Tabla: invitaciones_sobres (Invitaciones a sobres compartidos)
+ */
+export interface InvitacionesSobresTable {
+  id: Generated<string>
+  sobre_id: string
+  invitado_por_id: string
+  invitado_user_id: string
+  rol: Generated<RolSobreUsuario>
+  estado: Generated<EstadoInvitacionSobre>
+  mensaje: string | null
+  created_at: Generated<Timestamp>
+  expires_at: Timestamp
+  accepted_at: Timestamp | null
+}
+
+/**
+ * Tabla: categorias (Categorías de gastos)
+ */
+export interface CategoriasTable {
+  id: Generated<string>
+  nombre: string
+  usuario_id: string
+  color: string | null
+  emoji: string | null
+  created_at: Generated<Timestamp>
+  updated_at: Timestamp
+  deleted_at: Timestamp | null
+}
+
+/**
+ * Tabla: sobres_categorias (Relación N:N)
+ */
+export interface SobresCategoriasTable {
+  sobre_id: string
+  categoria_id: string
+  created_at: Generated<Timestamp>
+}
+
+/**
+ * Tabla: subcategorias (Marcas/Empresas)
+ */
+export interface SubcategoriasTable {
+  id: Generated<string>
+  nombre: string
+  categoria_id: string
+  usuario_id: string
+  color: string | null
+  emoji: string | null
+  imagen_url: string | null
+  created_at: Generated<Timestamp>
+  updated_at: Timestamp
+  deleted_at: Timestamp | null
+}
+
+/**
+ * Tabla: transacciones (Movimientos financieros)
+ */
+export interface TransaccionesTable {
+  id: Generated<string>
+  monto: number // DECIMAL(15,2)
+  moneda_id: string
+  billetera_id: string
+  tipo: TipoTransaccion
+  usuario_id: string
+  sobre_id: string | null
+  categoria_id: string | null
+  subcategoria_id: string | null
+  descripcion: string | null
+  fecha: Timestamp
+  billetera_destino_id: string | null
+  pago_tc: any | null // JSONB
+  conversion_info: any | null // JSONB
+  auto_aumento_sobre: any | null // JSONB
+  version: Generated<number>
+  created_at: Generated<Timestamp>
+  updated_at: Timestamp
+  deleted_at: Timestamp | null
+}
+
+/**
+ * Tabla: asignaciones_presupuesto (Tracking de asignaciones)
+ */
+export interface AsignacionesPresupuestoTable {
+  id: Generated<string>
+  sobre_id: string
+  billetera_id: string
+  usuario_id: string
+  monto: number // DECIMAL(15,2)
+  moneda_id: string
+  tipo: TipoAsignacionPresupuesto
+  created_at: Generated<Timestamp>
+}
+
+/**
+ * Tabla: ingresos_recurrentes (Ingresos automáticos)
+ */
+export interface IngresosRecurrentesTable {
+  id: Generated<string>
+  nombre: string
+  monto: number // DECIMAL(15,2)
+  moneda_id: string
+  frecuencia: FrecuenciaIngreso
+  dia: number
+  billetera_id: string
+  usuario_id: string
+  auto_distribuir: Generated<boolean>
+  distribucion: any | null // JSONB
+  estado: Generated<EstadoIngresoRecurrente>
+  proxima_ejecucion: Timestamp | null
+  created_at: Generated<Timestamp>
+  updated_at: Timestamp
+  deleted_at: Timestamp | null
+}
+
+/**
+ * Tabla: periodos (Períodos de presupuesto)
+ */
+export interface PeriodosTable {
+  id: Generated<string>
+  user_id: string
+  tipo: TipoPeriodo
+  dia_inicio: number | null
+  fecha_inicio: Timestamp
+  fecha_fin: Timestamp
+  activo: Generated<boolean>
+  created_at: Generated<Timestamp>
+}
+
+/**
  * Database interface con todas las tablas
  */
 export interface Database {
@@ -282,4 +523,19 @@ export interface Database {
   payment_products: PaymentProductsTable
   themes: ThemesTable
   user_theme_preferences: UserThemePreferencesTable
+  // CORE - Financial System
+  monedas: MonedasTable
+  tipos_cambio: TiposCambioTable
+  user_config: UserConfigTable
+  billeteras: BilleterasTable
+  sobres: SobresTable
+  sobres_usuarios: SobresUsuariosTable
+  invitaciones_sobres: InvitacionesSobresTable
+  categorias: CategoriasTable
+  sobres_categorias: SobresCategoriasTable
+  subcategorias: SubcategoriasTable
+  transacciones: TransaccionesTable
+  asignaciones_presupuesto: AsignacionesPresupuestoTable
+  ingresos_recurrentes: IngresosRecurrentesTable
+  periodos: PeriodosTable
 }

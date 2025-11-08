@@ -5,8 +5,8 @@
  */
 
 import { db } from '../kysely'
-// TODO: Importar TransaccionesTable cuando se regeneren los tipos después de la migración
-// import type { TransaccionesTable } from '../types'
+
+import type { TransaccionesTable } from '../types'
 
 /**
  * Tipo para creación de transacción
@@ -261,7 +261,7 @@ export async function calcularTotalGastosBySobre(
 ) {
   let query = db
     .selectFrom('transacciones')
-    .select((eb) => eb.fn.sum('monto').as('total'))
+    .select((eb: any) => eb.fn.sum('monto').as('total'))
     .where('sobre_id', '=', sobreId)
     .where('tipo', '=', 'GASTO')
     .where('deleted_at', 'is', null)
@@ -287,7 +287,7 @@ export async function calcularTotalesByUser(
 ) {
   let query = db
     .selectFrom('transacciones')
-    .select((eb) => [
+    .select((eb: any) => [
       eb.fn.sum('monto').filterWhere('tipo', '=', 'INGRESO').as('total_ingresos'),
       eb.fn.sum('monto').filterWhere('tipo', '=', 'GASTO').as('total_gastos'),
     ])

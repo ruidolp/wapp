@@ -5,8 +5,7 @@
  */
 
 import { db } from '../kysely'
-// TODO: Importar BilleterasTable cuando se regeneren los tipos después de la migración
-// import type { BilleterasTable } from '../types'
+import type { BilleterasTable } from '../types'
 
 /**
  * Tipo para creación de billetera
@@ -177,7 +176,7 @@ export async function updateBilleteraSaldos(
 export async function calcularSaldoTotalByUser(userId: string) {
   const result = await db
     .selectFrom('billeteras')
-    .select((eb) => [
+    .select((eb: any) => [
       eb.fn.sum('saldo_real').as('total_real'),
       eb.fn.sum('saldo_proyectado').as('total_proyectado'),
     ])

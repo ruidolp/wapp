@@ -5,8 +5,8 @@
  */
 
 import { db } from '../kysely'
-// TODO: Importar SubcategoriasTable cuando se regeneren los tipos después de la migración
-// import type { SubcategoriasTable } from '../types'
+
+import type { SubcategoriasTable } from '../types'
 
 /**
  * Tipo para creación de subcategoría
@@ -82,7 +82,7 @@ export async function findSubcategoriaByNombre(
     .selectAll()
     .where('usuario_id', '=', userId)
     .where('categoria_id', '=', categoriaId)
-    .where((eb) => eb.fn('LOWER', ['nombre']), '=', nombre.toLowerCase())
+    .where((eb: any) => eb.fn('LOWER', ['nombre']), '=', nombre.toLowerCase())
     .where('deleted_at', 'is', null)
     .executeTakeFirst()
 }

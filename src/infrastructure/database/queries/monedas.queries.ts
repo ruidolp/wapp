@@ -5,8 +5,8 @@
  */
 
 import { db } from '../kysely'
-// TODO: Importar MonedasTable cuando se regeneren los tipos después de la migración
-// import type { MonedasTable } from '../types'
+
+import type { MonedasTable } from '../types'
 
 /**
  * Obtener todas las monedas activas
