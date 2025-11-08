@@ -273,7 +273,7 @@ export async function calcularTotalGastosBySobre(
     query = query.where('fecha', '<=', fechaFin)
   }
 
-  const result = await query.executeTakeFirst()
+  const result = (await query.executeTakeFirst()) as { total: string | null } | undefined
   return Number(result?.total || 0)
 }
 
@@ -301,7 +301,9 @@ export async function calcularTotalesByUser(
     query = query.where('fecha', '<=', fechaFin)
   }
 
-  const result = await query.executeTakeFirst()
+  const result = (await query.executeTakeFirst()) as
+    | { total_ingresos: string | null; total_gastos: string | null }
+    | undefined
 
   return {
     total_ingresos: Number(result?.total_ingresos || 0),
