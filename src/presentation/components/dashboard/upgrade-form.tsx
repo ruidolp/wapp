@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { apiClient, getErrorMessage } from '@/infrastructure/lib/api-client'
 
 interface UpgradeFormProps {
   currentPlanSlug: string
@@ -80,22 +81,12 @@ export function UpgradeForm({ currentPlanSlug, locale }: UpgradeFormProps) {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/subscriptions/upgrade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          planSlug: selectedPlan,
-          period: selectedPeriod,
-          platform: 'web',
-          locale,
-        }),
+      const data = await apiClient.post('/api/subscriptions/upgrade', {
+        planSlug: selectedPlan,
+        period: selectedPeriod,
+        platform: 'web',
+        locale,
       })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Upgrade failed')
-      }
 
       // Redirect to checkout URL (sandbox or production)
       if (data.checkoutUrl) {
@@ -104,12 +95,12 @@ export function UpgradeForm({ currentPlanSlug, locale }: UpgradeFormProps) {
       } else {
         throw new Error('No checkout URL received')
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Upgrade error:', error)
       toast({
         variant: 'destructive',
         title: t('error.title'),
-        description: error.message || t('error.description'),
+        description: getErrorMessage(error),
       })
       setIsLoading(false)
     }

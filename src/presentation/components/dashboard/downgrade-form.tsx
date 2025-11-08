@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { AlertCircle, XCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { apiClient, getErrorMessage } from '@/infrastructure/lib/api-client'
 
 interface DowngradeFormProps {
   currentPlanSlug: string
@@ -30,16 +31,7 @@ export function DowngradeForm({ currentPlanSlug, currentPlanName, locale }: Down
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/subscriptions/downgrade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Downgrade failed')
-      }
+      await apiClient.post('/api/subscriptions/downgrade')
 
       toast({
         title: t('success.title'),
@@ -49,12 +41,12 @@ export function DowngradeForm({ currentPlanSlug, currentPlanName, locale }: Down
       // Redirect to dashboard
       router.push(`/${locale}/dashboard`)
       router.refresh()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Downgrade error:', error)
       toast({
         variant: 'destructive',
         title: t('error.title'),
-        description: error.message || t('error.description'),
+        description: getErrorMessage(error),
       })
       setIsLoading(false)
     }

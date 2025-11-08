@@ -21,6 +21,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from '@/hooks/use-toast'
 
 import { loginSchema, type LoginInput } from '@/infrastructure/utils/validation'
+import { apiClient, getErrorMessage } from '@/infrastructure/lib/api-client'
 
 interface AuthConfig {
   auth: {
@@ -63,8 +64,7 @@ export function LoginForm() {
 
   // Fetch config from API
   useEffect(() => {
-    fetch('/api/config')
-      .then(res => res.json())
+    apiClient.get<AuthConfig>('/api/config')
       .then(data => {
         setConfig(data)
         // Show credentials form by default if no OAuth providers are available
