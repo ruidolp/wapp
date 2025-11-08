@@ -19,10 +19,12 @@ import {
   removeParticipanteFromSobre,
   updateParticipanteTracking,
   findParticipantesBySobre,
+} from '@/infrastructure/database/queries/sobres.queries'
+import {
   linkCategoriasToSobre,
   unlinkCategoriaFromSobre,
   findCategoriasBySobre,
-} from '@/infrastructure/database/queries/sobres.queries'
+} from '@/infrastructure/database/queries/categorias.queries'
 import type { TipoSobre, RolSobreUsuario } from '@/infrastructure/database/types'
 
 /**

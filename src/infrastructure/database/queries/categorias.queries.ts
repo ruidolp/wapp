@@ -181,3 +181,19 @@ export async function isCategoriaLinkedToSobre(sobreId: string, categoriaId: str
 
   return !!result
 }
+
+/**
+ * Vincular múltiples categorías a un sobre
+ */
+export async function linkCategoriasToSobre(sobreId: string, categoriaIds: string[]) {
+  const values = categoriaIds.map((categoriaId) => ({
+    sobre_id: sobreId,
+    categoria_id: categoriaId,
+    created_at: new Date(),
+  }))
+
+  return await db
+    .insertInto('sobres_categorias')
+    .values(values)
+    .execute()
+}
