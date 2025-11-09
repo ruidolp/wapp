@@ -6,9 +6,11 @@ import { Menu, Monitor, Smartphone, LogOut } from 'lucide-react'
 import { SwipeContainer, SwipeItem, BilleterasCard, SobreCard } from '@/components/swipe'
 import type { CategoriaGasto } from '@/components/swipe'
 import type { Billetera, Sobre, Transaccion } from '@/domain/types'
-import { CrearBilleteraDialog } from '@/components/dialogs/CrearBilleteraDialog'
-import { CrearSobreDialog } from '@/components/dialogs/CrearSobreDialog'
-import { OnboardingDrawer } from '@/components/drawers'
+import {
+  OnboardingDrawer,
+  CrearBilleteraDrawer,
+  CrearSobreDrawer,
+} from '@/components/drawers'
 import { signOut } from 'next-auth/react'
 
 interface User {
@@ -207,13 +209,13 @@ export function DashboardClient({
         />
       </div>
 
-      {/* Dialogs */}
-      <CrearBilleteraDialog
+      {/* Drawers */}
+      <CrearBilleteraDrawer
         open={showCrearBilletera}
         onOpenChange={setShowCrearBilletera}
         userId={user.id}
       />
-      <CrearSobreDialog
+      <CrearSobreDrawer
         open={showCrearSobre}
         onOpenChange={setShowCrearSobre}
         userId={user.id}
