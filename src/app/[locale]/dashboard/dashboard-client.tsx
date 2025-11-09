@@ -1,12 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Menu, Monitor, Smartphone } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Menu, Monitor, Smartphone, LogOut } from 'lucide-react'
 import { SwipeContainer, SwipeItem, BilleterasCard, SobreCard } from '@/components/swipe'
 import type { CategoriaGasto } from '@/components/swipe'
 import type { Billetera, Sobre, Transaccion } from '@/domain/types'
 import { CrearBilleteraDialog } from '@/components/dialogs/CrearBilleteraDialog'
 import { CrearSobreDialog } from '@/components/dialogs/CrearSobreDialog'
+import { OnboardingDrawer } from '@/components/drawers'
+import { signOut } from 'next-auth/react'
 
 interface User {
   id: string
@@ -26,6 +29,7 @@ interface DashboardClientProps {
   user: User
   billeteras: Billetera[]
   sobresConDatos: SobreConDatos[]
+  hasUserConfig: boolean
 }
 
 export function DashboardClient({
@@ -33,13 +37,16 @@ export function DashboardClient({
   user,
   billeteras,
   sobresConDatos,
+  hasUserConfig,
 }: DashboardClientProps) {
+  const router = useRouter()
   const [activeIndex, setActiveIndex] = useState(0)
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState<boolean | null>(null) // null = detectando
   const [showCrearBilletera, setShowCrearBilletera] = useState(false)
   const [showCrearSobre, setShowCrearSobre] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(!hasUserConfig)
 
-  // Detectar si es mobile
+  // Detectar si es mobile (sin flash inicial)
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
@@ -52,6 +59,11 @@ export function DashboardClient({
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Función para logout
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: `/${locale}/auth/login` })
+  }
 
   // Construir items del swipe
   const swipeItems: SwipeItem[] = [
@@ -94,6 +106,18 @@ export function DashboardClient({
       ),
     })),
   ]
+
+  // Loading mientras detecta viewport
+  if (isMobile === null) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 animate-pulse" />
+          <p className="text-slate-600">Cargando...</p>
+        </div>
+      </div>
+    )
+  }
 
   // Vista Desktop: Placeholder
   if (!isMobile) {
@@ -163,17 +187,15 @@ export function DashboardClient({
   return (
     <>
       <div className="relative w-full h-screen bg-slate-50">
-        {/* Hamburger Menu Icon - Top Left */}
+        {/* Logout Button - Top Left */}
         <div className="absolute top-4 left-4 z-50">
           <button
-            className="w-10 h-10 rounded-lg bg-white/80 backdrop-blur-sm shadow-md border border-slate-200 flex items-center justify-center hover:bg-white transition-all"
-            onClick={() => {
-              console.log('Menu clicked')
-              // TODO: Abrir menú lateral
-            }}
-            aria-label="Menu"
+            className="w-10 h-10 rounded-lg bg-white/80 backdrop-blur-sm shadow-md border border-slate-200 flex items-center justify-center hover:bg-red-50 hover:border-red-300 transition-all group"
+            onClick={handleLogout}
+            aria-label="Cerrar sesión"
+            title="Cerrar sesión"
           >
-            <Menu className="w-5 h-5 text-slate-700" />
+            <LogOut className="w-5 h-5 text-slate-700 group-hover:text-red-600 transition-colors" />
           </button>
         </div>
 
@@ -195,6 +217,12 @@ export function DashboardClient({
         open={showCrearSobre}
         onOpenChange={setShowCrearSobre}
         userId={user.id}
+      />
+
+      {/* Onboarding Drawer - se muestra si no tiene configuración */}
+      <OnboardingDrawer
+        open={showOnboarding}
+        onOpenChange={setShowOnboarding}
       />
     </>
   )

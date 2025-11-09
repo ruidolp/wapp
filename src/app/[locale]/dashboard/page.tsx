@@ -18,6 +18,7 @@ import {
 import {
   findCategoriasBySobre,
 } from '@/infrastructure/database/queries/categorias.queries'
+import { findUserConfig } from '@/infrastructure/database/queries/user-config.queries'
 import { toBilletera, toSobre, toTransaccion } from '@/infrastructure/database/mappers'
 
 export default async function DashboardPage({
@@ -33,6 +34,9 @@ export default async function DashboardPage({
   }
 
   const userId = session.user.id
+
+  // Verificar configuración del usuario
+  const userConfig = await findUserConfig(userId)
 
   // Cargar billeteras
   const billeterasResult = await obtenerBilleterasUsuario(userId)
@@ -98,6 +102,7 @@ export default async function DashboardPage({
       user={session.user}
       billeteras={billeteras}
       sobresConDatos={sobresConDatos}
+      hasUserConfig={!!userConfig}
     />
   )
 }

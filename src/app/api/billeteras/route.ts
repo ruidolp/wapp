@@ -90,7 +90,15 @@ export async function POST(req: NextRequest) {
     })
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 })
+      // Si el error es por falta de configuración, indicar que requiere onboarding
+      const requiresOnboarding = result.error?.includes('Configuración de usuario no encontrada')
+      return NextResponse.json(
+        {
+          error: result.error,
+          ...(requiresOnboarding && { requiresOnboarding: true })
+        },
+        { status: 400 }
+      )
     }
 
     return NextResponse.json({
