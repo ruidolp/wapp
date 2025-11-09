@@ -33,20 +33,45 @@ export async function findUserConfig(userId: string) {
 }
 
 /**
- * Crear configuración por defecto para usuario
+ * Tipo para crear configuración de usuario
  */
-export async function createDefaultUserConfig(userId: string, monedaPrincipalId: string = 'CLP') {
+export type CreateUserConfigData = {
+  user_id: string
+  moneda_principal_id: string
+  timezone?: string
+  locale?: string
+  primer_dia_semana?: number
+  tipo_periodo?: TipoPeriodo
+  dia_inicio_periodo?: number
+}
+
+/**
+ * Crear configuración para usuario
+ * IMPORTANTE: No usa valores hardcodeados. Los valores deben ser proporcionados.
+ */
+export async function createDefaultUserConfig(
+  userId: string,
+  monedaPrincipalId: string,
+  options: {
+    timezone?: string
+    locale?: string
+    primerDiaSemana?: number
+    tipoPeriodo?: TipoPeriodo
+    diaInicioPeriodo?: number
+  } = {}
+) {
   return await db
     .insertInto('user_config')
     .values({
       user_id: userId,
       moneda_principal_id: monedaPrincipalId,
       monedas_habilitadas: [monedaPrincipalId],
-      timezone: 'America/Santiago',
-      locale: 'es-CL',
-      primer_dia_semana: 1,
-      tipo_periodo: 'MENSUAL',
-      dia_inicio_periodo: 1,
+      // Usar valores proporcionados o dejar que la DB use sus defaults
+      timezone: options.timezone,
+      locale: options.locale,
+      primer_dia_semana: options.primerDiaSemana,
+      tipo_periodo: options.tipoPeriodo || 'MENSUAL',
+      dia_inicio_periodo: options.diaInicioPeriodo,
       created_at: new Date(),
       updated_at: new Date(),
     })

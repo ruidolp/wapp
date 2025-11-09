@@ -102,16 +102,24 @@ export async function crearSobre(
       }
     }
 
+    // Validar que se proporcione moneda
+    if (!input.monedaPrincipalId) {
+      return {
+        success: false,
+        error: 'monedaPrincipalId es requerido',
+      }
+    }
+
     // Crear sobre
     const sobre = await createSobre({
       nombre: input.nombre.trim(),
       tipo: input.tipo,
-      moneda_principal_id: input.monedaPrincipalId || 'CLP',
+      moneda_principal_id: input.monedaPrincipalId,
       presupuesto_asignado: input.presupuestoAsignado,
       color: input.color,
       emoji: input.emoji,
       is_compartido: false,
-      max_participantes: 10,
+      max_participantes: 10, // Este es un límite de negocio, no un hardcode de config
       usuario_id: input.userId,
     })
 
