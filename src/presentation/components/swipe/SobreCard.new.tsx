@@ -62,8 +62,8 @@ export function SobreCard({
 
   return (
     <div className="w-full h-full flex flex-col bg-background">
-      {/* Envelope Container - Ocupa todo el ancho */}
-      <div className="flex-1 overflow-y-auto pb-6">
+      {/* Envelope Container - Con márgenes laterales */}
+      <div className="flex-1 overflow-y-auto pb-6 px-3 pt-2">
         <div
           className="relative w-full"
           style={{
@@ -96,6 +96,14 @@ export function SobreCard({
                   d="M 0 0 L 200 85 L 400 0 L 400 25 L 200 110 L 0 25 Z"
                   fill="url(#flapGradient)"
                 />
+                {/* Línea de cierre más clara */}
+                <path
+                  d="M 0 0 L 200 85 L 400 0"
+                  stroke={adjustBrightness(color, 40)}
+                  strokeWidth="2"
+                  fill="none"
+                  opacity="0.7"
+                />
                 <defs>
                   <linearGradient id="flapGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stopColor={adjustBrightness(color, -30)} stopOpacity="0.6" />
@@ -104,9 +112,9 @@ export function SobreCard({
                 </defs>
               </svg>
 
-              {/* NOMBRE en la solapa - CON TRANSPARENCIA */}
+              {/* NOMBRE en la solapa - SIN FONDO */}
               <div className="absolute top-8 left-0 right-0 z-10 flex items-center justify-center">
-                <h2 className="text-3xl font-extrabold font-display text-white tracking-tight text-center px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm"
+                <h2 className="text-3xl font-extrabold font-display text-white tracking-tight text-center px-4"
                   style={{
                     textShadow: '0 4px 20px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3)',
                   }}
@@ -117,7 +125,7 @@ export function SobreCard({
             </div>
 
             {/* Envelope Content (DENTRO del sobre) */}
-            <div className="relative p-5 pb-6 text-white space-y-1">
+            <div className="relative p-5 pb-6 text-white space-y-0">
               {/* Balance Card - TRANSPARENTE para ver solapa debajo */}
               <div className="bg-white/15 backdrop-blur-md rounded-2xl p-4 border border-white/20"
                 style={{
@@ -187,15 +195,6 @@ export function SobreCard({
                 <CirculoCategoriasGastos categorias={DUMMY_CATEGORIAS} size={300} />
               </div>
             </div>
-
-            {/* Envelope Bottom Seal */}
-            <div
-              className="h-3"
-              style={{
-                background: `linear-gradient(to bottom, ${adjustBrightness(color, -20)}, ${adjustBrightness(color, -25)})`,
-                boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.2)',
-              }}
-            />
           </div>
         </div>
 
