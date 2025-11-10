@@ -36,20 +36,23 @@ export function SwipeContainer({
         transform: 'scale(1) translateX(0)',
         opacity: 1,
         zIndex: 10,
+        pointerEvents: 'auto' as const,
       }
     } else if (diff === -1) {
       // Previous card - smaller, to the left, semi-transparent
       return {
-        transform: 'scale(0.85) translateX(-85%)',
-        opacity: 0.4,
+        transform: 'scale(0.9) translateX(-100%)',
+        opacity: 0.3,
         zIndex: 5,
+        pointerEvents: 'none' as const,
       }
     } else if (diff === 1) {
       // Next card - smaller, to the right, semi-transparent
       return {
-        transform: 'scale(0.85) translateX(85%)',
-        opacity: 0.4,
+        transform: 'scale(0.9) translateX(100%)',
+        opacity: 0.3,
         zIndex: 5,
+        pointerEvents: 'none' as const,
       }
     } else {
       // Hidden cards
@@ -57,69 +60,42 @@ export function SwipeContainer({
         transform: diff < 0 ? 'scale(0.7) translateX(-200%)' : 'scale(0.7) translateX(200%)',
         opacity: 0,
         zIndex: 0,
+        pointerEvents: 'none' as const,
       }
     }
   }
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      {/* Cards Container */}
+      {/* Cards Container - Con padding bottom para el footer fixed */}
       <div
-        className="relative w-full h-[calc(100%-4rem)] flex items-center justify-center"
+        className="relative w-full h-full flex items-start justify-center pb-24"
         {...swipeHandlers}
+        style={{
+          touchAction: 'pan-y pinch-zoom',
+        }}
       >
         {items.map((item, index) => {
           const style = getCardStyle(index)
-          const isActive = index === activeIndex
-          const isAdjacent = Math.abs(index - activeIndex) === 1
 
           return (
             <div
               key={item.id}
-              className="absolute inset-0 flex flex-col items-center justify-center transition-all duration-300 ease-out"
+              className="absolute inset-0 flex flex-col transition-all duration-300 ease-out"
               style={{
                 transform: style.transform,
                 opacity: style.opacity,
                 zIndex: style.zIndex,
-              }}
-              onClick={() => {
-                if (!isActive && isAdjacent) {
-                  goToIndex(index)
-                }
+                pointerEvents: style.pointerEvents,
               }}
             >
-              {/* Card Name Label (for adjacent cards) */}
-              {isAdjacent && (
-                <div className="absolute top-4 left-0 right-0 text-center z-20">
-                  <span className="text-sm font-medium text-gray-500 bg-white/80 px-3 py-1 rounded-full">
-                    {item.name}
-                  </span>
-                </div>
-              )}
-
               {/* Card Content */}
-              <div className="w-full h-full">
+              <div className="w-full h-full overflow-y-auto">
                 {item.content}
               </div>
             </div>
           )
         })}
-      </div>
-
-      {/* Dots Navigation */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 flex items-center justify-center gap-2">
-        {items.map((item, index) => (
-          <button
-            key={item.id}
-            onClick={() => goToIndex(index)}
-            className={`transition-all duration-200 rounded-full ${
-              index === activeIndex
-                ? 'w-8 h-2 bg-primary'
-                : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
-            }`}
-            aria-label={`Go to ${item.name}`}
-          />
-        ))}
       </div>
     </div>
   )
