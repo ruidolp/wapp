@@ -37,9 +37,9 @@ export function SwipeContainer({
 
   // Gesture handling with @use-gesture
   const bind = useDrag(
-    ({ active, movement: [mx], direction: [xDir], distance, cancel, velocity: [vx] }) => {
+    ({ active, movement: [mx], direction: [xDir], distance: [dx], cancel, velocity: [vx] }) => {
       // Swipe threshold: 50px or fast swipe (velocity > 0.2)
-      const trigger = distance > 50 || (vx > 0.2 && distance > 20)
+      const trigger = Math.abs(dx) > 50 || (Math.abs(vx) > 0.2 && Math.abs(dx) > 20)
 
       if (trigger && !active) {
         // Determine direction
