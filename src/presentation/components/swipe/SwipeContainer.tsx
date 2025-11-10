@@ -25,7 +25,8 @@ export function SwipeContainer({
   const [index, setIndex] = useState(initialIndex)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
-  // offset = desplazamiento relativo en páginas respecto al índice actual
+  // offset = desplazamiento relativo respecto al índice actual:
+  // 0 = centrado, -1 = siguiente (contenido se fue a la izquierda), +1 = anterior.
   const [{ offset }, api] = useSpring(() => ({
     offset: 0,
     config: { tension: 220, friction: 26 },
@@ -37,22 +38,21 @@ export function SwipeContainer({
   const goTo = (fromIndex: number, toIndex: number) => {
     const final = clampIndex(toIndex)
     if (final === fromIndex) {
-      // Nada que hacer, solo snap back
+      // Nada que mover, solo recentrar
       api.start({ offset: 0 })
       return
     }
 
-    // Si vamos hacia adelante (index+1), contenido se desplaza a la izquierda => offsetDir = -1
-    // Si vamos hacia atrás (index-1), contenido se desplaza a la derecha => offsetDir = +1
+    // final > fromIndex => vamos a la siguiente ⇒ contenido se desplaza a la izquierda ⇒ offsetDir = -1
+    // final < fromIndex => vamos a la anterior ⇒ contenido se desplaza a la derecha ⇒ offsetDir = +1
     const offsetDir = final > fromIndex ? -1 : 1
 
     api.start({
       offset: offsetDir,
       onRest: () => {
-        // Reseteamos primero el offset a 0 de forma inmediata
-        api.set({ offset: 0, immediate: true })
-
-        // Luego actualizamos el índice lógico
+        // 1) Dejamos el offset nuevamente en 0 (centrado relativo)
+        api.set({ offset: 0 })
+        // 2) Actualizamos index lógico al nuevo slide
         setIndex(final)
         onIndexChange?.(final)
       },
@@ -87,16 +87,14 @@ export function SwipeContainer({
 
       if (!active && last) {
         if (!isSwipe) {
-          // No alcanzó umbral → volver al centro
+          // No alcanzó el umbral → volver suave al centro
           api.start({ offset: 0 })
           return
         }
 
-        // dx: -1 = dedo hacia la izquierda → vamos a siguiente (index + 1)
-        // dx:  1 = dedo hacia la derecha → vamos a anterior (index - 1)
-        const toIndex =
-          dx < 0 ? index + 1 : index - 1
-
+        // dx: -1 = dedo hacia la izquierda → ir a siguiente (index + 1)
+        // dx:  1 = dedo hacia la derecha → ir a anterior (index - 1)
+        const toIndex = dx < 0 ? index + 1 : index - 1
         goTo(index, toIndex)
       }
     },
@@ -128,9 +126,7 @@ export function SwipeContainer({
               ),
             }}
           >
-            <div className="w-full h-full">
-              {item.content}
-            </div>
+            <div className="w-full h-full">{item.content}</div>
           </animated.div>
         ))}
       </div>
