@@ -19,11 +19,7 @@ export function SwipeFooter({
 }: SwipeFooterProps) {
   if (componentType === 'billeteras') {
     return (
-      <div className="fixed bottom-0 left-0 right-0 w-full px-6 py-3 bg-gradient-to-t from-background via-background/95 to-transparent backdrop-blur-md z-40"
-        style={{
-          boxShadow: '0 -4px 20px hsl(var(--primary) / 0.08)',
-        }}
-      >
+      <div className="fixed bottom-0 left-0 right-0 w-full px-6 py-3 z-40">
         <div className="flex items-center justify-center gap-3">
           {/* Botón Nueva Cuenta */}
           <button
@@ -83,11 +79,7 @@ export function SwipeFooter({
 
   // Footer para Sobres
   return (
-    <div className="fixed bottom-0 left-0 right-0 w-full px-6 py-3 bg-gradient-to-t from-background via-background/95 to-transparent backdrop-blur-md z-40"
-      style={{
-        boxShadow: '0 -4px 20px hsl(var(--primary) / 0.08)',
-      }}
-    >
+    <div className="fixed bottom-0 left-0 right-0 w-full px-6 py-3 z-40">
       <div className="flex items-center justify-center">
         <button
           onClick={onRegistrarGasto}

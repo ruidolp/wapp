@@ -7,9 +7,9 @@ import {
   SwipeContainer,
   SwipeItem,
   SwipeHeader,
-  SwipeFooter,
   BilleterasCard,
   SobreCard,
+  FloatingActionButton,
 } from '@/components/swipe'
 import type { CategoriaGasto } from '@/components/swipe'
 import type { Billetera, Sobre, Transaccion } from '@/domain/types'
@@ -165,16 +165,12 @@ export function DashboardClient({
           />
         </div>
 
-        {/* Footer con botones modernos */}
-        <SwipeFooter
-          componentType={activeComponentType}
-          onNuevaCuenta={() => setShowCrearBilletera(true)}
+        {/* FAB Floating Action Button */}
+        <FloatingActionButton
+          onCrearCuenta={() => setShowCrearBilletera(true)}
           onCrearSobre={() => setShowCrearSobre(true)}
           onTransferir={() => {
             console.log('Transferir')
-          }}
-          onRegistrarGasto={() => {
-            console.log('Registrar gasto')
           }}
         />
       </div>

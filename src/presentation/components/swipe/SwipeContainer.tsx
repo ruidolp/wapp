@@ -24,10 +24,10 @@ export function SwipeContainer({
 }: SwipeContainerProps) {
   const [index, setIndex] = useState(initialIndex)
 
-  // Spring animation for card position
+  // Spring animation for card position - smooth transitions
   const [{ x }, api] = useSpring(() => ({
     x: 0,
-    config: config.stiff,
+    config: { tension: 280, friction: 35 }, // Smooth and fluid
   }))
 
   // Notify parent of index changes
@@ -38,8 +38,8 @@ export function SwipeContainer({
   // Gesture handling with @use-gesture
   const bind = useDrag(
     ({ active, movement: [mx], direction: [xDir], distance: [dx], cancel, velocity: [vx] }) => {
-      // Swipe threshold: 50px or fast swipe (velocity > 0.2)
-      const trigger = Math.abs(dx) > 50 || (Math.abs(vx) > 0.2 && Math.abs(dx) > 20)
+      // Swipe threshold: 80px or fast swipe (velocity > 0.3)
+      const trigger = Math.abs(dx) > 80 || (Math.abs(vx) > 0.3 && Math.abs(dx) > 30)
 
       if (trigger && !active) {
         // Determine direction
@@ -69,25 +69,50 @@ export function SwipeContainer({
     }
   )
 
+  // Determinar qué cards renderizar (anterior, actual, siguiente)
+  const cardsToRender = []
+  const prevIndex = index - 1
+  const nextIndex = index + 1
+
+  if (prevIndex >= 0) {
+    cardsToRender.push({ item: items[prevIndex], position: -1, key: items[prevIndex].id })
+  }
+  cardsToRender.push({ item: items[index], position: 0, key: items[index].id })
+  if (nextIndex < items.length) {
+    cardsToRender.push({ item: items[nextIndex], position: 1, key: items[nextIndex].id })
+  }
+
   return (
     <div className="relative w-full h-full overflow-hidden">
-      {/* Main swipe container with padding for fixed footer */}
-      <div className="relative w-full h-full pb-24">
+      {/* Main swipe container */}
+      <div className="relative w-full h-full">
         <animated.div
           {...bind()}
           style={{
-            x,
             touchAction: 'pan-y',
-            willChange: 'transform',
           }}
           className="relative w-full h-full"
         >
-          {/* Only render active card for performance */}
-          <div className="absolute inset-0 flex items-start justify-center">
-            <div className="w-full max-w-2xl h-full px-2">
-              {items[index]?.content}
-            </div>
-          </div>
+          {/* Renderizar las 3 cards (anterior, actual, siguiente) */}
+          {cardsToRender.map(({ item, position, key }) => (
+            <animated.div
+              key={key}
+              style={{
+                transform: x.to((xVal) => {
+                  // Posición base + desplazamiento del gesto
+                  const basePosition = position * 100
+                  const offset = (xVal / window.innerWidth) * 100
+                  return `translate3d(${basePosition + offset}%, 0, 0)`
+                }),
+                willChange: 'transform',
+              }}
+              className="absolute inset-0 w-full h-full"
+            >
+              <div className="w-full h-full">
+                {item.content}
+              </div>
+            </animated.div>
+          ))}
         </animated.div>
       </div>
     </div>
