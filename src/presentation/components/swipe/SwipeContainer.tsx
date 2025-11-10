@@ -39,26 +39,30 @@ export function SwipeContainer({
   // Gesture handling con @use-gesture
   const bind = useDrag(
     ({ active, movement: [mx], direction: [xDir], distance: [dx], velocity: [vx], cancel }) => {
-      // Swipe threshold
-      const trigger = Math.abs(dx) > 80 || (Math.abs(vx) > 0.3 && Math.abs(dx) > 30)
-
-      if (trigger && !active) {
-        const newIndex = index + (xDir > 0 ? -1 : 1)
-
-        // Clamp index
-        if (newIndex < 0 || newIndex >= items.length) {
-          cancel()
-          return
-        }
-
-        setIndex(newIndex)
-      } else if (!active) {
-        // Spring back si no se completó el swipe
-        api.start({ offset: index })
-      } else {
-        // Durante el arrastre, ajustar offset temporalmente
+      if (active) {
+        // Durante el arrastre: seguir el dedo
         const dragOffset = -mx / window.innerWidth
         api.start({ offset: index + dragOffset, immediate: true })
+      } else {
+        // Al soltar: verificar si se completó el swipe
+        const trigger = Math.abs(dx) > 80 || (Math.abs(vx) > 0.3 && Math.abs(dx) > 30)
+
+        if (trigger) {
+          // Swipe completado: cambiar index
+          const newIndex = index + (xDir > 0 ? -1 : 1)
+
+          // Clamp index
+          if (newIndex < 0 || newIndex >= items.length) {
+            // Fuera de rango: spring back
+            api.start({ offset: index, immediate: false })
+          } else {
+            // Cambiar al nuevo index (useEffect animará el offset)
+            setIndex(newIndex)
+          }
+        } else {
+          // Swipe no completado: spring back al index actual
+          api.start({ offset: index, immediate: false })
+        }
       }
     },
     {
