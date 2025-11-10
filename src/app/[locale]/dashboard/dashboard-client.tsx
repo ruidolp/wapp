@@ -2,8 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Menu, Monitor, Smartphone, LogOut } from 'lucide-react'
-import { SwipeContainer, SwipeItem, BilleterasCard, SobreCard } from '@/components/swipe'
+import { Monitor, LogOut } from 'lucide-react'
+import {
+  SwipeContainer,
+  SwipeItem,
+  SwipeHeader,
+  SwipeFooter,
+  BilleterasCard,
+  SobreCard,
+} from '@/components/swipe'
 import type { CategoriaGasto } from '@/components/swipe'
 import type { Billetera, Sobre, Transaccion } from '@/domain/types'
 import {
@@ -43,26 +50,22 @@ export function DashboardClient({
 }: DashboardClientProps) {
   const router = useRouter()
   const [activeIndex, setActiveIndex] = useState(0)
-  const [isMobile, setIsMobile] = useState<boolean | null>(null) // null = detectando
+  const [isMobile, setIsMobile] = useState<boolean | null>(null)
   const [showCrearBilletera, setShowCrearBilletera] = useState(false)
   const [showCrearSobre, setShowCrearSobre] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(!hasUserConfig)
 
-  // Detectar si es mobile (sin flash inicial)
+  // Detectar si es mobile
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
-
-    // Check inicial
     checkMobile()
-
-    // Escuchar cambios de tamaño
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Función para logout
+  // Logout
   const handleLogout = async () => {
     await signOut({ callbackUrl: `/${locale}/auth/login` })
   }
@@ -76,15 +79,8 @@ export function DashboardClient({
       content: (
         <BilleterasCard
           billeteras={billeteras}
-          onNuevaCuenta={() => setShowCrearBilletera(true)}
-          onCrearSobre={() => setShowCrearSobre(true)}
-          onTransferir={() => {
-            console.log('Transferir')
-            // TODO: Abrir modal/página de transferencia
-          }}
           onClickCuenta={(billetera) => {
             console.log('Click en cuenta:', billetera.nombre)
-            // TODO: Abrir detalle de cuenta
           }}
         />
       ),
@@ -93,91 +89,53 @@ export function DashboardClient({
     ...sobresConDatos.map(({ sobre, categorias, transacciones, totalGastado }) => ({
       id: sobre.id,
       name: sobre.nombre.toUpperCase(),
-      color: sobre.color || undefined,
       content: (
         <SobreCard
           sobre={sobre}
           categorias={categorias}
           transacciones={transacciones}
           totalGastado={totalGastado}
-          onRegistrarGasto={() => {
-            console.log('Registrar gasto en:', sobre.nombre)
-            // TODO: Abrir modal/página de registrar gasto
-          }}
         />
       ),
     })),
   ]
 
+  // Determinar tipo de componente activo
+  const activeComponentType = activeIndex === 0 ? 'billeteras' : 'sobre'
+
   // Loading mientras detecta viewport
   if (isMobile === null) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 animate-pulse" />
-          <p className="text-slate-600">Cargando...</p>
+          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 animate-pulse shadow-2xl" />
+          <p className="text-lg font-semibold text-slate-700 font-display">Cargando...</p>
         </div>
       </div>
     )
   }
 
-  // Vista Desktop: Placeholder
+  // Vista Desktop
   if (!isMobile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-8">
-        <div className="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-12 text-center">
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+        <div className="max-w-2xl w-full bg-white rounded-3xl shadow-2xl p-12 text-center">
+          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-xl">
             <Monitor className="w-12 h-12 text-white" />
           </div>
-
-          <h1 className="text-3xl font-bold text-slate-900 mb-4">
+          <h1 className="text-4xl font-extrabold text-slate-900 mb-4 font-display">
             Vista Desktop en Desarrollo
           </h1>
-
-          <p className="text-lg text-slate-600 mb-6">
+          <p className="text-lg text-slate-600 mb-8">
             La interfaz de escritorio está planificada para una próxima fase.
             Por ahora, la aplicación está optimizada para dispositivos móviles.
           </p>
-
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <Smartphone className="w-6 h-6 text-blue-600" />
-              <h3 className="text-lg font-semibold text-blue-900">
-                Vista Previa Mobile
-              </h3>
-            </div>
-            <p className="text-sm text-blue-800">
-              Para ver la interfaz mobile, redimensiona tu ventana a menos de 768px de ancho
-              o accede desde un dispositivo móvil.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-            <div className="bg-slate-50 rounded-lg p-4">
-              <h4 className="font-semibold text-slate-900 mb-2">✓ Implementado (Mobile)</h4>
-              <ul className="text-sm text-slate-600 space-y-1">
-                <li>• Navegación swipe horizontal</li>
-                <li>• Gestión de billeteras</li>
-                <li>• Presupuesto por sobres</li>
-                <li>• Gráficos de categorías</li>
-                <li>• Lista de transacciones</li>
-              </ul>
-            </div>
-            <div className="bg-slate-50 rounded-lg p-4">
-              <h4 className="font-semibold text-slate-900 mb-2">⏳ Próximamente</h4>
-              <ul className="text-sm text-slate-600 space-y-1">
-                <li>• Vista de escritorio</li>
-                <li>• Dashboard ampliado</li>
-                <li>• Gráficos avanzados</li>
-                <li>• Reportes detallados</li>
-                <li>• Multi-panel</li>
-              </ul>
-            </div>
-          </div>
-
           <div className="mt-8 pt-6 border-t border-slate-200">
             <p className="text-sm text-slate-500">
-              Usuario: <span className="font-medium text-slate-700">{user.name || user.email}</span>
+              Usuario:{' '}
+              <span className="font-medium text-slate-700 font-display">
+                {user.name || user.email}
+              </span>
             </p>
           </div>
         </div>
@@ -185,27 +143,52 @@ export function DashboardClient({
     )
   }
 
-  // Vista Mobile: Swipe Navigation
+  // Vista Mobile: Nueva estructura con Header + Swipe + Footer
   return (
     <>
-      <div className="relative w-full h-screen bg-slate-50">
-        {/* Logout Button - Top Left */}
-        <div className="absolute top-4 left-4 z-50">
+      <div className="relative w-full h-screen bg-gradient-to-br from-slate-50 to-white flex flex-col">
+        {/* Logout Button - Top Right */}
+        <div className="absolute top-4 right-4 z-50">
           <button
-            className="w-10 h-10 rounded-lg bg-white/80 backdrop-blur-sm shadow-md border border-slate-200 flex items-center justify-center hover:bg-red-50 hover:border-red-300 transition-all group"
             onClick={handleLogout}
+            className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm shadow-lg border border-slate-200 flex items-center justify-center hover:bg-red-50 hover:border-red-300 transition-all group"
             aria-label="Cerrar sesión"
             title="Cerrar sesión"
           >
-            <LogOut className="w-5 h-5 text-slate-700 group-hover:text-red-600 transition-colors" />
+            <LogOut className="w-5 h-5 text-slate-600 group-hover:text-red-600 transition-colors" />
           </button>
         </div>
 
-        {/* Swipe Container */}
-        <SwipeContainer
-          items={swipeItems}
-          initialIndex={0}
-          onIndexChange={setActiveIndex}
+        {/* Header con títulos superpuestos */}
+        <SwipeHeader
+          items={swipeItems.map((item) => ({ id: item.id, name: item.name }))}
+          activeIndex={activeIndex}
+          onComponentsClick={() => {
+            console.log('Abrir selector de componentes')
+            // TODO: Abrir drawer con lista de componentes
+          }}
+        />
+
+        {/* Swipe Container - Flex 1 para ocupar espacio disponible */}
+        <div className="flex-1 overflow-hidden">
+          <SwipeContainer
+            items={swipeItems}
+            initialIndex={0}
+            onIndexChange={setActiveIndex}
+          />
+        </div>
+
+        {/* Footer con botones modernos */}
+        <SwipeFooter
+          componentType={activeComponentType}
+          onNuevaCuenta={() => setShowCrearBilletera(true)}
+          onCrearSobre={() => setShowCrearSobre(true)}
+          onTransferir={() => {
+            console.log('Transferir')
+          }}
+          onRegistrarGasto={() => {
+            console.log('Registrar gasto')
+          }}
         />
       </div>
 
@@ -220,12 +203,7 @@ export function DashboardClient({
         onOpenChange={setShowCrearSobre}
         userId={user.id}
       />
-
-      {/* Onboarding Drawer - se muestra si no tiene configuración */}
-      <OnboardingDrawer
-        open={showOnboarding}
-        onOpenChange={setShowOnboarding}
-      />
+      <OnboardingDrawer open={showOnboarding} onOpenChange={setShowOnboarding} />
     </>
   )
 }
