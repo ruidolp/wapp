@@ -17,6 +17,7 @@ import {
   OnboardingDrawer,
   CrearBilleteraDrawer,
   CrearSobreDrawer,
+  ProfileDrawer,
 } from '@/components/drawers'
 import { signOut } from 'next-auth/react'
 
@@ -54,6 +55,7 @@ export function DashboardClient({
   const [showCrearBilletera, setShowCrearBilletera] = useState(false)
   const [showCrearSobre, setShowCrearSobre] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(!hasUserConfig)
+  const [showProfile, setShowProfile] = useState(false)
 
   // Detectar si es mobile
   useEffect(() => {
@@ -147,26 +149,11 @@ export function DashboardClient({
   return (
     <>
       <div className="relative w-full h-screen bg-gradient-to-br from-slate-50 to-white flex flex-col">
-        {/* Logout Button - Top Right */}
-        <div className="absolute top-4 right-4 z-50">
-          <button
-            onClick={handleLogout}
-            className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm shadow-lg border border-slate-200 flex items-center justify-center hover:bg-red-50 hover:border-red-300 transition-all group"
-            aria-label="Cerrar sesión"
-            title="Cerrar sesión"
-          >
-            <LogOut className="w-5 h-5 text-slate-600 group-hover:text-red-600 transition-colors" />
-          </button>
-        </div>
-
-        {/* Header con títulos superpuestos */}
+        {/* Header compacto con perfil y theme */}
         <SwipeHeader
           items={swipeItems.map((item) => ({ id: item.id, name: item.name }))}
           activeIndex={activeIndex}
-          onComponentsClick={() => {
-            console.log('Abrir selector de componentes')
-            // TODO: Abrir drawer con lista de componentes
-          }}
+          onProfileClick={() => setShowProfile(true)}
         />
 
         {/* Swipe Container - Flex 1 para ocupar espacio disponible */}
@@ -193,6 +180,13 @@ export function DashboardClient({
       </div>
 
       {/* Drawers */}
+      <ProfileDrawer
+        open={showProfile}
+        onOpenChange={setShowProfile}
+        userName={user.name}
+        userEmail={user.email}
+        onLogout={handleLogout}
+      />
       <CrearBilleteraDrawer
         open={showCrearBilletera}
         onOpenChange={setShowCrearBilletera}

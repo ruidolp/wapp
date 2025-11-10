@@ -12,7 +12,9 @@ export function BilleterasCard({
   billeteras,
   onClickCuenta,
 }: BilleterasCardProps) {
-  const totalBalance = billeteras.reduce((sum, b) => sum + b.saldo_real, 0)
+  const totalReal = billeteras.reduce((sum, b) => sum + b.saldo_real, 0)
+  // Dummy: Asumimos que 60% está asignado a sobres
+  const totalProyectado = totalReal * 0.4
 
   if (billeteras.length === 0) {
     return (
@@ -36,24 +38,30 @@ export function BilleterasCard({
 
   return (
     <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      {/* Balance Total */}
-      <div className="px-6 pt-6 pb-4">
-        <div className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-3xl p-6 shadow-2xl transform hover:scale-[1.02] transition-transform">
-          <div className="flex items-center justify-between text-white/80 mb-2">
-            <span className="text-sm font-medium">Balance Total</span>
-            <DollarSign className="w-5 h-5" />
+      {/* Balance Total - MÁS COMPACTO */}
+      <div className="px-4 pt-4 pb-3">
+        <div
+          className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl p-4 transform hover:scale-[1.01] transition-transform"
+          style={{
+            boxShadow: '0 10px 40px rgba(147, 51, 234, 0.35), 0 0 30px rgba(59, 130, 246, 0.2)',
+          }}
+        >
+          <div className="flex items-center justify-between text-white/80 mb-1">
+            <span className="text-xs font-semibold tracking-wide">BALANCE TOTAL</span>
+            <DollarSign className="w-4 h-4" />
           </div>
-          <p className="text-4xl font-extrabold text-white font-display tracking-tight">
-            {formatCurrency(totalBalance)}
+          <p className="text-3xl font-extrabold text-white font-display tracking-tight">
+            {formatCurrency(totalReal)}
           </p>
-          <p className="text-xs text-white/60 mt-1">
-            {billeteras.length} {billeteras.length === 1 ? 'cuenta' : 'cuentas'}
-          </p>
+          <div className="flex items-center justify-between mt-2 text-xs text-white/60">
+            <span>{billeteras.length} {billeteras.length === 1 ? 'cuenta' : 'cuentas'}</span>
+            <span>Proyectado: {formatCurrency(totalProyectado)}</span>
+          </div>
         </div>
       </div>
 
       {/* Billeteras List - Scrollable */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
         {billeteras.map(billetera => (
           <WalletCard
             key={billetera.id}
@@ -66,7 +74,7 @@ export function BilleterasCard({
   )
 }
 
-// Wallet Card - Cada cuenta como una billetera individual
+// Wallet Card - Más compacta con SALDO REAL y PROYECTADO
 function WalletCard({
   billetera,
   onClick,
@@ -77,18 +85,27 @@ function WalletCard({
   const bgColor = billetera.color || getColorByType(billetera.tipo)
   const Icon = getIconByType(billetera.tipo)
 
+  // Dummy data: Asumimos que 60% está asignado a sobres
+  const saldoReal = billetera.saldo_real
+  const saldoProyectado = saldoReal * 0.4
+  const asignado = saldoReal * 0.6
+  const porcentajeAsignado = 60 // 60% asignado, 40% libre
+
   return (
     <button
       onClick={onClick}
-      className="w-[calc(100%-1rem)] mx-2 group relative"
+      className="w-[calc(100%-0.5rem)] mx-1 group relative"
       style={{
         perspective: '1000px',
       }}
     >
-      {/* Shadow Layer (profundidad) */}
+      {/* Shadow Halo (profundidad) */}
       <div
-        className="absolute -inset-1 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity"
-        style={{ backgroundColor: bgColor }}
+        className="absolute -inset-1.5 rounded-2xl blur-2xl opacity-40 group-hover:opacity-60 transition-opacity"
+        style={{
+          backgroundColor: bgColor,
+          boxShadow: `0 0 40px ${bgColor}`,
+        }}
       />
 
       {/* Wallet Container */}
@@ -96,79 +113,114 @@ function WalletCard({
         className="relative rounded-2xl overflow-hidden transform transition-all duration-300 group-hover:scale-[1.02] group-hover:-translate-y-1"
         style={{
           transformStyle: 'preserve-3d',
+          boxShadow: `0 10px 30px ${bgColor}40`,
         }}
       >
-        {/* Wallet Back (fondo con textura) */}
+        {/* Main Wallet Content - MÁS COMPACTO */}
         <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `
-              repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 20px)
-            `,
-          }}
-        />
-
-        {/* Main Wallet Content */}
-        <div
-          className="relative px-5 py-4 text-white"
+          className="relative px-4 py-3 text-white"
           style={{
             background: `linear-gradient(135deg, ${bgColor} 0%, ${adjustBrightness(bgColor, -20)} 100%)`,
           }}
         >
-          {/* Top Row */}
-          <div className="flex items-start justify-between mb-6">
+          {/* Top Row: Icon - Nombre - Tipo */}
+          <div className="flex items-center justify-between gap-3 mb-3">
             {/* Emoji/Icon */}
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0"
+              style={{
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              }}
+            >
               {billetera.emoji ? (
-                <span className="text-2xl">{billetera.emoji}</span>
+                <span className="text-xl">{billetera.emoji}</span>
               ) : (
-                <Icon className="w-6 h-6 text-white" />
+                <Icon className="w-5 h-5 text-white" />
               )}
             </div>
 
+            {/* Nombre (centro) */}
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-bold font-display text-center truncate">
+                {billetera.nombre}
+              </p>
+            </div>
+
             {/* Tipo Badge */}
-            <div className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm">
-              <span className="text-xs font-semibold tracking-wide">
+            <div className="px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm flex-shrink-0">
+              <span className="text-[10px] font-bold tracking-wider">
                 {getTipoLabel(billetera.tipo)}
               </span>
             </div>
           </div>
 
-          {/* Balance */}
-          <div className="mb-3">
-            <p className="text-sm font-medium text-white/80 mb-1">
-              {billetera.nombre}
-            </p>
-            <p className="text-3xl font-extrabold font-display tracking-tight">
-              {formatCurrency(billetera.saldo_real)}
-            </p>
+          {/* SALDO REAL */}
+          <div className="mb-2.5">
+            <div className="flex items-baseline justify-between mb-1">
+              <span className="text-[10px] font-semibold text-white/70 tracking-wider">SALDO REAL</span>
+              <span className="text-lg font-extrabold font-display">{formatCurrency(saldoReal)}</span>
+            </div>
+            {/* Barra horizontal */}
+            <div className="relative w-full h-1.5 bg-black/20 rounded-full overflow-hidden"
+              style={{
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3)',
+              }}
+            >
+              <div
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full"
+                style={{
+                  width: '100%', // Saldo real es 100% de sí mismo
+                  boxShadow: '0 0 8px rgba(16, 185, 129, 0.6)',
+                }}
+              />
+            </div>
+            <div className="flex justify-between items-center mt-0.5 text-[9px] text-white/60">
+              <span>Ingresos totales</span>
+              <span>100%</span>
+            </div>
           </div>
 
-          {/* Card Number Effect (decorativo) */}
-          <div className="flex gap-3 opacity-60">
-            <div className="flex gap-1">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="w-2 h-2 rounded-full bg-white/60" />
-              ))}
+          {/* SALDO PROYECTADO */}
+          <div>
+            <div className="flex items-baseline justify-between mb-1">
+              <span className="text-[10px] font-semibold text-white/70 tracking-wider">SALDO PROYECTADO</span>
+              <span className="text-lg font-extrabold font-display">{formatCurrency(saldoProyectado)}</span>
             </div>
-            <div className="flex gap-1">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="w-2 h-2 rounded-full bg-white/60" />
-              ))}
+            {/* Barra horizontal con asignado y libre */}
+            <div className="relative w-full h-1.5 bg-black/20 rounded-full overflow-hidden"
+              style={{
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3)',
+              }}
+            >
+              {/* Parte asignada (rojo) */}
+              <div
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-400 to-red-500 rounded-l-full"
+                style={{
+                  width: `${porcentajeAsignado}%`,
+                }}
+              />
+              {/* Parte libre (azul) */}
+              <div
+                className="absolute inset-y-0 bg-gradient-to-r from-blue-400 to-blue-500 rounded-r-full"
+                style={{
+                  left: `${porcentajeAsignado}%`,
+                  right: 0,
+                  boxShadow: '0 0 8px rgba(59, 130, 246, 0.6)',
+                }}
+              />
             </div>
-            <div className="flex gap-1">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="w-2 h-2 rounded-full bg-white/60" />
-              ))}
+            <div className="flex justify-between items-center mt-0.5 text-[9px] text-white/60">
+              <span>Asignado: {formatCurrency(asignado)} ({porcentajeAsignado}%)</span>
+              <span>Libre: {100 - porcentajeAsignado}%</span>
             </div>
           </div>
         </div>
 
         {/* Wallet Bottom Edge (efecto 3D) */}
         <div
-          className="h-2"
+          className="h-1.5"
           style={{
             background: `linear-gradient(to bottom, ${adjustBrightness(bgColor, -30)}, ${adjustBrightness(bgColor, -40)})`,
+            boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.4)',
           }}
         />
       </div>
@@ -214,25 +266,21 @@ function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('es-PA', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(amount)
 }
 
 function adjustBrightness(hex: string, percent: number): string {
-  // Remove # if present
   hex = hex.replace(/^#/, '')
-
-  // Parse r, g, b values
   let r = parseInt(hex.substring(0, 2), 16)
   let g = parseInt(hex.substring(2, 4), 16)
   let b = parseInt(hex.substring(4, 6), 16)
 
-  // Adjust brightness
   r = Math.max(0, Math.min(255, r + (r * percent) / 100))
   g = Math.max(0, Math.min(255, g + (g * percent) / 100))
   b = Math.max(0, Math.min(255, b + (b * percent) / 100))
 
-  // Convert back to hex
   const toHex = (n: number) => Math.round(n).toString(16).padStart(2, '0')
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`
 }
