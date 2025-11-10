@@ -23,68 +23,74 @@ export function SwipeContainer({
   onIndexChange,
 }: SwipeContainerProps) {
   const [index, setIndex] = useState(initialIndex)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
-  // offset = desplazamiento relativo en "páginas" respecto al index actual.
-  // 0 = centrado, -1 = una página a la derecha, +1 = una página a la izquierda.
+  // offset = desplazamiento relativo en páginas respecto al índice actual
   const [{ offset }, api] = useSpring(() => ({
     offset: 0,
     config: { tension: 220, friction: 26 },
   }))
 
-  const clampIndex = (i: number) => Math.max(0, Math.min(items.length - 1, i))
+  const clampIndex = (i: number) =>
+    Math.max(0, Math.min(items.length - 1, i))
+
+  const goTo = (nextIndex: number, dir: number) => {
+    api.start({
+      offset: dir, // animamos hasta completar la página
+      onRest: () => {
+        const final = clampIndex(nextIndex)
+        if (final !== index) {
+          setIndex(final)
+          onIndexChange?.(final)
+        }
+        // centramos el nuevo slide sin salto
+        api.set({ offset: 0 })
+      },
+    })
+  }
 
   const bind = useDrag(
-    ({
-      active,
-      movement: [mx],
-      direction: [xDir],
-      velocity: [vx],
-      last,
-    }) => {
+    ({ active, movement: [mx], direction: [dx], velocity: [vx], last }) => {
       if (items.length <= 1) return
 
-      const width = containerRef.current?.offsetWidth || window.innerWidth
+      const width =
+        containerRef.current?.offsetWidth ||
+        (typeof window !== 'undefined' ? window.innerWidth : 1)
 
-      const delta = mx / width // desplazamiento en "páginas"
+      const delta = mx / width
       const isSwipe =
-        Math.abs(delta) > 0.25 || (Math.abs(vx) > 0.25 && Math.abs(delta) > 0.1)
+        Math.abs(delta) > 0.25 || (vx > 0.25 && Math.abs(delta) > 0.1)
 
       if (active && !last) {
-        // Seguir el dedo, pero con un pequeño límite para no arrastrar infinito en los bordes
+        // rubber-band en bordes, pero working sobre delta relativo
+        let displayed = delta
         const atFirst = index === 0 && delta > 0
         const atLast = index === items.length - 1 && delta < 0
-        const resistance = atFirst || atLast ? 0.3 : 1
-        api.start({ offset: delta * resistance, immediate: true })
+
+        if (atFirst || atLast) {
+          displayed = delta * 0.3
+        }
+
+        api.start({ offset: displayed, immediate: true })
         return
       }
 
-      // Al soltar:
       if (!active && last) {
-        if (isSwipe) {
-          const dir = xDir < 0 ? 1 : -1 // -x = siguiente, +x = anterior
-          const targetIndex = clampIndex(index + dir)
-
-          if (targetIndex === index) {
-            // En borde: volver suave
-            api.start({ offset: 0 })
-            return
-          }
-
-          // Animar hasta la página completa
-          api.start({
-            offset: dir,
-            onRest: () => {
-              const finalIndex = clampIndex(index + dir)
-              setIndex(finalIndex)
-              onIndexChange?.(finalIndex)
-              // Reseteamos offset instantáneo para que el nuevo index quede centrado sin salto
-              api.set({ offset: 0 })
-            },
-          })
-        } else {
-          // No alcanzó el umbral: volver al centro
+        if (!isSwipe) {
+          // volver al centro
           api.start({ offset: 0 })
+          return
+        }
+
+        // dx: -1 = hacia la izquierda (siguiente), 1 = hacia la derecha (anterior)
+        const dir = dx < 0 ? 1 : -1
+        const targetIndex = clampIndex(index + dir)
+
+        if (targetIndex === index) {
+          // en borde, solo snap back
+          api.start({ offset: 0 })
+        } else {
+          goTo(targetIndex, dir)
         }
       }
     },
@@ -96,7 +102,10 @@ export function SwipeContainer({
   )
 
   return (
-    <div ref={containerRef} className="relative w-full h-full overflow-hidden">
+    <div
+      ref={containerRef}
+      className="relative w-full h-full overflow-hidden"
+    >
       <div
         {...bind()}
         className="relative w-full h-full"
@@ -113,7 +122,9 @@ export function SwipeContainer({
               ),
             }}
           >
-            <div className="w-full h-full">{item.content}</div>
+            <div className="w-full h-full">
+              {item.content}
+            </div>
           </animated.div>
         ))}
       </div>
