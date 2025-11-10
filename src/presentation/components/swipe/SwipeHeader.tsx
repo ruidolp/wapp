@@ -14,22 +14,22 @@ interface SwipeHeaderProps {
 
 export function SwipeHeader({ items, activeIndex, onProfileClick }: SwipeHeaderProps) {
   return (
-    <div className="relative w-full px-4 py-3 bg-gradient-to-b from-white/95 via-white/90 to-transparent backdrop-blur-md border-b border-slate-200/50"
+    <div className="relative w-full px-4 py-2 bg-gradient-to-b from-background/95 via-background/90 to-transparent backdrop-blur-md border-b border-border"
       style={{
-        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+        boxShadow: '0 4px 20px hsl(var(--primary) / 0.06)',
       }}
     >
       <div className="flex items-center justify-between">
         {/* Botón de Perfil - Izquierda */}
         <button
           onClick={onProfileClick}
-          className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-105"
+          className="w-10 h-10 rounded-full bg-gradient-to-br from-[hsl(var(--primary))] via-[hsl(var(--accent))] to-[hsl(var(--secondary))] flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-105"
           style={{
-            boxShadow: '0 6px 20px rgba(147, 51, 234, 0.3)',
+            boxShadow: '0 6px 20px hsl(var(--primary) / 0.3)',
           }}
           aria-label="Abrir perfil"
         >
-          <User className="w-6 h-6 text-white" />
+          <User className="w-5 h-5 text-primary-foreground" />
         </button>
 
         {/* Indicadores de Swipe (Dots) - Centro */}
@@ -39,12 +39,12 @@ export function SwipeHeader({ items, activeIndex, onProfileClick }: SwipeHeaderP
               key={index}
               className={`transition-all duration-300 rounded-full ${
                 index === activeIndex
-                  ? 'w-8 h-2.5 bg-gradient-to-r from-blue-500 to-purple-500'
-                  : 'w-2.5 h-2.5 bg-slate-300 hover:bg-slate-400'
+                  ? 'w-8 h-2.5 bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--accent))]'
+                  : 'w-2.5 h-2.5 bg-muted hover:bg-muted-foreground/30'
               }`}
               style={
                 index === activeIndex
-                  ? { boxShadow: '0 2px 8px rgba(147, 51, 234, 0.4)' }
+                  ? { boxShadow: '0 2px 8px hsl(var(--primary) / 0.4)' }
                   : undefined
               }
             />
