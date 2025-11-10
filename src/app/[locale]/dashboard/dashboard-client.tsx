@@ -104,7 +104,7 @@ export function DashboardClient({
   ]
 
   // Determinar tipo de componente activo
-  const activeComponentType = activeIndex === 0 ? 'billeteras' : 'sobre'
+  const activeComponentType = activeIndex === 0 ? 'billeteras' : 'sobres'
 
   // Loading mientras detecta viewport
   if (isMobile === null) {
@@ -168,7 +168,7 @@ export function DashboardClient({
           </div>
 
           {/* Indicadores debajo del sobre */}
-          {activeComponentType === 'sobre' && (
+          {activeComponentType === 'sobres' && (
             <SwipeIndicators totalItems={swipeItems.length} activeIndex={activeIndex} />
           )}
         </div>
