@@ -18,16 +18,16 @@ export function BilleterasCard({
 
   if (billeteras.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center p-8">
+      <div className="w-full h-full flex items-center justify-center p-8 bg-background">
         <div className="text-center space-y-4">
-          <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center shadow-inner">
-            <Wallet className="w-12 h-12 text-slate-400" />
+          <div className="w-24 h-24 mx-auto rounded-full bg-muted flex items-center justify-center shadow-inner">
+            <Wallet className="w-12 h-12 text-muted-foreground" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-slate-700 font-display mb-2">
+            <h3 className="text-xl font-bold text-foreground font-display mb-2">
               Sin billeteras
             </h3>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               Crea tu primera cuenta para comenzar
             </p>
           </div>
@@ -37,23 +37,23 @@ export function BilleterasCard({
   }
 
   return (
-    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      {/* Balance Total - MÁS COMPACTO */}
-      <div className="px-4 pt-4 pb-3">
+    <div className="w-full h-full flex flex-col bg-background">
+      {/* Balance Total - Con colores del theme */}
+      <div className="px-3 pt-3 pb-2">
         <div
-          className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl p-4 transform hover:scale-[1.01] transition-transform"
+          className="bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(var(--accent))] rounded-2xl p-3.5 transform hover:scale-[1.01] transition-transform"
           style={{
-            boxShadow: '0 10px 40px rgba(147, 51, 234, 0.35), 0 0 30px rgba(59, 130, 246, 0.2)',
+            boxShadow: '0 10px 35px hsl(var(--primary) / 0.3), 0 0 25px hsl(var(--accent) / 0.2)',
           }}
         >
-          <div className="flex items-center justify-between text-white/80 mb-1">
+          <div className="flex items-center justify-between text-primary-foreground/80 mb-1">
             <span className="text-xs font-semibold tracking-wide">BALANCE TOTAL</span>
             <DollarSign className="w-4 h-4" />
           </div>
-          <p className="text-3xl font-extrabold text-white font-display tracking-tight">
+          <p className="text-3xl font-extrabold text-primary-foreground font-display tracking-tight">
             {formatCurrency(totalReal)}
           </p>
-          <div className="flex items-center justify-between mt-2 text-xs text-white/60">
+          <div className="flex items-center justify-between mt-2 text-xs text-primary-foreground/60">
             <span>{billeteras.length} {billeteras.length === 1 ? 'cuenta' : 'cuentas'}</span>
             <span>Proyectado: {formatCurrency(totalProyectado)}</span>
           </div>
@@ -61,7 +61,7 @@ export function BilleterasCard({
       </div>
 
       {/* Billeteras List - Scrollable */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
+      <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-2.5">
         {billeteras.map(billetera => (
           <WalletCard
             key={billetera.id}
@@ -74,7 +74,7 @@ export function BilleterasCard({
   )
 }
 
-// Wallet Card - Más compacta con SALDO REAL y PROYECTADO
+// Wallet Card - Usa color custom solo en tarjeta, resto theme
 function WalletCard({
   billetera,
   onClick,
@@ -82,7 +82,7 @@ function WalletCard({
   billetera: Billetera
   onClick: () => void
 }) {
-  const bgColor = billetera.color || getColorByType(billetera.tipo)
+  const customColor = billetera.color || getColorByType(billetera.tipo)
   const Icon = getIconByType(billetera.tipo)
 
   // Dummy data: Asumimos que 60% está asignado a sobres
@@ -94,86 +94,82 @@ function WalletCard({
   return (
     <button
       onClick={onClick}
-      className="w-[calc(100%-0.5rem)] mx-1 group relative"
+      className="w-full group relative"
       style={{
         perspective: '1000px',
       }}
     >
-      {/* Shadow Halo (profundidad) */}
+      {/* Shadow Halo con color del theme */}
       <div
-        className="absolute -inset-1.5 rounded-2xl blur-2xl opacity-40 group-hover:opacity-60 transition-opacity"
+        className="absolute -inset-1 rounded-2xl blur-2xl opacity-30 group-hover:opacity-50 transition-opacity"
         style={{
-          backgroundColor: bgColor,
-          boxShadow: `0 0 40px ${bgColor}`,
+          backgroundColor: customColor,
+          boxShadow: `0 0 35px hsl(var(--primary) / 0.2)`,
         }}
       />
 
-      {/* Wallet Container */}
+      {/* Wallet Container - color custom */}
       <div
-        className="relative rounded-2xl overflow-hidden transform transition-all duration-300 group-hover:scale-[1.02] group-hover:-translate-y-1"
+        className="relative rounded-2xl overflow-hidden transform transition-all duration-300 group-hover:scale-[1.02] group-hover:-translate-y-0.5"
         style={{
           transformStyle: 'preserve-3d',
-          boxShadow: `0 10px 30px ${bgColor}40`,
+          boxShadow: `0 8px 25px ${customColor}40`,
         }}
       >
-        {/* Main Wallet Content - MÁS COMPACTO */}
+        {/* Main Wallet Content - Compacto */}
         <div
-          className="relative px-4 py-3 text-white"
+          className="relative px-3 py-2.5 text-white"
           style={{
-            background: `linear-gradient(135deg, ${bgColor} 0%, ${adjustBrightness(bgColor, -20)} 100%)`,
+            background: `linear-gradient(135deg, ${customColor} 0%, ${adjustBrightness(customColor, -20)} 100%)`,
           }}
         >
           {/* Top Row: Icon - Nombre - Tipo */}
-          <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="flex items-center justify-between gap-2 mb-2">
             {/* Emoji/Icon */}
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0"
+            <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0"
               style={{
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                boxShadow: '0 3px 10px rgba(0,0,0,0.15)',
               }}
             >
               {billetera.emoji ? (
-                <span className="text-xl">{billetera.emoji}</span>
+                <span className="text-lg">{billetera.emoji}</span>
               ) : (
-                <Icon className="w-5 h-5 text-white" />
+                <Icon className="w-4 h-4 text-white" />
               )}
             </div>
 
             {/* Nombre (centro) */}
             <div className="flex-1 min-w-0">
-              <p className="text-base font-bold font-display text-center truncate">
+              <p className="text-sm font-bold font-display text-center truncate">
                 {billetera.nombre}
               </p>
             </div>
 
             {/* Tipo Badge */}
-            <div className="px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm flex-shrink-0">
-              <span className="text-[10px] font-bold tracking-wider">
+            <div className="px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm flex-shrink-0">
+              <span className="text-[9px] font-bold tracking-wider">
                 {getTipoLabel(billetera.tipo)}
               </span>
             </div>
           </div>
 
           {/* SALDO REAL */}
-          <div className="mb-2.5">
-            <div className="flex items-baseline justify-between mb-1">
-              <span className="text-[10px] font-semibold text-white/70 tracking-wider">SALDO REAL</span>
-              <span className="text-lg font-extrabold font-display">{formatCurrency(saldoReal)}</span>
+          <div className="mb-2">
+            <div className="flex items-baseline justify-between mb-0.5">
+              <span className="text-[9px] font-semibold text-white/70 tracking-wider">SALDO REAL</span>
+              <span className="text-base font-extrabold font-display">{formatCurrency(saldoReal)}</span>
             </div>
             {/* Barra horizontal */}
-            <div className="relative w-full h-1.5 bg-black/20 rounded-full overflow-hidden"
-              style={{
-                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3)',
-              }}
-            >
+            <div className="relative w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
               <div
                 className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full"
                 style={{
-                  width: '100%', // Saldo real es 100% de sí mismo
+                  width: '100%',
                   boxShadow: '0 0 8px rgba(16, 185, 129, 0.6)',
                 }}
               />
             </div>
-            <div className="flex justify-between items-center mt-0.5 text-[9px] text-white/60">
+            <div className="flex justify-between items-center mt-0.5 text-[8px] text-white/60">
               <span>Ingresos totales</span>
               <span>100%</span>
             </div>
@@ -181,16 +177,12 @@ function WalletCard({
 
           {/* SALDO PROYECTADO */}
           <div>
-            <div className="flex items-baseline justify-between mb-1">
-              <span className="text-[10px] font-semibold text-white/70 tracking-wider">SALDO PROYECTADO</span>
-              <span className="text-lg font-extrabold font-display">{formatCurrency(saldoProyectado)}</span>
+            <div className="flex items-baseline justify-between mb-0.5">
+              <span className="text-[9px] font-semibold text-white/70 tracking-wider">SALDO PROYECTADO</span>
+              <span className="text-base font-extrabold font-display">{formatCurrency(saldoProyectado)}</span>
             </div>
             {/* Barra horizontal con asignado y libre */}
-            <div className="relative w-full h-1.5 bg-black/20 rounded-full overflow-hidden"
-              style={{
-                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3)',
-              }}
-            >
+            <div className="relative w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
               {/* Parte asignada (rojo) */}
               <div
                 className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-400 to-red-500 rounded-l-full"
@@ -208,18 +200,18 @@ function WalletCard({
                 }}
               />
             </div>
-            <div className="flex justify-between items-center mt-0.5 text-[9px] text-white/60">
+            <div className="flex justify-between items-center mt-0.5 text-[8px] text-white/60">
               <span>Asignado: {formatCurrency(asignado)} ({porcentajeAsignado}%)</span>
               <span>Libre: {100 - porcentajeAsignado}%</span>
             </div>
           </div>
         </div>
 
-        {/* Wallet Bottom Edge (efecto 3D) */}
+        {/* Wallet Bottom Edge */}
         <div
-          className="h-1.5"
+          className="h-1"
           style={{
-            background: `linear-gradient(to bottom, ${adjustBrightness(bgColor, -30)}, ${adjustBrightness(bgColor, -40)})`,
+            background: `linear-gradient(to bottom, ${adjustBrightness(customColor, -30)}, ${adjustBrightness(customColor, -40)})`,
             boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.4)',
           }}
         />
@@ -242,11 +234,11 @@ function getIconByType(tipo: string) {
 
 function getColorByType(tipo: string): string {
   const colors: Record<string, string> = {
-    DEBITO: '#3b82f6',    // blue-500
-    CREDITO: '#ef4444',   // red-500
-    EFECTIVO: '#10b981',  // green-500
-    AHORRO: '#8b5cf6',    // purple-500
-    INVERSION: '#f59e0b', // amber-500
+    DEBITO: '#3b82f6',
+    CREDITO: '#ef4444',
+    EFECTIVO: '#10b981',
+    AHORRO: '#8b5cf6',
+    INVERSION: '#f59e0b',
   }
   return colors[tipo] || '#64748b'
 }
