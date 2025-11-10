@@ -1,7 +1,7 @@
 'use client'
 
-import { ReactNode, useState, useEffect } from 'react'
-import { useSpring, animated, config } from '@react-spring/web'
+import { ReactNode, useState, useRef } from 'react'
+import { useSpring, animated } from '@react-spring/web'
 import { useDrag } from '@use-gesture/react'
 
 export interface SwipeItem {
@@ -23,43 +23,69 @@ export function SwipeContainer({
   onIndexChange,
 }: SwipeContainerProps) {
   const [index, setIndex] = useState(initialIndex)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  // Spring animation for card position - smooth transitions
-  const [{ x }, api] = useSpring(() => ({
-    x: 0,
-    config: { tension: 280, friction: 35 }, // Smooth and fluid
+  // offset = desplazamiento relativo en "páginas" respecto al index actual.
+  // 0 = centrado, -1 = una página a la derecha, +1 = una página a la izquierda.
+  const [{ offset }, api] = useSpring(() => ({
+    offset: 0,
+    config: { tension: 220, friction: 26 },
   }))
 
-  // Notify parent of index changes
-  useEffect(() => {
-    onIndexChange?.(index)
-  }, [index, onIndexChange])
+  const clampIndex = (i: number) => Math.max(0, Math.min(items.length - 1, i))
 
-  // Gesture handling with @use-gesture
   const bind = useDrag(
-    ({ active, movement: [mx], direction: [xDir], distance: [dx], cancel, velocity: [vx] }) => {
-      // Swipe threshold: 80px or fast swipe (velocity > 0.3)
-      const trigger = Math.abs(dx) > 80 || (Math.abs(vx) > 0.3 && Math.abs(dx) > 30)
+    ({
+      active,
+      movement: [mx],
+      direction: [xDir],
+      velocity: [vx],
+      last,
+    }) => {
+      if (items.length <= 1) return
 
-      if (trigger && !active) {
-        // Determine direction
-        const newIndex = index + (xDir > 0 ? -1 : 1)
+      const width = containerRef.current?.offsetWidth || window.innerWidth
 
-        // Clamp index
-        if (newIndex < 0 || newIndex >= items.length) {
-          cancel()
-          api.start({ x: 0, immediate: false })
-          return
+      const delta = mx / width // desplazamiento en "páginas"
+      const isSwipe =
+        Math.abs(delta) > 0.25 || (Math.abs(vx) > 0.25 && Math.abs(delta) > 0.1)
+
+      if (active && !last) {
+        // Seguir el dedo, pero con un pequeño límite para no arrastrar infinito en los bordes
+        const atFirst = index === 0 && delta > 0
+        const atLast = index === items.length - 1 && delta < 0
+        const resistance = atFirst || atLast ? 0.3 : 1
+        api.start({ offset: delta * resistance, immediate: true })
+        return
+      }
+
+      // Al soltar:
+      if (!active && last) {
+        if (isSwipe) {
+          const dir = xDir < 0 ? 1 : -1 // -x = siguiente, +x = anterior
+          const targetIndex = clampIndex(index + dir)
+
+          if (targetIndex === index) {
+            // En borde: volver suave
+            api.start({ offset: 0 })
+            return
+          }
+
+          // Animar hasta la página completa
+          api.start({
+            offset: dir,
+            onRest: () => {
+              const finalIndex = clampIndex(index + dir)
+              setIndex(finalIndex)
+              onIndexChange?.(finalIndex)
+              // Reseteamos offset instantáneo para que el nuevo index quede centrado sin salto
+              api.set({ offset: 0 })
+            },
+          })
+        } else {
+          // No alcanzó el umbral: volver al centro
+          api.start({ offset: 0 })
         }
-
-        setIndex(newIndex)
-        api.start({ x: 0, immediate: false })
-      } else {
-        // Follow finger or spring back
-        api.start({
-          x: active ? mx : 0,
-          immediate: active,
-        })
       }
     },
     {
@@ -69,51 +95,27 @@ export function SwipeContainer({
     }
   )
 
-  // Determinar qué cards renderizar (anterior, actual, siguiente)
-  const cardsToRender = []
-  const prevIndex = index - 1
-  const nextIndex = index + 1
-
-  if (prevIndex >= 0) {
-    cardsToRender.push({ item: items[prevIndex], position: -1, key: items[prevIndex].id })
-  }
-  cardsToRender.push({ item: items[index], position: 0, key: items[index].id })
-  if (nextIndex < items.length) {
-    cardsToRender.push({ item: items[nextIndex], position: 1, key: items[nextIndex].id })
-  }
-
   return (
-    <div className="relative w-full h-full overflow-hidden">
-      {/* Main swipe container */}
-      <div className="relative w-full h-full">
-        <animated.div
-          {...bind()}
-          style={{
-            touchAction: 'pan-y',
-          }}
-          className="relative w-full h-full"
-        >
-          {/* Renderizar las 3 cards (anterior, actual, siguiente) */}
-          {cardsToRender.map(({ item, position, key }) => (
-            <animated.div
-              key={key}
-              style={{
-                transform: x.to((xVal) => {
-                  // Posición base + desplazamiento del gesto
-                  const basePosition = position * 100
-                  const offset = (xVal / window.innerWidth) * 100
-                  return `translate3d(${basePosition + offset}%, 0, 0)`
-                }),
-                willChange: 'transform',
-              }}
-              className="absolute inset-0 w-full h-full"
-            >
-              <div className="w-full h-full">
-                {item.content}
-              </div>
-            </animated.div>
-          ))}
-        </animated.div>
+    <div ref={containerRef} className="relative w-full h-full overflow-hidden">
+      <div
+        {...bind()}
+        className="relative w-full h-full"
+        style={{ touchAction: 'pan-y' }}
+      >
+        {items.map((item, i) => (
+          <animated.div
+            key={item.id}
+            className="absolute inset-0 w-full h-full"
+            style={{
+              willChange: 'transform',
+              transform: offset.to(
+                (o) => `translate3d(${(i - index - o) * 100}%, 0, 0)`
+              ),
+            }}
+          >
+            <div className="w-full h-full">{item.content}</div>
+          </animated.div>
+        ))}
       </div>
     </div>
   )
