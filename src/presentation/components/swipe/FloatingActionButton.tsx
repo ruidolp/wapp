@@ -4,15 +4,19 @@ import { useState } from 'react'
 import { Plus, Wallet, Mail, ArrowRightLeft, Menu } from 'lucide-react'
 
 interface FloatingActionButtonProps {
+  type: 'billeteras' | 'sobres'
   onCrearCuenta?: () => void
   onCrearSobre?: () => void
   onTransferir?: () => void
+  onRegistrarGasto?: () => void
 }
 
 export function FloatingActionButton({
+  type,
   onCrearCuenta,
   onCrearSobre,
   onTransferir,
+  onRegistrarGasto,
 }: FloatingActionButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -25,8 +29,34 @@ export function FloatingActionButton({
     setIsOpen(false)
   }
 
+  // FAB simple para sobres (solo botón +)
+  if (type === 'sobres') {
+    return (
+      <button
+        onClick={onRegistrarGasto}
+        className="fixed right-6 bottom-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(var(--accent))] flex items-center justify-center shadow-2xl hover:shadow-3xl transition-all hover:scale-110 active:scale-95"
+        style={{
+          boxShadow: '0 8px 30px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--accent) / 0.3)',
+        }}
+        aria-label="Registrar Gasto"
+      >
+        <Plus className="w-7 h-7 text-primary-foreground" />
+      </button>
+    )
+  }
+
+  // FAB con menú desplegable para billeteras
   return (
-    <div className="fixed right-6 bottom-32 z-50">
+    <>
+      {/* Backdrop transparente cuando el menú está abierto */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      <div className="fixed right-6 bottom-6 z-50">
       {/* Botones Expandidos */}
       {isOpen && (
         <div className="absolute bottom-16 right-0 flex flex-col gap-3 mb-2">
@@ -113,5 +143,6 @@ export function FloatingActionButton({
         </div>
       </button>
     </div>
+    </>
   )
 }

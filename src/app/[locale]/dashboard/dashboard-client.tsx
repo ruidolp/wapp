@@ -7,6 +7,7 @@ import {
   SwipeContainer,
   SwipeItem,
   SwipeHeader,
+  SwipeIndicators,
   BilleterasCard,
   SobreCard,
   FloatingActionButton,
@@ -145,7 +146,7 @@ export function DashboardClient({
     )
   }
 
-  // Vista Mobile: Nueva estructura con Header + Swipe + Footer
+  // Vista Mobile: Nueva estructura con Header + Swipe + Indicators + FAB
   return (
     <>
       <div className="relative w-full h-screen bg-gradient-to-br from-slate-50 to-white flex flex-col">
@@ -157,20 +158,31 @@ export function DashboardClient({
         />
 
         {/* Swipe Container - Flex 1 para ocupar espacio disponible */}
-        <div className="flex-1 overflow-hidden">
-          <SwipeContainer
-            items={swipeItems}
-            initialIndex={0}
-            onIndexChange={setActiveIndex}
-          />
+        <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-hidden">
+            <SwipeContainer
+              items={swipeItems}
+              initialIndex={0}
+              onIndexChange={setActiveIndex}
+            />
+          </div>
+
+          {/* Indicadores debajo del sobre */}
+          {activeComponentType === 'sobre' && (
+            <SwipeIndicators totalItems={swipeItems.length} activeIndex={activeIndex} />
+          )}
         </div>
 
-        {/* FAB Floating Action Button */}
+        {/* FAB Floating Action Button - Condicional */}
         <FloatingActionButton
+          type={activeComponentType}
           onCrearCuenta={() => setShowCrearBilletera(true)}
           onCrearSobre={() => setShowCrearSobre(true)}
           onTransferir={() => {
             console.log('Transferir')
+          }}
+          onRegistrarGasto={() => {
+            console.log('Registrar gasto')
           }}
         />
       </div>
