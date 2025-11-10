@@ -78,27 +78,27 @@ export function SobreCard({
               boxShadow: `0 0 60px ${color}40, inset 0 2px 30px rgba(255,255,255,0.1)`,
             }}
           >
-            {/* Envelope Flap (solapa) - FORMA ORIGINAL */}
-            <div className="relative h-28 overflow-hidden">
+            {/* Envelope Flap (solapa) - FORMA ORIGINAL MÁS COMPACTA */}
+            <div className="relative h-20 overflow-hidden">
               <svg
-                viewBox="0 0 400 110"
+                viewBox="0 0 400 80"
                 className="absolute inset-0 w-full h-full"
                 preserveAspectRatio="none"
               >
                 {/* Flap triangulo */}
                 <path
-                  d="M 0 0 L 200 85 L 400 0 Z"
+                  d="M 0 0 L 200 65 L 400 0 Z"
                   fill={adjustBrightness(color, -25)}
                   opacity="0.95"
                 />
                 {/* Flap fold shadow */}
                 <path
-                  d="M 0 0 L 200 85 L 400 0 L 400 25 L 200 110 L 0 25 Z"
+                  d="M 0 0 L 200 65 L 400 0 L 400 20 L 200 85 L 0 20 Z"
                   fill="url(#flapGradient)"
                 />
                 {/* Línea de cierre más clara */}
                 <path
-                  d="M 0 0 L 200 85 L 400 0"
+                  d="M 0 0 L 200 65 L 400 0"
                   stroke={adjustBrightness(color, 40)}
                   strokeWidth="2"
                   fill="none"
@@ -113,8 +113,8 @@ export function SobreCard({
               </svg>
 
               {/* NOMBRE en la solapa - SIN FONDO */}
-              <div className="absolute top-8 left-0 right-0 z-10 flex items-center justify-center">
-                <h2 className="text-3xl font-extrabold font-display text-white tracking-tight text-center px-4"
+              <div className="absolute top-6 left-0 right-0 z-10 flex items-center justify-center">
+                <h2 className="text-2xl font-extrabold font-display text-white tracking-tight text-center px-4"
                   style={{
                     textShadow: '0 4px 20px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3)',
                   }}
@@ -124,8 +124,8 @@ export function SobreCard({
               </div>
             </div>
 
-            {/* Envelope Content (DENTRO del sobre) */}
-            <div className="relative p-5 pb-6 text-white space-y-0">
+            {/* Envelope Content (DENTRO del sobre) - SIN padding top */}
+            <div className="relative pt-0 px-5 pb-6 text-white space-y-0">
               {/* Balance Card - TRANSPARENTE para ver solapa debajo */}
               <div className="bg-white/15 backdrop-blur-md rounded-2xl p-4 border border-white/20"
                 style={{
