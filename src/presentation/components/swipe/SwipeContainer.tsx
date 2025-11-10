@@ -25,8 +25,7 @@ export function SwipeContainer({
   const [index, setIndex] = useState(initialIndex)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
-  // offset = desplazamiento relativo en "páginas" respecto al índice actual.
-  // 0 = centrado, -1 = siguiente a la derecha, +1 = anterior a la izquierda.
+  // offset = desplazamiento relativo en páginas respecto al índice actual
   const [{ offset }, api] = useSpring(() => ({
     offset: 0,
     config: { tension: 220, friction: 26 },
@@ -35,13 +34,27 @@ export function SwipeContainer({
   const clampIndex = (i: number) =>
     Math.max(0, Math.min(items.length - 1, i))
 
-  const goTo = (finalIndex: number, offsetDir: number) => {
+  const goTo = (fromIndex: number, toIndex: number) => {
+    const final = clampIndex(toIndex)
+    if (final === fromIndex) {
+      // Nada que hacer, solo snap back
+      api.start({ offset: 0 })
+      return
+    }
+
+    // Si vamos hacia adelante (index+1), contenido se desplaza a la izquierda => offsetDir = -1
+    // Si vamos hacia atrás (index-1), contenido se desplaza a la derecha => offsetDir = +1
+    const offsetDir = final > fromIndex ? -1 : 1
+
     api.start({
       offset: offsetDir,
       onRest: () => {
-        setIndex(finalIndex)
-        onIndexChange?.(finalIndex)
-        api.set({ offset: 0 })
+        // Reseteamos primero el offset a 0 de forma inmediata
+        api.set({ offset: 0, immediate: true })
+
+        // Luego actualizamos el índice lógico
+        setIndex(final)
+        onIndexChange?.(final)
       },
     })
   }
@@ -59,10 +72,9 @@ export function SwipeContainer({
         Math.abs(delta) > 0.25 || (vx > 0.25 && Math.abs(delta) > 0.1)
 
       if (active && !last) {
-        // Desplazamiento relativo siguiendo el dedo
         let displayed = delta
 
-        // Rubber-band suave en bordes
+        // Rubber-band en bordes
         const atFirst = index === 0 && delta > 0
         const atLast = index === items.length - 1 && delta < 0
         if (atFirst || atLast) {
@@ -80,23 +92,12 @@ export function SwipeContainer({
           return
         }
 
-        // dx: -1 = dedo hacia la izquierda → queremos ir a la siguiente (index + 1)
-        // dx:  1 = dedo hacia la derecha → ir a la anterior (index - 1)
-        const slideDelta = dx < 0 ? 1 : -1
-        const finalIndex = clampIndex(index + slideDelta)
+        // dx: -1 = dedo hacia la izquierda → vamos a siguiente (index + 1)
+        // dx:  1 = dedo hacia la derecha → vamos a anterior (index - 1)
+        const toIndex =
+          dx < 0 ? index + 1 : index - 1
 
-        if (finalIndex === index) {
-          // En borde, solo snap back
-          api.start({ offset: 0 })
-          return
-        }
-
-        // Dirección de la animación del offset:
-        // si vamos a la siguiente (slideDelta = 1), contenido se termina yendo a la izquierda → offsetDir = -1
-        // si vamos a la anterior (slideDelta = -1), contenido se termina yendo a la derecha → offsetDir = +1
-        const offsetDir = slideDelta === 1 ? -1 : 1
-
-        goTo(finalIndex, offsetDir)
+        goTo(index, toIndex)
       }
     },
     {
