@@ -1,7 +1,8 @@
 'use client'
 
-import { ReactNode } from 'react'
-import { useCarousel } from '@/presentation/hooks/useSwipe'
+import { ReactNode, useState, useEffect } from 'react'
+import { useSpring, animated, config } from '@react-spring/web'
+import { useDrag } from '@use-gesture/react'
 
 export interface SwipeItem {
   id: string
@@ -21,81 +22,73 @@ export function SwipeContainer({
   initialIndex = 0,
   onIndexChange,
 }: SwipeContainerProps) {
-  const { activeIndex, swipeHandlers, goToIndex } = useCarousel({
-    itemCount: items.length,
-    initialIndex,
-    onIndexChange,
-  })
+  const [index, setIndex] = useState(initialIndex)
 
-  const getCardStyle = (index: number) => {
-    const diff = index - activeIndex
+  // Spring animation for card position
+  const [{ x }, api] = useSpring(() => ({
+    x: 0,
+    config: config.stiff,
+  }))
 
-    if (diff === 0) {
-      // Active card - full size, centered, full opacity
-      return {
-        transform: 'scale(1) translateX(0)',
-        opacity: 1,
-        zIndex: 10,
-        pointerEvents: 'auto' as const,
+  // Notify parent of index changes
+  useEffect(() => {
+    onIndexChange?.(index)
+  }, [index, onIndexChange])
+
+  // Gesture handling with @use-gesture
+  const bind = useDrag(
+    ({ active, movement: [mx], direction: [xDir], distance, cancel, velocity: [vx] }) => {
+      // Swipe threshold: 50px or fast swipe (velocity > 0.2)
+      const trigger = distance > 50 || (vx > 0.2 && distance > 20)
+
+      if (trigger && !active) {
+        // Determine direction
+        const newIndex = index + (xDir > 0 ? -1 : 1)
+
+        // Clamp index
+        if (newIndex < 0 || newIndex >= items.length) {
+          cancel()
+          api.start({ x: 0, immediate: false })
+          return
+        }
+
+        setIndex(newIndex)
+        api.start({ x: 0, immediate: false })
+      } else {
+        // Follow finger or spring back
+        api.start({
+          x: active ? mx : 0,
+          immediate: active,
+        })
       }
-    } else if (diff === -1) {
-      // Previous card - smaller, to the left, semi-transparent
-      return {
-        transform: 'scale(0.9) translateX(-100%)',
-        opacity: 0.3,
-        zIndex: 5,
-        pointerEvents: 'none' as const,
-      }
-    } else if (diff === 1) {
-      // Next card - smaller, to the right, semi-transparent
-      return {
-        transform: 'scale(0.9) translateX(100%)',
-        opacity: 0.3,
-        zIndex: 5,
-        pointerEvents: 'none' as const,
-      }
-    } else {
-      // Hidden cards
-      return {
-        transform: diff < 0 ? 'scale(0.7) translateX(-200%)' : 'scale(0.7) translateX(200%)',
-        opacity: 0,
-        zIndex: 0,
-        pointerEvents: 'none' as const,
-      }
+    },
+    {
+      axis: 'x',
+      filterTaps: true,
+      pointer: { touch: true },
     }
-  }
+  )
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      {/* Cards Container - Con padding bottom para el footer fixed */}
-      <div
-        className="relative w-full h-full flex items-start justify-center pb-24"
-        {...swipeHandlers}
-        style={{
-          touchAction: 'pan-y pinch-zoom',
-        }}
-      >
-        {items.map((item, index) => {
-          const style = getCardStyle(index)
-
-          return (
-            <div
-              key={item.id}
-              className="absolute inset-0 flex flex-col transition-all duration-300 ease-out"
-              style={{
-                transform: style.transform,
-                opacity: style.opacity,
-                zIndex: style.zIndex,
-                pointerEvents: style.pointerEvents,
-              }}
-            >
-              {/* Card Content */}
-              <div className="w-full h-full overflow-y-auto">
-                {item.content}
-              </div>
+      {/* Main swipe container with padding for fixed footer */}
+      <div className="relative w-full h-full pb-24">
+        <animated.div
+          {...bind()}
+          style={{
+            x,
+            touchAction: 'pan-y',
+            willChange: 'transform',
+          }}
+          className="relative w-full h-full"
+        >
+          {/* Only render active card for performance */}
+          <div className="absolute inset-0 flex items-start justify-center">
+            <div className="w-full max-w-2xl h-full px-2">
+              {items[index]?.content}
             </div>
-          )
-        })}
+          </div>
+        </animated.div>
       </div>
     </div>
   )
