@@ -25,7 +25,7 @@ export function SwipeContainer({
   const [index, setIndex] = useState(initialIndex)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
-  // page = índice "visual" continuo (0, 0.2, 0.8, 1, etc.)
+  // `page` = índice visual continuo (0 = primer item, 1 = segundo, etc.)
   const [{ page }, api] = useSpring(() => ({
     page: initialIndex,
     config: { tension: 220, friction: 26 },
@@ -41,7 +41,7 @@ export function SwipeContainer({
     Math.max(0, Math.min(items.length - 1, i))
 
   const bind = useDrag(
-    ({ active, movement: [mx], direction: [dx], velocity: [vx], last }) => {
+    ({ active, movement: [mx], velocity: [vx], last }) => {
       if (items.length <= 1) return
 
       const width =
@@ -49,19 +49,18 @@ export function SwipeContainer({
         (typeof window !== 'undefined' ? window.innerWidth : 1)
 
       const delta = mx / width
-      const isSwipe =
-        Math.abs(delta) > 0.25 || (vx > 0.25 && Math.abs(delta) > 0.1)
 
       if (active && !last) {
-        // Mientras arrastro: muevo la "page" continua
-        const rawPage = index - delta
+        // Mientras arrastro, movemos `page` en función del dedo.
+        // mx > 0 (dedo a la derecha) => queremos ver más del slide anterior => page disminuye.
+        // mx < 0 (dedo a la izquierda) => page aumenta.
+        let nextPage = index - delta
 
         // Rubber-band suave en bordes
-        let nextPage = rawPage
-        if (rawPage < 0) {
-          nextPage = -Math.pow(-rawPage, 0.6)
-        } else if (rawPage > items.length - 1) {
-          const extra = rawPage - (items.length - 1)
+        if (nextPage < 0) {
+          nextPage = -Math.pow(-nextPage, 0.6)
+        } else if (nextPage > items.length - 1) {
+          const extra = nextPage - (items.length - 1)
           nextPage = (items.length - 1) + Math.pow(extra, 0.6)
         }
 
@@ -70,26 +69,32 @@ export function SwipeContainer({
       }
 
       if (!active && last) {
-        // Al soltar:
-        const currentPage = (page.get?.() ?? index) as number
-        let targetIndex = index
+        const current = page.get() as number
+
+        // Heurística de swipe: desplazamiento o velocidad suficiente
+        const isSwipe =
+          Math.abs(delta) > 0.25 || vx > 0.25
+
+        let target = clampIndex(Math.round(current))
 
         if (isSwipe) {
-          // Swipe explícito según dirección
-          // dx: -1 = dedo izquierda → siguiente
-          // dx:  1 = dedo derecha  → anterior
-          targetIndex = clampIndex(index + (dx < 0 ? 1 : -1))
-        } else {
-          // Snap al más cercano
-          targetIndex = clampIndex(Math.round(currentPage))
+          // Si fue un swipe fuerte pero el redondeo no cambió de página,
+          // forzamos al menos un paso en la dirección del movimiento.
+          if (delta < 0 && target <= index) {
+            // dedo a la izquierda => siguiente página
+            target = clampIndex(index + 1)
+          } else if (delta > 0 && target >= index) {
+            // dedo a la derecha => página anterior
+            target = clampIndex(index - 1)
+          }
         }
 
         api.start({
-          page: targetIndex,
+          page: target,
           onRest: () => {
-            if (targetIndex !== index) {
-              setIndex(targetIndex)
-              onIndexChange?.(targetIndex)
+            if (target !== index) {
+              setIndex(target)
+              onIndexChange?.(target)
             }
           },
         })
@@ -118,7 +123,8 @@ export function SwipeContainer({
             className="absolute inset-0 w-full h-full"
             style={{
               willChange: 'transform',
-              // i - page: si page es 0.3, el primero va a -30%, el segundo a 70%, etc.
+              // Todo se basa en `page`: si page = 0.3,
+              // slide 0 está a -30%, slide 1 a 70%, etc.
               transform: page.to(
                 (p) => `translate3d(${(i - p) * 100}%, 0, 0)`
               ),
