@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useState, useRef } from 'react'
+import { ReactNode, useState, useRef, useEffect } from 'react'
 import { useSpring, animated } from '@react-spring/web'
 import { useDrag } from '@use-gesture/react'
 
@@ -25,39 +25,20 @@ export function SwipeContainer({
   const [index, setIndex] = useState(initialIndex)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
-  // offset = desplazamiento relativo respecto al índice actual:
-  // 0 = centrado, -1 = siguiente (contenido se fue a la izquierda), +1 = anterior.
-  const [{ offset }, api] = useSpring(() => ({
-    offset: 0,
+  // page = índice "visual" continuo (0, 0.2, 0.8, 1, etc.)
+  const [{ page }, api] = useSpring(() => ({
+    page: initialIndex,
     config: { tension: 220, friction: 26 },
   }))
 
+  // Si cambian el initialIndex desde afuera, sincronizamos
+  useEffect(() => {
+    setIndex(initialIndex)
+    api.start({ page: initialIndex })
+  }, [initialIndex, api])
+
   const clampIndex = (i: number) =>
     Math.max(0, Math.min(items.length - 1, i))
-
-  const goTo = (fromIndex: number, toIndex: number) => {
-    const final = clampIndex(toIndex)
-    if (final === fromIndex) {
-      // Nada que mover, solo recentrar
-      api.start({ offset: 0 })
-      return
-    }
-
-    // final > fromIndex => vamos a la siguiente ⇒ contenido se desplaza a la izquierda ⇒ offsetDir = -1
-    // final < fromIndex => vamos a la anterior ⇒ contenido se desplaza a la derecha ⇒ offsetDir = +1
-    const offsetDir = final > fromIndex ? -1 : 1
-
-    api.start({
-      offset: offsetDir,
-      onRest: () => {
-        // 1) Dejamos el offset nuevamente en 0 (centrado relativo)
-        api.set({ offset: 0 })
-        // 2) Actualizamos index lógico al nuevo slide
-        setIndex(final)
-        onIndexChange?.(final)
-      },
-    })
-  }
 
   const bind = useDrag(
     ({ active, movement: [mx], direction: [dx], velocity: [vx], last }) => {
@@ -72,30 +53,46 @@ export function SwipeContainer({
         Math.abs(delta) > 0.25 || (vx > 0.25 && Math.abs(delta) > 0.1)
 
       if (active && !last) {
-        let displayed = delta
+        // Mientras arrastro: muevo la "page" continua
+        const rawPage = index - delta
 
-        // Rubber-band en bordes
-        const atFirst = index === 0 && delta > 0
-        const atLast = index === items.length - 1 && delta < 0
-        if (atFirst || atLast) {
-          displayed = delta * 0.3
+        // Rubber-band suave en bordes
+        let nextPage = rawPage
+        if (rawPage < 0) {
+          nextPage = -Math.pow(-rawPage, 0.6)
+        } else if (rawPage > items.length - 1) {
+          const extra = rawPage - (items.length - 1)
+          nextPage = (items.length - 1) + Math.pow(extra, 0.6)
         }
 
-        api.start({ offset: displayed, immediate: true })
+        api.start({ page: nextPage, immediate: true })
         return
       }
 
       if (!active && last) {
-        if (!isSwipe) {
-          // No alcanzó el umbral → volver suave al centro
-          api.start({ offset: 0 })
-          return
+        // Al soltar:
+        const currentPage = (page.get?.() ?? index) as number
+        let targetIndex = index
+
+        if (isSwipe) {
+          // Swipe explícito según dirección
+          // dx: -1 = dedo izquierda → siguiente
+          // dx:  1 = dedo derecha  → anterior
+          targetIndex = clampIndex(index + (dx < 0 ? 1 : -1))
+        } else {
+          // Snap al más cercano
+          targetIndex = clampIndex(Math.round(currentPage))
         }
 
-        // dx: -1 = dedo hacia la izquierda → ir a siguiente (index + 1)
-        // dx:  1 = dedo hacia la derecha → ir a anterior (index - 1)
-        const toIndex = dx < 0 ? index + 1 : index - 1
-        goTo(index, toIndex)
+        api.start({
+          page: targetIndex,
+          onRest: () => {
+            if (targetIndex !== index) {
+              setIndex(targetIndex)
+              onIndexChange?.(targetIndex)
+            }
+          },
+        })
       }
     },
     {
@@ -121,12 +118,15 @@ export function SwipeContainer({
             className="absolute inset-0 w-full h-full"
             style={{
               willChange: 'transform',
-              transform: offset.to(
-                (o) => `translate3d(${(i - index + o) * 100}%, 0, 0)`
+              // i - page: si page es 0.3, el primero va a -30%, el segundo a 70%, etc.
+              transform: page.to(
+                (p) => `translate3d(${(i - p) * 100}%, 0, 0)`
               ),
             }}
           >
-            <div className="w-full h-full">{item.content}</div>
+            <div className="w-full h-full">
+              {item.content}
+            </div>
           </animated.div>
         ))}
       </div>
