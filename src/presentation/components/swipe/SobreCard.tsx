@@ -1,10 +1,9 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import { CirculoCategoriasGastos, CategoriaGasto } from './CirculoCategoriasGastos'
 import { TransaccionesList } from './TransaccionesList'
 import type { Sobre, Transaccion } from '@/domain/types'
+import { CategoriaGasto } from './CirculoCategoriasGastos'
 
 interface SobreCardProps {
   sobre: Sobre
@@ -42,8 +41,8 @@ export function SobreCard({
       {/* Content - Scrollable */}
       <div className="relative z-10 flex-1 overflow-y-auto">
         <div className="px-6 py-6 space-y-6">
-          {/* Header with progress bar */}
-          <div>
+          {/* Header with progress bar - NOW WITH TRANSPARENCY */}
+          <div className="bg-white/40 backdrop-blur-sm rounded-xl p-4 border border-white/60 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                 {sobre.emoji && <span className="text-2xl">{sobre.emoji}</span>}
@@ -92,10 +91,15 @@ export function SobreCard({
             </div>
           </div>
 
-          {/* Circle with categories */}
+          {/* Categories List */}
           {categorias.length > 0 ? (
-            <div className="flex items-center justify-center py-4">
-              <CirculoCategoriasGastos categorias={categorias} size={280} />
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">
+                Categorías
+              </h3>
+              {categorias.map((categoria) => (
+                <CategoriaButton key={categoria.nombre} categoria={categoria} presupuesto={presupuesto} />
+              ))}
             </div>
           ) : (
             <div className="text-center py-12">
@@ -122,20 +126,119 @@ export function SobreCard({
           )}
         </div>
       </div>
+    </div>
+  )
+}
 
-      {/* Footer - Registrar Gasto Button */}
-      <div className="relative z-10 px-6 py-4 bg-white/80 backdrop-blur-sm border-t border-slate-200">
-        <Button
-          onClick={onRegistrarGasto}
-          className="w-full"
-          size="lg"
-          style={{
-            backgroundColor: sobre.color || '#3b82f6',
-          }}
+// Category Button with mini chart
+function CategoriaButton({
+  categoria,
+  presupuesto,
+}: {
+  categoria: CategoriaGasto
+  presupuesto: number
+}) {
+  const porcentaje = presupuesto > 0 ? (categoria.gastado / presupuesto) * 100 : 0
+
+  return (
+    <button
+      className="w-full bg-white/60 backdrop-blur-sm hover:bg-white/80 rounded-lg p-3 border border-white/80 shadow-sm transition-all hover:shadow-md text-left flex items-center gap-3"
+      onClick={() => {
+        // TODO: Handle category click
+        console.log('Category clicked:', categoria.nombre)
+      }}
+    >
+      {/* Category Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          {categoria.emoji && <span className="text-lg">{categoria.emoji}</span>}
+          <span className="font-semibold text-slate-800 truncate">
+            {categoria.nombre}
+          </span>
+        </div>
+        <div className="flex items-center gap-3 text-xs">
+          <span className="text-slate-600">
+            Gastado: <span className="font-bold text-slate-800">{formatCurrency(categoria.gastado)}</span>
+          </span>
+          <span
+            className={`font-semibold ${
+              porcentaje > 100
+                ? 'text-red-600'
+                : porcentaje > 80
+                ? 'text-orange-600'
+                : 'text-green-600'
+            }`}
+          >
+            {porcentaje.toFixed(1)}%
+          </span>
+        </div>
+      </div>
+
+      {/* Mini Progress Chart */}
+      <div className="w-16 h-16 flex-shrink-0">
+        <MiniProgressChart
+          gastado={categoria.gastado}
+          presupuesto={presupuesto}
+          porcentaje={porcentaje}
+          color={categoria.color}
+        />
+      </div>
+    </button>
+  )
+}
+
+// Mini circular progress chart for each category
+function MiniProgressChart({
+  gastado,
+  presupuesto,
+  porcentaje,
+  color,
+}: {
+  gastado: number
+  presupuesto: number
+  porcentaje: number
+  color?: string
+}) {
+  const radius = 24
+  const circumference = 2 * Math.PI * radius
+  const strokeDashoffset = circumference - (Math.min(porcentaje, 100) / 100) * circumference
+
+  const strokeColor = porcentaje > 100 ? '#dc2626' : porcentaje > 80 ? '#ea580c' : color || '#10b981'
+
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      <svg className="w-full h-full -rotate-90" viewBox="0 0 56 56">
+        {/* Background circle */}
+        <circle
+          cx="28"
+          cy="28"
+          r={radius}
+          fill="none"
+          stroke="#e2e8f0"
+          strokeWidth="4"
+        />
+        {/* Progress circle */}
+        <circle
+          cx="28"
+          cy="28"
+          r={radius}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="4"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          className="transition-all duration-500"
+        />
+      </svg>
+      {/* Percentage text in center */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span
+          className="text-[10px] font-bold"
+          style={{ color: strokeColor }}
         >
-          <Plus className="w-5 h-5 mr-2" />
-          Registrar Gasto
-        </Button>
+          {Math.round(porcentaje)}%
+        </span>
       </div>
     </div>
   )
