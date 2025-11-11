@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus } from 'lucide-react'
+import { Plus, MoreVertical } from 'lucide-react'
 import { TransaccionesList } from './TransaccionesList'
 import type { Sobre, Transaccion } from '@/domain/types'
 import { CategoriaGasto } from './CirculoCategoriasGastos'
@@ -26,11 +26,13 @@ export function SobreCard({
 
   return (
     <div
-      className="relative w-full h-full flex flex-col overflow-hidden"
+      className="relative w-full flex flex-col overflow-hidden"
       style={{
         background: sobre.color
           ? `linear-gradient(to bottom right, ${sobre.color}15, ${sobre.color}05)`
           : 'linear-gradient(to bottom right, #f8fafc, #f1f5f9)',
+        height: 'calc(100vh - 180px)', // Adjust to end before indicators with minimal spacing
+        maxHeight: '700px',
       }}
     >
       {/* Envelope Shape Background */}
@@ -38,9 +40,37 @@ export function SobreCard({
         <EnvelopeShape color={sobre.color || '#64748b'} />
       </div>
 
+      {/* Three Dots Menu on Envelope Flap - Always Visible */}
+      <div className="absolute top-8 right-6 z-20">
+        <button
+          className="p-2 rounded-full bg-white/60 backdrop-blur-sm hover:bg-white/80 shadow-sm transition-all border border-white/80"
+          onClick={() => {
+            // TODO: Handle menu click
+            console.log('Menu clicked')
+          }}
+        >
+          <MoreVertical className="w-5 h-5 text-slate-700" />
+        </button>
+      </div>
+
+      {/* Circular Progress Chart - Bottom Right */}
+      <div className="absolute bottom-6 right-6 z-20">
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-xs font-semibold text-slate-700">Gastado:</span>
+          <div className="w-20 h-20">
+            <CircularProgress
+              gastado={totalGastado}
+              presupuesto={presupuesto}
+              porcentaje={porcentajeGastado}
+              color={sobre.color || undefined}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Content - Scrollable */}
       <div className="relative z-10 flex-1 overflow-y-auto">
-        <div className="px-6 py-6 space-y-6">
+        <div className="px-6 py-6 space-y-6 pb-32">
           {/* Header with progress bar - NOW WITH TRANSPARENCY */}
           <div className="bg-white/40 backdrop-blur-sm rounded-xl p-4 border border-white/60 shadow-sm">
             <div className="flex items-center justify-between mb-3">
@@ -244,84 +274,128 @@ function MiniProgressChart({
   )
 }
 
-// Envelope SVG Shape (closed envelope with triangle flap)
+// Circular Progress Chart for bottom right corner - smaller size
+function CircularProgress({
+  gastado,
+  presupuesto,
+  porcentaje,
+  color,
+}: {
+  gastado: number
+  presupuesto: number
+  porcentaje: number
+  color?: string
+}) {
+  const radius = 32
+  const circumference = 2 * Math.PI * radius
+  const strokeDashoffset = circumference - (Math.min(porcentaje, 100) / 100) * circumference
+
+  const strokeColor = porcentaje > 100 ? '#dc2626' : porcentaje > 80 ? '#ea580c' : color || '#10b981'
+
+  return (
+    <div className="relative w-full h-full flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-full shadow-md border border-white/80">
+      <svg className="w-full h-full -rotate-90" viewBox="0 0 72 72">
+        {/* Background circle */}
+        <circle
+          cx="36"
+          cy="36"
+          r={radius}
+          fill="none"
+          stroke="#e2e8f0"
+          strokeWidth="6"
+        />
+        {/* Progress circle */}
+        <circle
+          cx="36"
+          cy="36"
+          r={radius}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="6"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          className="transition-all duration-500"
+        />
+      </svg>
+      {/* Percentage text in center */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span
+          className="text-sm font-bold"
+          style={{ color: strokeColor }}
+        >
+          {Math.round(porcentaje)}%
+        </span>
+      </div>
+    </div>
+  )
+}
+
+// Envelope SVG Shape (trapezoid: wider at top, narrower at bottom)
 function EnvelopeShape({ color }: { color: string }) {
   return (
     <svg
-      viewBox="0 0 400 400"
-      className="w-full h-full opacity-10"
+      viewBox="0 0 400 300"
+      className="w-full h-auto opacity-10"
       xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="xMidYMin meet"
     >
-      {/* Envelope body */}
-      <rect
-        x="50"
-        y="150"
-        width="300"
-        height="200"
-        rx="8"
-        fill={color}
-        opacity="0.3"
-      />
+      <defs>
+        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="4" stdDeviation="6" floodOpacity="0.3"/>
+        </filter>
+        <linearGradient id="envelopeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style={{ stopColor: color, stopOpacity: 0.4 }} />
+          <stop offset="100%" style={{ stopColor: color, stopOpacity: 0.2 }} />
+        </linearGradient>
+      </defs>
 
-      {/* Triangle flap (closed envelope) */}
+      {/* Trapezoid envelope body - wider at top, narrower at bottom */}
       <path
-        d="M 50 150 L 200 250 L 350 150 Z"
-        fill={color}
-        opacity="0.4"
-        stroke={color}
-        strokeWidth="2"
-        strokeOpacity="0.6"
+        d="M 30 100 L 370 100 L 320 280 L 80 280 Z"
+        fill="url(#envelopeGradient)"
+        filter="url(#shadow)"
       />
 
-      {/* Back flap lines */}
-      <line
-        x1="50"
-        y1="150"
-        x2="50"
-        y2="350"
+      {/* Triangle flap */}
+      <path
+        d="M 30 100 L 200 180 L 370 100 Z"
+        fill={color}
+        opacity="0.5"
         stroke={color}
         strokeWidth="2"
-        opacity="0.5"
+        strokeOpacity="0.7"
       />
-      <line
-        x1="350"
-        y1="150"
-        x2="350"
-        y2="350"
+
+      {/* Envelope edges with shadow effect */}
+      <path
+        d="M 30 100 L 80 280 L 320 280 L 370 100"
+        fill="none"
         stroke={color}
         strokeWidth="2"
-        opacity="0.5"
-      />
-      <line
-        x1="50"
-        y1="350"
-        x2="350"
-        y2="350"
-        stroke={color}
-        strokeWidth="2"
-        opacity="0.5"
+        opacity="0.6"
       />
 
       {/* Diagonal fold lines */}
       <line
-        x1="50"
-        y1="150"
+        x1="30"
+        y1="100"
         x2="200"
-        y2="250"
+        y2="180"
         stroke={color}
-        strokeWidth="2"
-        opacity="0.6"
-        strokeDasharray="4 4"
+        strokeWidth="1.5"
+        opacity="0.5"
+        strokeDasharray="3 3"
       />
       <line
-        x1="350"
-        y1="150"
+        x1="370"
+        y1="100"
         x2="200"
-        y2="250"
+        y2="180"
         stroke={color}
-        strokeWidth="2"
-        opacity="0.6"
-        strokeDasharray="4 4"
+        strokeWidth="1.5"
+        opacity="0.5"
+        strokeDasharray="3 3"
       />
     </svg>
   )
