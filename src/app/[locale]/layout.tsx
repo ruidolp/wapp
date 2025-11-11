@@ -17,6 +17,7 @@ import { routing } from '@/i18n/routing'
 import { SessionProvider } from '@/presentation/providers/session-provider'
 import { ThemeProvider } from '@/presentation/providers/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
+import { Toaster as SonnerToaster } from 'sonner'
 import { getActiveThemes, getUserThemePreference } from '@/infrastructure/database/queries'
 import { auth } from '@/infrastructure/lib/auth'
 import '@/app/globals.css'
@@ -115,6 +116,7 @@ export default async function LocaleLayout({
             <NextIntlClientProvider messages={messages}>
               {children}
               <Toaster />
+              <SonnerToaster position="top-center" richColors />
             </NextIntlClientProvider>
           </SessionProvider>
         </ThemeProvider>
