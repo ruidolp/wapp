@@ -22,11 +22,9 @@ export function SwipeContainer({
   onIndexChange,
 }: SwipeContainerProps) {
   const [index, setIndex] = useState(initialIndex);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [index, setIndex] = useState(initialIndex)
-  const indexRef = useRef(initialIndex)
-  const startIndexRef = useRef(initialIndex)
-  const containerRef = useRef<HTMLDivElement | null>(null)
+  const indexRef = useRef(initialIndex);
+  const startIndexRef = useRef(initialIndex);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [{ page }, api] = useSpring(() => ({
     page: initialIndex,
