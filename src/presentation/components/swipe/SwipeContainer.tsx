@@ -28,7 +28,7 @@ export function SwipeContainer({
   // Spring animation for position - CRITICAL: uses immediate during drag
   const [{ x }, api] = useSpring(() => ({
     x: 0,
-    config: { tension: 280, friction: 35 },
+    config: { tension: 170, friction: 26, mass: 1 }, // Smoother, more natural config
   }))
 
   // Notify parent of index changes
@@ -70,14 +70,24 @@ export function SwipeContainer({
         }
       }
 
-      // Animate back to center
+      // Calculate final position for smooth transition
+      const indexDiff = targetIndex - dragStartIndex
+      const finalX = -indexDiff * width // Negative because we move container opposite to index direction
+
+      // Animate to the final card position
       api.start({
-        x: 0,
+        x: finalX,
         immediate: false,
+        config: { tension: 170, friction: 26, mass: 1, clamp: false },
         onRest: () => {
-          // CRITICAL: Update index only after animation completes
-          if (targetIndex !== index) {
+          // After animation completes, update index and reset position
+          if (targetIndex !== dragStartIndex) {
             setIndex(targetIndex)
+            // Reset x to 0 immediately so next drag starts fresh
+            api.start({ x: 0, immediate: true })
+          } else {
+            // No index change, just return to center
+            api.start({ x: 0, immediate: false })
           }
         }
       })
