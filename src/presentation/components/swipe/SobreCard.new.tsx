@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp, TrendingDown } from 'lucide-react'
+import { TrendingUp, TrendingDown, MoreVertical } from 'lucide-react'
 import { CategoriaGasto } from './CirculoCategoriasGastos'
 import type { Sobre, Transaccion } from '@/domain/types'
 
@@ -61,7 +61,13 @@ export function SobreCard({
   }, {} as Record<string, typeof DUMMY_TRANSACTIONS>)
 
   return (
-    <div className="w-full h-full flex flex-col bg-background">
+    <div
+      className="w-full flex flex-col bg-background"
+      style={{
+        height: 'calc(100vh - 180px)',
+        maxHeight: '700px',
+      }}
+    >
       {/* Envelope Container - Con márgenes laterales */}
       <div className="flex-1 overflow-y-auto pb-6 px-3 pt-2">
         <div
@@ -70,16 +76,43 @@ export function SobreCard({
             filter: `drop-shadow(0 25px 50px ${color}33)`,
           }}
         >
-          {/* Envelope Body - Degradado customColor + theme */}
-          <div
-            className="relative rounded-3xl overflow-hidden"
-            style={{
-              background: `linear-gradient(135deg, ${color} 0%, ${adjustBrightness(color, -15)} 100%)`,
-              boxShadow: `0 0 60px ${color}40, inset 0 2px 30px rgba(255,255,255,0.1)`,
-            }}
-          >
-            {/* Envelope Flap (solapa) - FORMA ORIGINAL MÁS COMPACTA */}
-            <div className="relative h-20 overflow-hidden">
+          {/* Envelope Body - Trapezoid Shape (wider at top, narrower at bottom) */}
+          <div className="relative overflow-hidden">
+            <svg
+              viewBox="0 0 400 500"
+              className="absolute inset-0 w-full h-full"
+              preserveAspectRatio="none"
+              style={{ zIndex: 0 }}
+            >
+              <defs>
+                <linearGradient id={`envelopeGradient-${sobre.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor={color} />
+                  <stop offset="100%" stopColor={adjustBrightness(color, -15)} />
+                </linearGradient>
+                <filter id={`shadow-${sobre.id}`}>
+                  <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.4"/>
+                </filter>
+              </defs>
+
+              {/* Trapezoid body - wider at top, narrower at bottom */}
+              <path
+                d="M 20 80 L 380 80 L 340 480 L 60 480 Z"
+                fill={`url(#envelopeGradient-${sobre.id})`}
+                filter={`url(#shadow-${sobre.id})`}
+              />
+
+              {/* Border outline */}
+              <path
+                d="M 20 80 L 60 480 L 340 480 L 380 80 Z"
+                fill="none"
+                stroke={adjustBrightness(color, -20)}
+                strokeWidth="2"
+                opacity="0.6"
+              />
+            </svg>
+
+            {/* Envelope Flap (solapa) */}
+            <div className="relative h-20 overflow-hidden" style={{ zIndex: 1 }}>
               <svg
                 viewBox="0 0 400 80"
                 className="absolute inset-0 w-full h-full"
@@ -87,32 +120,44 @@ export function SobreCard({
               >
                 {/* Flap triangulo */}
                 <path
-                  d="M 0 0 L 200 65 L 400 0 Z"
+                  d="M 20 0 L 200 65 L 380 0 Z"
                   fill={adjustBrightness(color, -25)}
                   opacity="0.95"
                 />
                 {/* Flap fold shadow */}
                 <path
-                  d="M 0 0 L 200 65 L 400 0 L 400 20 L 200 85 L 0 20 Z"
-                  fill="url(#flapGradient)"
+                  d="M 20 0 L 200 65 L 380 0 L 380 20 L 200 85 L 20 20 Z"
+                  fill={`url(#flapGradient-${sobre.id})`}
                 />
                 {/* Línea de cierre más clara */}
                 <path
-                  d="M 0 0 L 200 65 L 400 0"
+                  d="M 20 0 L 200 65 L 380 0"
                   stroke={adjustBrightness(color, 40)}
                   strokeWidth="2"
                   fill="none"
                   opacity="0.7"
                 />
                 <defs>
-                  <linearGradient id="flapGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <linearGradient id={`flapGradient-${sobre.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stopColor={adjustBrightness(color, -30)} stopOpacity="0.6" />
                     <stop offset="100%" stopColor={adjustBrightness(color, -40)} stopOpacity="0.9" />
                   </linearGradient>
                 </defs>
               </svg>
 
-              {/* NOMBRE en la solapa - SIN FONDO */}
+              {/* Three Dots Menu - Always Visible */}
+              <div className="absolute top-4 right-6 z-20">
+                <button
+                  className="p-1.5 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all"
+                  onClick={() => {
+                    console.log('Menu clicked')
+                  }}
+                >
+                  <MoreVertical className="w-4 h-4 text-white" />
+                </button>
+              </div>
+
+              {/* NOMBRE en la solapa */}
               <div className="absolute top-6 left-0 right-0 z-10 flex items-center justify-center">
                 <h2 className="text-2xl font-extrabold font-display text-white tracking-tight text-center px-4"
                   style={{
@@ -191,7 +236,7 @@ export function SobreCard({
               </div>
 
               {/* Listado de Categorías - Reemplaza el CirculoCategoriasGastos */}
-              <div className="space-y-2 max-h-72 overflow-y-auto">
+              <div className="space-y-2 max-h-72 overflow-y-auto pb-24">
                 {DUMMY_CATEGORIAS.map((categoria) => (
                   <CategoriaButton
                     key={categoria.id}
@@ -199,6 +244,19 @@ export function SobreCard({
                     presupuesto={presupuesto}
                   />
                 ))}
+              </div>
+            </div>
+
+            {/* Circular Progress Chart - Bottom Right */}
+            <div className="absolute bottom-4 right-4 z-20">
+              <div className="flex flex-col items-end gap-0.5">
+                <span className="text-[10px] font-semibold text-white/80">Gastado:</span>
+                <div className="w-16 h-16">
+                  <LargeCircularProgress
+                    porcentaje={porcentajeGastado}
+                    color={color}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -351,6 +409,56 @@ function MiniProgressChart({
         <span
           className="text-[9px] font-bold text-white"
         >
+          {Math.round(porcentaje)}%
+        </span>
+      </div>
+    </div>
+  )
+}
+
+// Large circular progress chart for bottom right corner
+function LargeCircularProgress({
+  porcentaje,
+  color,
+}: {
+  porcentaje: number
+  color: string
+}) {
+  const radius = 24
+  const circumference = 2 * Math.PI * radius
+  const strokeDashoffset = circumference - (Math.min(porcentaje, 100) / 100) * circumference
+
+  const strokeColor = porcentaje > 100 ? '#fca5a5' : porcentaje > 80 ? '#fde047' : '#86efac'
+
+  return (
+    <div className="relative w-full h-full flex items-center justify-center bg-white/20 backdrop-blur-md rounded-full border border-white/30 shadow-lg">
+      <svg className="w-full h-full -rotate-90 p-2" viewBox="0 0 56 56">
+        {/* Círculo de fondo */}
+        <circle
+          cx="28"
+          cy="28"
+          r={radius}
+          fill="none"
+          stroke="rgba(255,255,255,0.3)"
+          strokeWidth="4"
+        />
+        {/* Círculo de progreso */}
+        <circle
+          cx="28"
+          cy="28"
+          r={radius}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="4"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          className="transition-all duration-500"
+        />
+      </svg>
+      {/* Porcentaje en el centro */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-xs font-bold text-white">
           {Math.round(porcentaje)}%
         </span>
       </div>
