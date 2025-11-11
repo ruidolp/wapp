@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { HexColorPicker } from 'react-colorful'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
@@ -14,25 +15,13 @@ import {
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { notify } from '@/infrastructure/lib/notifications'
 
 interface CrearSobreDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   userId: string
 }
-
-const TIPOS_SOBRE = [
-  { value: 'GASTO', label: 'Gasto' },
-  { value: 'AHORRO', label: 'Ahorro' },
-  { value: 'DEUDA', label: 'Deuda' },
-]
 
 const COLORES_SUGERIDOS = [
   '#3b82f6', // blue
@@ -54,27 +43,55 @@ export function CrearSobreDrawer({
 }: CrearSobreDrawerProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [existingSobres, setExistingSobres] = useState<string[]>([])
 
   const [nombre, setNombre] = useState('')
-  const [tipo, setTipo] = useState<string>('GASTO')
-  const [presupuesto, setPresupuesto] = useState('0')
+  const [presupuesto, setPresupuesto] = useState('')
   const [color, setColor] = useState(COLORES_SUGERIDOS[0])
   const [emoji, setEmoji] = useState(EMOJIS_SUGERIDOS[0])
+  const [showColorPicker, setShowColorPicker] = useState(false)
+
+  // Cargar sobres existentes para validar duplicados
+  useEffect(() => {
+    if (open) {
+      fetchExistingSobres()
+    }
+  }, [open])
+
+  const fetchExistingSobres = async () => {
+    try {
+      const response = await fetch('/api/sobres')
+      if (response.ok) {
+        const data = await response.json()
+        const nombres = data.sobres.map((s: any) => s.nombre.toLowerCase().trim())
+        setExistingSobres(nombres)
+      }
+    } catch (error) {
+      console.error('Error al cargar sobres:', error)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
 
     try {
+      const nombreTrimmed = nombre.trim()
+
+      // Validar duplicado
+      if (existingSobres.includes(nombreTrimmed.toLowerCase())) {
+        notify.duplicate('sobre', 'nombre')
+        setLoading(false)
+        return
+      }
+
       const response = await fetch('/api/sobres', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
-          nombre: nombre.trim(),
-          tipo,
+          nombre: nombreTrimmed,
+          tipo: 'GASTO', // Por defecto siempre GASTO
           presupuestoAsignado: parseFloat(presupuesto) || 0,
           color,
           emoji,
@@ -84,14 +101,25 @@ export function CrearSobreDrawer({
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al crear sobre')
+        // Manejar errores específicos
+        if (data.requiresOnboarding) {
+          notify.warning('Configuración requerida', data.error)
+        } else {
+          notify.error(data.error)
+        }
+        setLoading(false)
+        return
       }
+
+      // Éxito
+      notify.created('Sobre')
 
       // Reset form
       setNombre('')
-      setPresupuesto('0')
+      setPresupuesto('')
       setColor(COLORES_SUGERIDOS[0])
       setEmoji(EMOJIS_SUGERIDOS[0])
+      setShowColorPicker(false)
 
       // Close drawer
       onOpenChange(false)
@@ -99,7 +127,7 @@ export function CrearSobreDrawer({
       // Refresh page
       router.refresh()
     } catch (err: any) {
-      setError(err.message)
+      notify.error(err.message || 'Error al crear el sobre')
     } finally {
       setLoading(false)
     }
@@ -111,7 +139,7 @@ export function CrearSobreDrawer({
         <DrawerHeader>
           <DrawerTitle>Crear Nuevo Sobre</DrawerTitle>
           <DrawerDescription>
-            Agrega un presupuesto para gestionar tus gastos
+            Segmenta tus gastos para orden y claridad en tus gastos, dentro de ellos puedes crear Categorías
           </DrawerDescription>
         </DrawerHeader>
 
@@ -130,25 +158,6 @@ export function CrearSobreDrawer({
             />
           </div>
 
-          {/* Tipo */}
-          <div className="space-y-2">
-            <Label htmlFor="tipo">
-              Tipo <span className="text-red-500">*</span>
-            </Label>
-            <Select value={tipo} onValueChange={setTipo}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TIPOS_SOBRE.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Presupuesto */}
           <div className="space-y-2">
             <Label htmlFor="presupuesto">
@@ -158,31 +167,12 @@ export function CrearSobreDrawer({
               id="presupuesto"
               type="number"
               step="0.01"
+              min="0"
               value={presupuesto}
               onChange={(e) => setPresupuesto(e.target.value)}
-              placeholder="0.00"
+              placeholder="0"
               required
             />
-          </div>
-
-          {/* Color */}
-          <div className="space-y-2">
-            <Label>Color</Label>
-            <div className="flex gap-2 flex-wrap">
-              {COLORES_SUGERIDOS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  className={`w-10 h-10 rounded-full border-2 transition-all ${
-                    color === c
-                      ? 'border-slate-900 scale-110'
-                      : 'border-slate-300 hover:scale-105'
-                  }`}
-                  style={{ backgroundColor: c }}
-                />
-              ))}
-            </div>
           </div>
 
           {/* Emoji */}
@@ -206,22 +196,73 @@ export function CrearSobreDrawer({
             </div>
           </div>
 
-          {error && (
-            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
-              {error}
-            </div>
-          )}
+          {/* Color */}
+          <div className="space-y-2">
+            <Label>Color</Label>
 
-          <DrawerFooter className="px-0 pt-4">
+            {/* Colores predefinidos */}
+            <div className="flex gap-2 flex-wrap items-center">
+              {COLORES_SUGERIDOS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => {
+                    setColor(c)
+                    setShowColorPicker(false)
+                  }}
+                  className={`w-10 h-10 rounded-full border-2 transition-all ${
+                    color === c && !showColorPicker
+                      ? 'border-slate-900 scale-110'
+                      : 'border-slate-300 hover:scale-105'
+                  }`}
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+
+              {/* Botón para abrir selector personalizado */}
+              <button
+                type="button"
+                onClick={() => setShowColorPicker(!showColorPicker)}
+                className={`w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center text-xs font-bold ${
+                  showColorPicker
+                    ? 'border-slate-900 bg-slate-100'
+                    : 'border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                +
+              </button>
+            </div>
+
+            {/* Color Picker */}
+            {showColorPicker && (
+              <div className="mt-3 p-3 border border-slate-300 rounded-lg bg-white">
+                <HexColorPicker color={color} onChange={setColor} />
+                <div className="mt-3 flex items-center gap-2">
+                  <div
+                    className="w-8 h-8 rounded border border-slate-300"
+                    style={{ backgroundColor: color }}
+                  />
+                  <Input
+                    type="text"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    className="flex-1 font-mono text-sm"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DrawerFooter className="px-0 pt-4 pb-2">
             <Button
               type="submit"
-              disabled={loading || !nombre.trim() || parseFloat(presupuesto) <= 0}
+              disabled={loading || !nombre.trim()}
               className="w-full"
             >
               {loading ? 'Creando...' : 'Crear Sobre'}
             </Button>
             <DrawerClose asChild>
-              <Button variant="outline" disabled={loading} className="w-full">
+              <Button variant="outline" disabled={loading} className="w-full mb-4">
                 Cancelar
               </Button>
             </DrawerClose>
