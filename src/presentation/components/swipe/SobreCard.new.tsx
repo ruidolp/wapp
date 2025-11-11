@@ -61,12 +61,9 @@ export function SobreCard({
   }, {} as Record<string, typeof DUMMY_TRANSACTIONS>)
 
   return (
-    <div
-      className="w-full flex flex-col bg-background"
-      style={{ height: 'calc(100vh - 180px)' }}
-    >
+    <div className="w-full h-full flex flex-col bg-background">
       {/* Envelope Container - Con márgenes laterales */}
-      <div className="flex-1 overflow-y-auto pb-6 px-3 pt-2">
+      <div className="flex-1 overflow-y-auto pb-3 px-3 pt-2">
         <div
           className="relative w-full"
           style={{
@@ -81,27 +78,27 @@ export function SobreCard({
               boxShadow: `0 0 60px ${color}40, inset 0 2px 30px rgba(255,255,255,0.1)`,
             }}
           >
-            {/* Envelope Flap (solapa) - TRAPEZOID */}
+            {/* Envelope Flap (solapa) - TRIANGLE */}
             <div className="relative h-20 overflow-hidden">
               <svg
                 viewBox="0 0 400 80"
                 className="absolute inset-0 w-full h-full"
                 preserveAspectRatio="none"
               >
-                {/* Flap trapezoid - más ancho arriba, angosto abajo */}
+                {/* Flap triangle - triangular tradicional */}
                 <path
-                  d="M 0 0 L 400 0 L 280 65 L 120 65 Z"
+                  d="M 0 0 L 200 65 L 400 0 Z"
                   fill={adjustBrightness(color, -25)}
                   opacity="0.95"
                 />
                 {/* Flap fold shadow */}
                 <path
-                  d="M 0 0 L 400 0 L 280 65 L 120 65 L 0 20 Z"
+                  d="M 0 0 L 200 65 L 400 0 L 400 20 L 200 85 L 0 20 Z"
                   fill={`url(#flapGradient-${sobre.id})`}
                 />
                 {/* Línea de cierre más clara */}
                 <path
-                  d="M 0 0 L 120 65 L 280 65 L 400 0"
+                  d="M 0 0 L 200 65 L 400 0"
                   stroke={adjustBrightness(color, 40)}
                   strokeWidth="2"
                   fill="none"
@@ -205,8 +202,8 @@ export function SobreCard({
                 </div>
               </div>
 
-              {/* Grid de Categorías - 2 columnas */}
-              <div className="grid grid-cols-2 gap-2 pt-2">
+              {/* Lista de Categorías - 1 columna */}
+              <div className="space-y-2 pt-2">
                 {DUMMY_CATEGORIAS.map((categoria) => (
                   <CategoriaCard key={categoria.id} categoria={categoria} />
                 ))}

@@ -7,7 +7,6 @@ import {
   SwipeContainer,
   SwipeItem,
   SwipeHeader,
-  SwipeIndicators,
   BilleterasCard,
   SobreCard,
   FloatingActionButton,
@@ -158,19 +157,12 @@ export function DashboardClient({
         />
 
         {/* Swipe Container - Flex 1 para ocupar espacio disponible */}
-        <div className="flex-1 overflow-hidden flex flex-col">
-          <div className="flex-1 overflow-hidden">
-            <SwipeContainer
-              items={swipeItems}
-              initialIndex={0}
-              onIndexChange={setActiveIndex}
-            />
-          </div>
-
-          {/* Indicadores debajo del sobre */}
-          {activeComponentType === 'sobres' && (
-            <SwipeIndicators totalItems={swipeItems.length} activeIndex={activeIndex} />
-          )}
+        <div className="flex-1 overflow-hidden">
+          <SwipeContainer
+            items={swipeItems}
+            initialIndex={0}
+            onIndexChange={setActiveIndex}
+          />
         </div>
 
         {/* FAB Floating Action Button - Condicional */}
