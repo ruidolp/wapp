@@ -1,8 +1,7 @@
 'use client'
 
-import { ReactNode, useState, useRef, useEffect } from 'react'
-import { useSpring, animated } from '@react-spring/web'
-import { useDrag } from '@use-gesture/react'
+import { ReactNode, useCallback, useEffect } from 'react'
+import useEmblaCarousel from 'embla-carousel-react'
 
 export interface SwipeItem {
   id: string
@@ -22,127 +21,63 @@ export function SwipeContainer({
   initialIndex = 0,
   onIndexChange,
 }: SwipeContainerProps) {
-  const [index, setIndex] = useState(initialIndex)
-  const containerRef = useRef<HTMLDivElement>(null)
+  // Embla Carousel setup with iOS-like smooth physics
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    startIndex: initialIndex,
+    align: 'start',
+    containScroll: 'trimSnaps',
+    dragFree: false, // Snap to slides for precise navigation
+    skipSnaps: false,
+    loop: false,
+    // Physics configuration for smooth iOS-like feel
+    duration: 25, // Smooth transition duration
+    dragThreshold: 10, // Lower threshold for responsive drag
+  })
 
-  // Spring animation for position - CRITICAL: uses immediate during drag
-  const [{ x }, api] = useSpring(() => ({
-    x: 0,
-    config: { tension: 170, friction: 26, mass: 1 }, // Smoother, more natural config
-  }))
+  // Listen for slide changes and notify parent
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return
+    const selectedIndex = emblaApi.selectedScrollSnap()
+    onIndexChange?.(selectedIndex)
+  }, [emblaApi, onIndexChange])
 
-  // Notify parent of index changes
+  // Setup event listener
   useEffect(() => {
-    onIndexChange?.(index)
-  }, [index, onIndexChange])
+    if (!emblaApi) return
 
-  // Gesture handling - USES MEMO TO PREVENT RACE CONDITIONS
-  const bind = useDrag(
-    ({ active, movement: [mx], direction: [xDir], distance, velocity: [vx], memo }) => {
-      // memo stores the index when drag started - prevents jumps
-      const dragStartIndex = memo ?? index
+    // Initial call
+    onSelect()
 
-      if (active) {
-        // During drag: move cards following finger
-        // CRITICAL: Use immediate mode to prevent animation lag
-        api.start({ x: mx, immediate: true })
+    // Listen to slide changes
+    emblaApi.on('select', onSelect)
 
-        // Return the starting index to persist across drag events
-        return dragStartIndex
-      }
-
-      // Drag ended - determine if we should change page
-      const width = containerRef.current?.offsetWidth || window.innerWidth
-      const threshold = 50 // px
-      const velocityThreshold = 0.2
-
-      // Calculate target index based on swipe distance and velocity
-      let targetIndex = dragStartIndex
-
-      if (Math.abs(mx) > threshold || Math.abs(vx) > velocityThreshold) {
-        // Swipe detected
-        if (mx > 0) {
-          // Swiped right - go to previous
-          targetIndex = Math.max(0, dragStartIndex - 1)
-        } else {
-          // Swiped left - go to next
-          targetIndex = Math.min(items.length - 1, dragStartIndex + 1)
-        }
-      }
-
-      // Calculate final position for smooth transition
-      const indexDiff = targetIndex - dragStartIndex
-      const finalX = -indexDiff * width // Negative because we move container opposite to index direction
-
-      // Animate to the final card position
-      api.start({
-        x: finalX,
-        immediate: false,
-        config: { tension: 170, friction: 26, mass: 1, clamp: false },
-        onRest: () => {
-          // After animation completes, update index and reset position
-          if (targetIndex !== dragStartIndex) {
-            setIndex(targetIndex)
-            // Reset x to 0 immediately so next drag starts fresh
-            api.start({ x: 0, immediate: true })
-          } else {
-            // No index change, just return to center
-            api.start({ x: 0, immediate: false })
-          }
-        }
-      })
-
-      // Don't return anything - memo is not needed after drag ends
-    },
-    {
-      axis: 'x',
-      filterTaps: true,
-      pointer: { touch: true },
+    // Cleanup
+    return () => {
+      emblaApi.off('select', onSelect)
     }
-  )
-
-  // Calculate which cards to render (prev, current, next)
-  const cardsToRender = []
-  const prevIndex = index - 1
-  const nextIndex = index + 1
-
-  if (prevIndex >= 0) {
-    cardsToRender.push({ item: items[prevIndex], position: -1, key: items[prevIndex].id })
-  }
-  cardsToRender.push({ item: items[index], position: 0, key: items[index].id })
-  if (nextIndex < items.length) {
-    cardsToRender.push({ item: items[nextIndex], position: 1, key: items[nextIndex].id })
-  }
+  }, [emblaApi, onSelect])
 
   return (
-    <div ref={containerRef} className="relative w-full h-full overflow-hidden">
-      <div className="relative w-full h-full">
-        {/* CRITICAL: touchAction on draggable element prevents browser scroll conflicts */}
-        <div
-          {...bind()}
-          style={{ touchAction: 'pan-y pinch-zoom' }}
-          className="relative w-full h-full cursor-grab active:cursor-grabbing"
-        >
-          {/* Render 3 cards: previous, current, next */}
-          {cardsToRender.map(({ item, position, key }) => (
-            <animated.div
-              key={key}
+    <div className="relative w-full h-full overflow-hidden">
+      {/* Embla viewport */}
+      <div ref={emblaRef} className="w-full h-full overflow-hidden">
+        {/* Embla container */}
+        <div className="flex h-full touch-pan-y">
+          {/* Slides */}
+          {items.map((item) => (
+            <div
+              key={item.id}
+              className="flex-[0_0_100%] min-w-0 h-full"
               style={{
-                transform: x.to((xVal) => {
-                  // CRITICAL: Get width from ref, not window
-                  const width = containerRef.current?.offsetWidth || window.innerWidth
-                  const basePosition = position * 100
-                  const offset = (xVal / width) * 100
-                  return `translate3d(${basePosition + offset}%, 0, 0)`
-                }),
+                // Hardware acceleration for smooth performance
+                transform: 'translate3d(0, 0, 0)',
                 willChange: 'transform',
               }}
-              className="absolute inset-0 w-full h-full"
             >
-              <div className="w-full h-full pointer-events-none">
+              <div className="w-full h-full">
                 {item.content}
               </div>
-            </animated.div>
+            </div>
           ))}
         </div>
       </div>
