@@ -13,14 +13,14 @@ interface SobreCardProps {
 
 // 8 Categorías dummy con colores del theme
 const DUMMY_CATEGORIAS: CategoriaGasto[] = [
-  { id: '1', nombre: 'Comida', emoji: '🍔', color: 'hsl(var(--primary))', gastado: 45000, presupuesto: 60000 },
-  { id: '2', nombre: 'Transporte', emoji: '🚗', color: 'hsl(var(--secondary))', gastado: 32000, presupuesto: 40000 },
-  { id: '3', nombre: 'Servicios', emoji: '💡', color: 'hsl(var(--accent))', gastado: 25000, presupuesto: 30000 },
-  { id: '4', nombre: 'Entretenimiento', emoji: '🎮', color: 'hsl(var(--primary) / 0.7)', gastado: 18500, presupuesto: 25000 },
-  { id: '5', nombre: 'Salud', emoji: '💊', color: 'hsl(var(--accent) / 0.7)', gastado: 15700, presupuesto: 20000 },
-  { id: '6', nombre: 'Educación', emoji: '📚', color: 'hsl(var(--secondary) / 0.7)', gastado: 12300, presupuesto: 15000 },
-  { id: '7', nombre: 'Hogar', emoji: '🏠', color: 'hsl(var(--primary) / 0.5)', gastado: 9200, presupuesto: 12000 },
-  { id: '8', nombre: 'Otros', emoji: '🎁', color: 'hsl(var(--muted-foreground))', gastado: 5500, presupuesto: 8000 },
+  { id: '1', nombre: 'Comida', emoji: '🍔', color: '#3b82f6', gastado: 45000, presupuesto: 60000 },
+  { id: '2', nombre: 'Transporte', emoji: '🚗', color: '#8b5cf6', gastado: 32000, presupuesto: 40000 },
+  { id: '3', nombre: 'Servicios', emoji: '💡', color: '#10b981', gastado: 25000, presupuesto: 30000 },
+  { id: '4', nombre: 'Entretenimiento', emoji: '🎮', color: '#f59e0b', gastado: 18500, presupuesto: 25000 },
+  { id: '5', nombre: 'Salud', emoji: '💊', color: '#ef4444', gastado: 15700, presupuesto: 20000 },
+  { id: '6', nombre: 'Educación', emoji: '📚', color: '#06b6d4', gastado: 12300, presupuesto: 15000 },
+  { id: '7', nombre: 'Hogar', emoji: '🏠', color: '#84cc16', gastado: 9200, presupuesto: 12000 },
+  { id: '8', nombre: 'Otros', emoji: '🎁', color: '#6b7280', gastado: 5500, presupuesto: 8000 },
 ]
 
 // Transacciones dummy
@@ -148,7 +148,7 @@ export function SobreCard({
                 }}
               >
                 {/* Presupuesto y Gastado */}
-                <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="grid grid-cols-2 gap-3 mb-2">
                   <div className="text-left">
                     <p className="text-[10px] text-white/70 font-semibold mb-0.5 tracking-wider">PRESUPUESTO</p>
                     <p className="text-xl font-extrabold font-display">

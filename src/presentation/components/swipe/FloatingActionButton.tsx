@@ -29,20 +29,9 @@ export function FloatingActionButton({
     setIsOpen(false)
   }
 
-  // FAB simple para sobres (solo botón +)
+  // No mostrar FAB para sobres
   if (type === 'sobres') {
-    return (
-      <button
-        onClick={onRegistrarGasto}
-        className="fixed right-6 bottom-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(var(--accent))] flex items-center justify-center shadow-2xl hover:shadow-3xl transition-all hover:scale-110 active:scale-95"
-        style={{
-          boxShadow: '0 8px 30px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--accent) / 0.3)',
-        }}
-        aria-label="Registrar Gasto"
-      >
-        <Plus className="w-7 h-7 text-primary-foreground" />
-      </button>
-    )
+    return null
   }
 
   // FAB con menú desplegable para billeteras
