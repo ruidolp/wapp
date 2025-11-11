@@ -1,7 +1,7 @@
 'use client'
 
-import { TrendingUp, TrendingDown } from 'lucide-react'
-import { CirculoCategoriasGastos, CategoriaGasto } from './CirculoCategoriasGastos'
+import { TrendingUp, TrendingDown, MoreVertical } from 'lucide-react'
+import { CategoriaGasto } from './CirculoCategoriasGastos'
 import type { Sobre, Transaccion } from '@/domain/types'
 
 interface SobreCardProps {
@@ -61,7 +61,10 @@ export function SobreCard({
   }, {} as Record<string, typeof DUMMY_TRANSACTIONS>)
 
   return (
-    <div className="w-full h-full flex flex-col bg-background">
+    <div
+      className="w-full flex flex-col bg-background"
+      style={{ height: 'calc(100vh - 180px)' }}
+    >
       {/* Envelope Container - Con márgenes laterales */}
       <div className="flex-1 overflow-y-auto pb-6 px-3 pt-2">
         <div
@@ -78,41 +81,53 @@ export function SobreCard({
               boxShadow: `0 0 60px ${color}40, inset 0 2px 30px rgba(255,255,255,0.1)`,
             }}
           >
-            {/* Envelope Flap (solapa) - FORMA ORIGINAL MÁS COMPACTA */}
+            {/* Envelope Flap (solapa) - TRAPEZOID */}
             <div className="relative h-20 overflow-hidden">
               <svg
                 viewBox="0 0 400 80"
                 className="absolute inset-0 w-full h-full"
                 preserveAspectRatio="none"
               >
-                {/* Flap triangulo */}
+                {/* Flap trapezoid - más ancho arriba, angosto abajo */}
                 <path
-                  d="M 0 0 L 200 65 L 400 0 Z"
+                  d="M 0 0 L 400 0 L 280 65 L 120 65 Z"
                   fill={adjustBrightness(color, -25)}
                   opacity="0.95"
                 />
                 {/* Flap fold shadow */}
                 <path
-                  d="M 0 0 L 200 65 L 400 0 L 400 20 L 200 85 L 0 20 Z"
-                  fill="url(#flapGradient)"
+                  d="M 0 0 L 400 0 L 280 65 L 120 65 L 0 20 Z"
+                  fill={`url(#flapGradient-${sobre.id})`}
                 />
                 {/* Línea de cierre más clara */}
                 <path
-                  d="M 0 0 L 200 65 L 400 0"
+                  d="M 0 0 L 120 65 L 280 65 L 400 0"
                   stroke={adjustBrightness(color, 40)}
                   strokeWidth="2"
                   fill="none"
                   opacity="0.7"
                 />
                 <defs>
-                  <linearGradient id="flapGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <linearGradient id={`flapGradient-${sobre.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stopColor={adjustBrightness(color, -30)} stopOpacity="0.6" />
                     <stop offset="100%" stopColor={adjustBrightness(color, -40)} stopOpacity="0.9" />
                   </linearGradient>
                 </defs>
               </svg>
 
-              {/* NOMBRE en la solapa - SIN FONDO */}
+              {/* Three Dots Menu - Always Visible */}
+              <div className="absolute top-4 right-6 z-20">
+                <button
+                  className="p-1.5 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all"
+                  onClick={() => {
+                    console.log('Menu clicked')
+                  }}
+                >
+                  <MoreVertical className="w-4 h-4 text-white" />
+                </button>
+              </div>
+
+              {/* NOMBRE en la solapa */}
               <div className="absolute top-6 left-0 right-0 z-10 flex items-center justify-center">
                 <h2 className="text-2xl font-extrabold font-display text-white tracking-tight text-center px-4"
                   style={{
@@ -124,8 +139,8 @@ export function SobreCard({
               </div>
             </div>
 
-            {/* Envelope Content (DENTRO del sobre) - SIN padding top */}
-            <div className="relative pt-0 px-5 pb-6 text-white space-y-0">
+            {/* Envelope Content (DENTRO del sobre) - Gap entre elementos */}
+            <div className="relative pt-0 px-5 pb-6 text-white space-y-2">
               {/* Balance Card - TRANSPARENTE para ver solapa debajo */}
               <div className="bg-white/15 backdrop-blur-md rounded-2xl p-4 border border-white/20"
                 style={{
@@ -190,9 +205,11 @@ export function SobreCard({
                 </div>
               </div>
 
-              {/* Gráfico Pie de Categorías - SIN título "DISTRIBUCIÓN" */}
-              <div className="flex items-center justify-center py-4">
-                <CirculoCategoriasGastos categorias={DUMMY_CATEGORIAS} size={300} />
+              {/* Grid de Categorías - 2 columnas */}
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                {DUMMY_CATEGORIAS.map((categoria) => (
+                  <CategoriaCard key={categoria.id} categoria={categoria} />
+                ))}
               </div>
             </div>
           </div>
@@ -241,6 +258,83 @@ export function SobreCard({
             </div>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+// Componente de Categoría con mini gráfico circular
+function CategoriaCard({ categoria }: { categoria: CategoriaGasto }) {
+  const porcentaje = categoria.presupuesto > 0 ? (categoria.gastado / categoria.presupuesto) * 100 : 0
+
+  return (
+    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2.5 border border-white/20 flex items-center gap-2">
+      {/* Info de categoría */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 mb-1">
+          {categoria.emoji && <span className="text-base">{categoria.emoji}</span>}
+          <span className="font-bold text-white truncate text-xs">
+            {categoria.nombre}
+          </span>
+        </div>
+        <p className="text-[10px] text-white/70">
+          Gastado: <span className="font-bold text-white">${categoria.gastado.toLocaleString('es-PA')} USD</span>
+        </p>
+      </div>
+
+      {/* Mini gráfico circular */}
+      <div className="w-10 h-10 flex-shrink-0">
+        <MiniProgressChart porcentaje={porcentaje} color={categoria.color} />
+      </div>
+    </div>
+  )
+}
+
+// Mini gráfico circular SVG
+function MiniProgressChart({
+  porcentaje,
+  color,
+}: {
+  porcentaje: number
+  color?: string
+}) {
+  const radius = 14
+  const circumference = 2 * Math.PI * radius
+  const strokeDashoffset = circumference - (Math.min(porcentaje, 100) / 100) * circumference
+
+  const strokeColor = porcentaje > 100 ? '#fca5a5' : porcentaje > 80 ? '#fde047' : '#86efac'
+
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      <svg className="w-full h-full -rotate-90" viewBox="0 0 32 32">
+        {/* Círculo de fondo */}
+        <circle
+          cx="16"
+          cy="16"
+          r={radius}
+          fill="none"
+          stroke="rgba(255,255,255,0.2)"
+          strokeWidth="2.5"
+        />
+        {/* Círculo de progreso */}
+        <circle
+          cx="16"
+          cy="16"
+          r={radius}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="2.5"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          className="transition-all duration-500"
+        />
+      </svg>
+      {/* Porcentaje en el centro */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-[8px] font-bold text-white">
+          {Math.round(porcentaje)}%
+        </span>
       </div>
     </div>
   )
