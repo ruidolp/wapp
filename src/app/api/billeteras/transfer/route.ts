@@ -13,8 +13,8 @@ import { transferirEntreBilleteras } from '@/application/services/billeteras.ser
  *
  * Body:
  * {
- *   billeteraOrigenId: string (requerido)
- *   billeteraDestinoId: string (requerido)
+ *   billeteraOrigenId: string (requerido, o "UNDECLARED" para ajuste manual)
+ *   billeteraDestinoId: string (requerido, o "UNDECLARED" para ajuste manual)
  *   monto: number (requerido)
  *   descripcion?: string
  * }
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     const { billeteraOrigenId, billeteraDestinoId, monto, descripcion } = body
 
     // Validaciones
-    if (!billeteraOrigenId || !billeteraDestinoId || !monto) {
+    if (!billeteraOrigenId || !billeteraDestinoId || monto === undefined) {
       return NextResponse.json(
         { error: 'Campos requeridos: billeteraOrigenId, billeteraDestinoId, monto' },
         { status: 400 }
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Transferencia realizada correctamente',
+      message: result.data?.message || 'Ajuste registrado correctamente',
     })
   } catch (error: any) {
     console.error('Error al realizar transferencia:', error)

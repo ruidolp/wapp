@@ -316,6 +316,7 @@ export async function eliminarBilletera(
 
 /**
  * Transferir dinero entre billeteras
+ * Soporta "UNDECLARED" como origen o destino para registros de ajuste manual
  */
 export async function transferirEntreBilleteras(
   input: TransferenciaBilleterasInput
@@ -331,93 +332,114 @@ export async function transferirEntreBilleteras(
       }
     }
 
-    // Verificar billetera origen
-    const origenResult = await obtenerBilletera(billeteraOrigenId, userId)
-    if (!origenResult.success) {
-      return {
-        success: false,
-        error: 'Billetera de origen no válida',
+    // Verificar billetera origen (si no es UNDECLARED)
+    let billeteraOrigen: any = null
+    let monedaId = ''
+
+    if (billeteraOrigenId !== 'UNDECLARED') {
+      const origenResult = await obtenerBilletera(billeteraOrigenId, userId)
+      if (!origenResult.success) {
+        return {
+          success: false,
+          error: 'Billetera de origen no válida',
+        }
+      }
+      billeteraOrigen = origenResult.data
+      monedaId = billeteraOrigen.moneda_principal_id
+    } else {
+      // Si es UNDECLARED, obtener la moneda del destino
+      if (billeteraDestinoId !== 'UNDECLARED') {
+        const destinoResult = await obtenerBilletera(billeteraDestinoId, userId)
+        if (!destinoResult.success) {
+          return {
+            success: false,
+            error: 'Billetera de destino no válida',
+          }
+        }
+        monedaId = destinoResult.data.moneda_principal_id
+      } else {
+        // Si ambas son UNDECLARED, usar la moneda principal del usuario
+        const userConfig = await findUserConfig(userId)
+        monedaId = userConfig?.moneda_principal_id || 'CLP'
       }
     }
-    const billeteraOrigen = origenResult.data
 
-    // Verificar billetera destino
-    const destinoResult = await obtenerBilletera(billeteraDestinoId, userId)
-    if (!destinoResult.success) {
-      return {
-        success: false,
-        error: 'Billetera de destino no válida',
+    // Verificar billetera destino (si no es UNDECLARED)
+    let billeteraDestino: any = null
+
+    if (billeteraDestinoId !== 'UNDECLARED') {
+      const destinoResult = await obtenerBilletera(billeteraDestinoId, userId)
+      if (!destinoResult.success) {
+        return {
+          success: false,
+          error: 'Billetera de destino no válida',
+        }
+      }
+      billeteraDestino = destinoResult.data
+
+      // Si origen no es UNDECLARED, verificar misma moneda
+      if (billeteraOrigen && billeteraOrigen.moneda_principal_id !== billeteraDestino.moneda_principal_id) {
+        return {
+          success: false,
+          error: 'Las billeteras deben usar la misma moneda para transferencias',
+        }
       }
     }
-    const billeteraDestino = destinoResult.data
 
-    // Verificar que las billeteras sean diferentes
-    if (billeteraOrigenId === billeteraDestinoId) {
+    // Verificar que no sean iguales (excepto si es UNDECLARED)
+    if (billeteraOrigenId !== 'UNDECLARED' && billeteraDestinoId !== 'UNDECLARED' && billeteraOrigenId === billeteraDestinoId) {
       return {
         success: false,
         error: 'No puedes transferir a la misma billetera',
       }
     }
 
-    // Verificar que origen tenga saldo suficiente
-    if (billeteraOrigen.saldo_real < monto) {
-      return {
-        success: false,
-        error: 'Saldo insuficiente en la billetera de origen',
-      }
-    }
-
-    // Verificar que ambas billeteras usen la misma moneda
-    if (billeteraOrigen.moneda_principal_id !== billeteraDestino.moneda_principal_id) {
-      return {
-        success: false,
-        error: 'Las billeteras deben usar la misma moneda para transferencias',
-      }
-    }
-
-    const monedaId = billeteraOrigen.moneda_principal_id
-
     // Crear transacción de salida (origen)
-    await createTransaccion({
-      monto: monto,
-      moneda_id: monedaId,
-      billetera_id: billeteraOrigenId,
-      tipo: 'TRANSFERENCIA',
-      descripcion: descripcion || `Transferencia a ${billeteraDestino.nombre}`,
-      fecha: new Date(),
-      usuario_id: userId,
-      billetera_destino_id: billeteraDestinoId,
-    })
+    if (billeteraOrigenId !== 'UNDECLARED') {
+      await createTransaccion({
+        monto: monto,
+        moneda_id: monedaId,
+        billetera_id: billeteraOrigenId,
+        tipo: 'TRANSFERENCIA',
+        descripcion: descripcion || (billeteraDestino ? `Transferencia a ${billeteraDestino.nombre}` : 'Transferencia a destino no declarado'),
+        fecha: new Date(),
+        usuario_id: userId,
+        billetera_destino_id: billeteraDestinoId === 'UNDECLARED' ? null : billeteraDestinoId,
+      })
+
+      // Actualizar saldo origen
+      const nuevoSaldoOrigen = Number(billeteraOrigen.saldo_real) - monto
+      const nuevoSaldoProyectadoOrigen = Number(billeteraOrigen.saldo_proyectado) - monto
+      await updateBilleteraSaldos(billeteraOrigenId, nuevoSaldoOrigen, nuevoSaldoProyectadoOrigen)
+    }
 
     // Crear transacción de entrada (destino)
-    await createTransaccion({
-      monto: monto,
-      moneda_id: monedaId,
-      billetera_id: billeteraDestinoId,
-      tipo: 'DEPOSITO',
-      descripcion: descripcion || `Transferencia desde ${billeteraOrigen.nombre}`,
-      fecha: new Date(),
-      usuario_id: userId,
-    })
+    if (billeteraDestinoId !== 'UNDECLARED') {
+      await createTransaccion({
+        monto: monto,
+        moneda_id: monedaId,
+        billetera_id: billeteraDestinoId,
+        tipo: billeteraOrigenId === 'UNDECLARED' ? 'DEPOSITO' : 'DEPOSITO',
+        descripcion: descripcion || (billeteraOrigen ? `Transferencia desde ${billeteraOrigen.nombre}` : 'Transferencia desde origen no declarado'),
+        fecha: new Date(),
+        usuario_id: userId,
+      })
 
-    // Actualizar saldos
-    const nuevoSaldoOrigen = Number(billeteraOrigen.saldo_real) - monto
-    const nuevoSaldoProyectadoOrigen = Number(billeteraOrigen.saldo_proyectado) - monto
-    await updateBilleteraSaldos(billeteraOrigenId, nuevoSaldoOrigen, nuevoSaldoProyectadoOrigen)
-
-    const nuevoSaldoDestino = Number(billeteraDestino.saldo_real) + monto
-    const nuevoSaldoProyectadoDestino = Number(billeteraDestino.saldo_proyectado) + monto
-    await updateBilleteraSaldos(billeteraDestinoId, nuevoSaldoDestino, nuevoSaldoProyectadoDestino)
+      // Actualizar saldo destino
+      const nuevoSaldoDestino = Number(billeteraDestino.saldo_real) + monto
+      const nuevoSaldoProyectadoDestino = Number(billeteraDestino.saldo_proyectado) + monto
+      await updateBilleteraSaldos(billeteraDestinoId, nuevoSaldoDestino, nuevoSaldoProyectadoDestino)
+    }
 
     return {
       success: true,
-      data: { message: 'Transferencia realizada correctamente' },
+      data: { message: 'Ajuste registrado correctamente' },
     }
   } catch (error) {
     console.error('Error al transferir entre billeteras:', error)
     return {
       success: false,
-      error: 'Error al realizar la transferencia',
+      error: 'Error al realizar el ajuste',
     }
   }
 }

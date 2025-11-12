@@ -27,7 +27,6 @@ import { Switch } from '@/components/ui/switch'
 import {
   useCreateBilletera,
   useUpdateBilletera,
-  useAdjustBalance,
   type Billetera,
 } from '@/presentation/hooks/useBilleteras'
 
@@ -49,7 +48,6 @@ export function CardManageDrawer({
 
   const createMutation = useCreateBilletera()
   const updateMutation = useUpdateBilletera()
-  const adjustMutation = useAdjustBalance()
 
   // Form state
   const [nombre, setNombre] = useState('')
@@ -58,7 +56,6 @@ export function CardManageDrawer({
   const [tieneInteres, setTieneInteres] = useState(false)
   const [tasaInteres, setTasaInteres] = useState('')
   const [saldoInicial, setSaldoInicial] = useState('')
-  const [ajusteSaldo, setAjusteSaldo] = useState('')
 
   // Reset form cuando abre/cierra o cambia billetera
   useEffect(() => {
@@ -70,7 +67,6 @@ export function CardManageDrawer({
         setTieneInteres(!!billetera.tasa_interes)
         setTasaInteres(billetera.tasa_interes?.toString() || '')
         setSaldoInicial('')
-        setAjusteSaldo('')
       } else {
         setNombre('')
         setTipo('DEBITO')
@@ -78,7 +74,6 @@ export function CardManageDrawer({
         setTieneInteres(false)
         setTasaInteres('')
         setSaldoInicial('')
-        setAjusteSaldo('')
       }
     }
   }, [open, billetera])
@@ -99,18 +94,6 @@ export function CardManageDrawer({
         is_compartida: isCompartida,
         tasa_interes: tasaInteresValue,
       })
-
-      // Si hay ajuste de saldo, ejecutarlo
-      if (ajusteSaldo && ajusteSaldo !== '0') {
-        const monto = parseFloat(ajusteSaldo)
-        if (!isNaN(monto) && monto !== 0) {
-          await adjustMutation.mutateAsync({
-            id: billetera.id,
-            monto,
-            descripcion: `Ajuste manual: ${monto > 0 ? '+' : ''}${monto}`,
-          })
-        }
-      }
     } else {
       // Crear billetera
       await createMutation.mutateAsync({
@@ -125,7 +108,7 @@ export function CardManageDrawer({
     onOpenChange(false)
   }
 
-  const loading = createMutation.isPending || updateMutation.isPending || adjustMutation.isPending
+  const loading = createMutation.isPending || updateMutation.isPending
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -228,41 +211,6 @@ export function CardManageDrawer({
                 placeholder={t('fields.initialBalancePlaceholder')}
                 required
               />
-            </div>
-          )}
-
-          {/* Ajustar Saldo (solo editar) */}
-          {isEdit && billetera && (
-            <div className="space-y-3">
-              {/* Current Balances Display */}
-              <div className="rounded-lg border bg-muted/50 p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">{t('balance.real')}</span>
-                  <span className="font-semibold">${Number(billetera.saldo_real).toFixed(2)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">{t('balance.projected')}</span>
-                  <span className="font-semibold">${Number(billetera.saldo_proyectado).toFixed(2)}</span>
-                </div>
-              </div>
-
-              {/* Adjust Field */}
-              <div className="space-y-2">
-                <Label htmlFor="ajusteSaldo">
-                  {t('fields.adjustBalance')}
-                </Label>
-                <Input
-                  id="ajusteSaldo"
-                  type="number"
-                  step="0.01"
-                  value={ajusteSaldo}
-                  onChange={(e) => setAjusteSaldo(e.target.value)}
-                  placeholder={t('fields.adjustPlaceholder')}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('fields.adjustHint')}
-                </p>
-              </div>
             </div>
           )}
 
