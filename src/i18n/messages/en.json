@@ -345,6 +345,7 @@
   },
   "billeteras": {
     "title": "Wallets",
+    "loading": "Loading wallets...",
     "empty": "No wallets yet",
     "emptyDescription": "Create your first wallet to get started",
     "addCard": "Add Wallet",
