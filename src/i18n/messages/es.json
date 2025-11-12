@@ -343,5 +343,86 @@
     "back": "Atrás",
     "next": "Siguiente",
     "or": "O"
+  },
+  "billeteras": {
+    "title": "Billeteras",
+    "empty": "Aún no tienes billeteras",
+    "emptyDescription": "Crea tu primera billetera para comenzar",
+    "addCard": "Agregar Billetera",
+    "transfer": "Transferir",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "info": "Información",
+    "fields": {
+      "name": "Nombre",
+      "namePlaceholder": "Mi Billetera",
+      "type": "Tipo de Tarjeta",
+      "shared": "Compartida",
+      "sharedDescription": "Permitir acceso a otros usuarios",
+      "interest": "Tiene Interés",
+      "interestDescription": "Esta billetera genera intereses",
+      "interestRate": "Tasa de Interés (Opcional)",
+      "interestRatePlaceholder": "5.5",
+      "initialBalance": "Saldo Inicial",
+      "initialBalancePlaceholder": "0.00",
+      "adjustBalance": "Ajustar Saldo",
+      "adjustPlaceholder": "+500 o -250"
+    },
+    "types": {
+      "DEBITO": "Débito",
+      "CREDITO": "Crédito",
+      "EFECTIVO": "Efectivo",
+      "AHORRO": "Ahorro",
+      "INVERSION": "Inversión"
+    },
+    "balance": {
+      "real": "Saldo Real",
+      "projected": "Saldo Proyectado"
+    },
+    "create": {
+      "title": "Nueva Billetera",
+      "submit": "Crear Billetera",
+      "submitting": "Creando..."
+    },
+    "edit": {
+      "title": "Editar Billetera",
+      "submit": "Guardar Cambios",
+      "submitting": "Guardando..."
+    },
+    "transfer": {
+      "title": "Transferir Entre Billeteras",
+      "from": "Desde",
+      "to": "Hacia",
+      "amount": "Monto",
+      "amountPlaceholder": "100.00",
+      "submit": "Transferir",
+      "submitting": "Transfiriendo...",
+      "selectOrigin": "Selecciona billetera origen",
+      "selectDestination": "Selecciona billetera destino",
+      "noWallets": "Necesitas al menos 2 billeteras para transferir"
+    },
+    "delete": {
+      "title": "Eliminar Billetera",
+      "confirm": "¿Estás seguro?",
+      "warning": "Esta acción no se puede deshacer",
+      "linkedEnvelopes": "Sobres vinculados",
+      "linkedEnvelopesDescription": "Esta billetera está siendo usada por {count} sobre(s)",
+      "impactWarning": "Eliminar esta billetera afectará tus sobres",
+      "submit": "Eliminar Billetera",
+      "submitting": "Eliminando...",
+      "cancel": "Cancelar"
+    },
+    "contextual": {
+      "title": "Acciones Rápidas"
+    },
+    "notifications": {
+      "created": "Billetera creada exitosamente",
+      "updated": "Billetera actualizada exitosamente",
+      "deleted": "Billetera eliminada exitosamente",
+      "transferred": "Transferencia completada exitosamente",
+      "error": "Ocurrió un error",
+      "sameWallet": "No puedes transferir a la misma billetera",
+      "insufficientBalance": "Saldo insuficiente"
+    }
   }
 }
