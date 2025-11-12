@@ -104,7 +104,7 @@ export function CardsList({
               onClick={() => onEdit(billetera)}
             >
               <Pencil className="h-3 w-3 mr-2" />
-              {t('edit')}
+              {t('actions.edit')}
             </Button>
             <Button
               variant="outline"
@@ -113,7 +113,7 @@ export function CardsList({
               onClick={() => onTransfer(billetera)}
             >
               <ArrowRightLeft className="h-3 w-3 mr-2" />
-              {t('transfer')}
+              {t('actions.transfer')}
             </Button>
             <Button
               variant="outline"

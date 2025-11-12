@@ -349,11 +349,13 @@
     "loading": "Cargando billeteras...",
     "empty": "Aún no tienes billeteras",
     "emptyDescription": "Crea tu primera billetera para comenzar",
-    "addCard": "Agregar Billetera",
-    "transfer": "Transferir",
-    "delete": "Eliminar",
-    "edit": "Editar",
-    "info": "Información",
+    "actions": {
+      "addCard": "Agregar Billetera",
+      "transfer": "Transferir",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "info": "Información"
+    },
     "fields": {
       "name": "Nombre",
       "namePlaceholder": "Mi Billetera",
@@ -400,7 +402,8 @@
       "submitting": "Transfiriendo...",
       "selectOrigin": "Selecciona billetera origen",
       "selectDestination": "Selecciona billetera destino",
-      "noWallets": "Necesitas al menos 2 billeteras para transferir"
+      "noWallets": "Necesitas al menos 2 billeteras para transferir",
+      "invalidAmount": "Monto inválido"
     },
     "delete": {
       "title": "Eliminar Billetera",
@@ -414,7 +417,8 @@
       "cancel": "Cancelar"
     },
     "contextual": {
-      "title": "Acciones Rápidas"
+      "title": "Acciones Rápidas",
+      "transferDescription": "Entre tus billeteras"
     },
     "notifications": {
       "created": "Billetera creada exitosamente",

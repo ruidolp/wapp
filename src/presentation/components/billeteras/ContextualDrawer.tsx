@@ -55,7 +55,7 @@ export function ContextualDrawer({
               <Wallet className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1 text-left">
-              <p className="font-medium">{t('addCard')}</p>
+              <p className="font-medium">{t('actions.addCard')}</p>
               <p className="text-sm text-muted-foreground">
                 {t('emptyDescription')}
               </p>
@@ -71,9 +71,9 @@ export function ContextualDrawer({
               <ArrowRightLeft className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1 text-left">
-              <p className="font-medium">{t('transfer')}</p>
+              <p className="font-medium">{t('actions.transfer')}</p>
               <p className="text-sm text-muted-foreground">
-                Entre tus billeteras
+                {t('contextual.transferDescription')}
               </p>
             </div>
           </Button>
