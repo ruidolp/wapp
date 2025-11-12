@@ -1,0 +1,92 @@
+/**
+ * ContextualDrawer - Drawer de acciones rápidas para billeteras
+ */
+
+import { useTranslations } from 'next-intl'
+import { Wallet, ArrowRightLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer'
+
+interface ContextualDrawerProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onAddWallet: () => void
+  onTransfer: () => void
+}
+
+export function ContextualDrawer({
+  open,
+  onOpenChange,
+  onAddWallet,
+  onTransfer,
+}: ContextualDrawerProps) {
+  const t = useTranslations('billeteras')
+
+  const handleAction = (action: () => void) => {
+    action()
+    onOpenChange(false)
+  }
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>{t('contextual.title')}</DrawerTitle>
+          <DrawerDescription>
+            {t('title')}
+          </DrawerDescription>
+        </DrawerHeader>
+
+        <div className="px-4 space-y-2 pb-4">
+          <Button
+            variant="outline"
+            className="w-full h-14 flex items-center justify-start gap-3"
+            onClick={() => handleAction(onAddWallet)}
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+              <Wallet className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="font-medium">{t('addCard')}</p>
+              <p className="text-sm text-muted-foreground">
+                {t('emptyDescription')}
+              </p>
+            </div>
+          </Button>
+
+          <Button
+            variant="outline"
+            className="w-full h-14 flex items-center justify-start gap-3"
+            onClick={() => handleAction(onTransfer)}
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+              <ArrowRightLeft className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="font-medium">{t('transfer')}</p>
+              <p className="text-sm text-muted-foreground">
+                Entre tus billeteras
+              </p>
+            </div>
+          </Button>
+        </div>
+
+        <DrawerFooter>
+          <DrawerClose asChild>
+            <Button variant="outline" className="w-full">
+              {t('delete.cancel')}
+            </Button>
+          </DrawerClose>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  )
+}
