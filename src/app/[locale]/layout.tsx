@@ -16,6 +16,7 @@ import type { Metadata } from 'next'
 import { routing } from '@/i18n/routing'
 import { SessionProvider } from '@/presentation/providers/session-provider'
 import { ThemeProvider } from '@/presentation/providers/theme-provider'
+import { QueryProvider } from '@/presentation/providers/query-provider'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as SonnerToaster } from 'sonner'
 import { getActiveThemes, getUserThemePreference } from '@/infrastructure/database/queries'
@@ -111,15 +112,17 @@ export default async function LocaleLayout({
         />
       </head>
       <body className="font-sans antialiased">
-        <ThemeProvider defaultTheme={defaultTheme} themes={themes}>
-          <SessionProvider>
-            <NextIntlClientProvider messages={messages}>
-              {children}
-              <Toaster />
-              <SonnerToaster position="top-center" richColors />
-            </NextIntlClientProvider>
-          </SessionProvider>
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider defaultTheme={defaultTheme} themes={themes}>
+            <SessionProvider>
+              <NextIntlClientProvider messages={messages}>
+                {children}
+                <Toaster />
+                <SonnerToaster position="top-center" richColors />
+              </NextIntlClientProvider>
+            </SessionProvider>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   )

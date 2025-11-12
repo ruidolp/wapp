@@ -342,5 +342,86 @@
     "back": "Back",
     "next": "Next",
     "or": "Or"
+  },
+  "billeteras": {
+    "title": "Wallets",
+    "empty": "No wallets yet",
+    "emptyDescription": "Create your first wallet to get started",
+    "addCard": "Add Wallet",
+    "transfer": "Transfer",
+    "delete": "Delete",
+    "edit": "Edit",
+    "info": "Information",
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "My Wallet",
+      "type": "Card Type",
+      "shared": "Shared",
+      "sharedDescription": "Allow other users to access",
+      "interest": "Has Interest",
+      "interestDescription": "This wallet generates interest",
+      "interestRate": "Interest Rate (Optional)",
+      "interestRatePlaceholder": "5.5",
+      "initialBalance": "Initial Balance",
+      "initialBalancePlaceholder": "0.00",
+      "adjustBalance": "Adjust Balance",
+      "adjustPlaceholder": "+500 or -250"
+    },
+    "types": {
+      "DEBITO": "Debit",
+      "CREDITO": "Credit",
+      "EFECTIVO": "Cash",
+      "AHORRO": "Savings",
+      "INVERSION": "Investment"
+    },
+    "balance": {
+      "real": "Real Balance",
+      "projected": "Projected Balance"
+    },
+    "create": {
+      "title": "New Wallet",
+      "submit": "Create Wallet",
+      "submitting": "Creating..."
+    },
+    "edit": {
+      "title": "Edit Wallet",
+      "submit": "Save Changes",
+      "submitting": "Saving..."
+    },
+    "transfer": {
+      "title": "Transfer Between Wallets",
+      "from": "From",
+      "to": "To",
+      "amount": "Amount",
+      "amountPlaceholder": "100.00",
+      "submit": "Transfer",
+      "submitting": "Transferring...",
+      "selectOrigin": "Select origin wallet",
+      "selectDestination": "Select destination wallet",
+      "noWallets": "You need at least 2 wallets to transfer"
+    },
+    "delete": {
+      "title": "Delete Wallet",
+      "confirm": "Are you sure?",
+      "warning": "This action cannot be undone",
+      "linkedEnvelopes": "Linked envelopes",
+      "linkedEnvelopesDescription": "This wallet is being used by {count} envelope(s)",
+      "impactWarning": "Deleting this wallet will affect your envelopes",
+      "submit": "Delete Wallet",
+      "submitting": "Deleting...",
+      "cancel": "Cancel"
+    },
+    "contextual": {
+      "title": "Quick Actions"
+    },
+    "notifications": {
+      "created": "Wallet created successfully",
+      "updated": "Wallet updated successfully",
+      "deleted": "Wallet deleted successfully",
+      "transferred": "Transfer completed successfully",
+      "error": "An error occurred",
+      "sameWallet": "Cannot transfer to the same wallet",
+      "insufficientBalance": "Insufficient balance"
+    }
   }
 }
