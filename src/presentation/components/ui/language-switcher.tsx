@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Globe } from '@phosphor-icons/react'
+import { Globe } from 'lucide-react'
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -43,7 +43,7 @@ export function LanguageSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
-          <Globe size={16} weight="duotone" />
+          <Globe className="h-4 w-4" />
           <span className="hidden sm:inline">{currentLanguage.name}</span>
           <span className="sm:hidden">{currentLanguage.flag}</span>
         </Button>

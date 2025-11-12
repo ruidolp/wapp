@@ -1,11 +1,11 @@
 /**
- * Estilos globales
+ * Estilos globales - Sistema minimalista
  *
- * Este archivo define las CSS variables para el sistema de theming
- * y los estilos base de la aplicación.
- *
- * IMPORTANTE: NO usar estilos inline (style={}) en componentes.
- * Usar siempre Tailwind classes o CSS modules.
+ * REGLAS:
+ * - NO usar estilos inline (style={})
+ * - Componentes shadcn/ui sin modificaciones
+ * - Solo lucide-react para iconos
+ * - Colores solo vía CSS variables
  */
 
 @tailwind base;
@@ -13,160 +13,93 @@
 @tailwind utilities;
 
 /**
- * THEME SYSTEM - CSS VARIABLES
- *
- * Temas configurables dinámicamente via data-theme attribute
- * Modificar 1 variable = cambio global en toda la app
- *
- * Variables disponibles:
- * - Backgrounds: background, card, popover
- * - Foregrounds: foreground, card-foreground, popover-foreground
- * - Interactive: primary, secondary, accent, destructive, muted
- * - Borders/Inputs: border, input, ring
- * - Radius: border-radius global
+ * THEME SYSTEM - Variables esenciales únicamente
  */
 
 @layer base {
   /**
-   * DEFAULT THEME: Blanco (Pure Monochrome Light)
+   * DEFAULT THEME: Blanco
    */
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 9%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 0% 25%;
-    --destructive-foreground: 0 0% 100%;
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 0 0% 9%;
     --radius: 0.5rem;
-    --sobre-base: 0 0% 20%;
-    --sobre-base-dark: 0 0% 9%;
   }
 
   /**
-   * THEME: NEON (Electric Dreams)
-   * Colores: Cyan eléctrico + Magenta ultra + Amarillo voltaico
+   * THEME: NEON
    */
   [data-theme="neon"] {
     --background: 250 35% 8%;
     --foreground: 180 100% 85%;
     --card: 250 30% 11%;
     --card-foreground: 180 100% 85%;
-    --popover: 250 30% 11%;
-    --popover-foreground: 180 100% 85%;
     --primary: 174 100% 51%;
     --primary-foreground: 250 35% 8%;
-    --secondary: 320 100% 58%;
-    --secondary-foreground: 250 35% 8%;
     --muted: 250 20% 18%;
     --muted-foreground: 180 30% 70%;
-    --accent: 54 100% 50%;
-    --accent-foreground: 250 35% 8%;
-    --destructive: 0 100% 55%;
-    --destructive-foreground: 0 0% 100%;
     --border: 174 100% 51%;
     --input: 250 20% 18%;
-    --ring: 174 100% 51%;
     --radius: 0.5rem;
-    --sobre-base: 320 100% 58%;
-    --sobre-base-dark: 320 100% 45%;
   }
 
   /**
-   * THEME: BLANCO (Classic Monochrome)
+   * THEME: BLANCO
    */
   [data-theme="blanco"] {
     --background: 0 0% 100%;
     --foreground: 0 0% 9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 20%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 0% 25%;
-    --destructive-foreground: 0 0% 100%;
     --border: 0 0% 89%;
     --input: 0 0% 89%;
-    --ring: 0 0% 9%;
     --radius: 0.5rem;
-    --sobre-base: 0 0% 20%;
-    --sobre-base-dark: 0 0% 9%;
   }
 
   /**
-   * THEME: NEGRO (Pure Monochrome Dark)
+   * THEME: NEGRO
    */
   [data-theme="negro"] {
     --background: 0 0% 9%;
     --foreground: 0 0% 98%;
     --card: 0 0% 12%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
     --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 18%;
-    --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 18%;
     --muted-foreground: 0 0% 65%;
-    --accent: 0 0% 98%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 0% 75%;
-    --destructive-foreground: 0 0% 9%;
     --border: 0 0% 20%;
     --input: 0 0% 18%;
-    --ring: 0 0% 98%;
     --radius: 0.5rem;
-    --sobre-base: 0 0% 85%;
-    --sobre-base-dark: 0 0% 98%;
   }
 
   /**
-   * THEME: ROSADO (Sunset Dreams)
-   * Colores: Coral vibrante + Lavanda + Dorado cálido
+   * THEME: ROSADO
    */
   [data-theme="rosado"] {
     --background: 28 40% 97%;
     --foreground: 330 45% 12%;
     --card: 0 0% 100%;
     --card-foreground: 330 45% 12%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 330 45% 12%;
     --primary: 350 85% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 280 65% 75%;
-    --secondary-foreground: 330 45% 12%;
     --muted: 28 35% 93%;
     --muted-foreground: 330 25% 42%;
-    --accent: 38 100% 55%;
-    --accent-foreground: 330 45% 12%;
-    --destructive: 5 90% 58%;
-    --destructive-foreground: 0 0% 100%;
     --border: 28 30% 85%;
     --input: 28 35% 88%;
-    --ring: 350 85% 60%;
     --radius: 0.75rem;
-    --sobre-base: 280 65% 68%;
-    --sobre-base-dark: 350 85% 52%;
   }
 }
 
@@ -185,7 +118,7 @@
 }
 
 /**
- * Estilos para scroll personalizado
+ * Utilities - Solo esenciales
  */
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
@@ -195,100 +128,5 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
-  }
-}
-
-/**
- * Estilos para gestos de swipe en mobile
- */
-@layer utilities {
-  .touch-pan-x {
-    touch-action: pan-x;
-  }
-
-  .touch-pan-y {
-    touch-action: pan-y;
-  }
-
-  .touch-none {
-    touch-action: none;
-  }
-}
-
-/**
- * Clases de utilidad para mobile
- */
-@layer utilities {
-  .safe-top {
-    padding-top: env(safe-area-inset-top);
-  }
-
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  .safe-left {
-    padding-left: env(safe-area-inset-left);
-  }
-
-  .safe-right {
-    padding-right: env(safe-area-inset-right);
-  }
-
-  .safe-area {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
-}
-
-/**
- * Animaciones personalizadas
- */
-@layer utilities {
-  .animate-in {
-    animation-name: fadeIn;
-    animation-duration: 0.3s;
-    animation-fill-mode: both;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-}
-
-/**
- * Optimizaciones para Capacitor/Mobile
- */
-@layer base {
-  @media (hover: none) and (pointer: coarse) {
-    /* Estilos específicos para touch devices */
-    button,
-    a,
-    input,
-    textarea,
-    select {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    * {
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-
-    input,
-    textarea {
-      -webkit-user-select: text;
-      user-select: text;
-    }
   }
 }
