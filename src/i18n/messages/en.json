@@ -348,11 +348,13 @@
     "loading": "Loading wallets...",
     "empty": "No wallets yet",
     "emptyDescription": "Create your first wallet to get started",
-    "addCard": "Add Wallet",
-    "transfer": "Transfer",
-    "delete": "Delete",
-    "edit": "Edit",
-    "info": "Information",
+    "actions": {
+      "addCard": "Add Wallet",
+      "transfer": "Transfer",
+      "delete": "Delete",
+      "edit": "Edit",
+      "info": "Information"
+    },
     "fields": {
       "name": "Name",
       "namePlaceholder": "My Wallet",
@@ -399,7 +401,8 @@
       "submitting": "Transferring...",
       "selectOrigin": "Select origin wallet",
       "selectDestination": "Select destination wallet",
-      "noWallets": "You need at least 2 wallets to transfer"
+      "noWallets": "You need at least 2 wallets to transfer",
+      "invalidAmount": "Invalid amount"
     },
     "delete": {
       "title": "Delete Wallet",
@@ -413,7 +416,8 @@
       "cancel": "Cancel"
     },
     "contextual": {
-      "title": "Quick Actions"
+      "title": "Quick Actions",
+      "transferDescription": "Between your wallets"
     },
     "notifications": {
       "created": "Wallet created successfully",

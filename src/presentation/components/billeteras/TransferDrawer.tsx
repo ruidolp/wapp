@@ -72,12 +72,12 @@ export function TransferDrawer({
 
     const montoNum = parseFloat(monto)
     if (isNaN(montoNum) || montoNum <= 0) {
-      notify.error('Monto inválido')
+      notify.error(t('transfer.invalidAmount'))
       return
     }
 
     const fromBilletera = billeteras.find((b) => b.id === fromId)
-    if (fromBilletera && fromBilletera.saldo_real < montoNum) {
+    if (fromBilletera && Number(fromBilletera.saldo_real) < montoNum) {
       notify.error(t('notifications.insufficientBalance'))
       return
     }
@@ -133,7 +133,7 @@ export function TransferDrawer({
               <SelectContent>
                 {billeteras.map((b) => (
                   <SelectItem key={b.id} value={b.id}>
-                    {b.nombre} (${b.saldo_real.toFixed(2)})
+                    {b.nombre} (${Number(b.saldo_real).toFixed(2)})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -152,7 +152,7 @@ export function TransferDrawer({
               <SelectContent>
                 {availableDestinations.map((b) => (
                   <SelectItem key={b.id} value={b.id}>
-                    {b.nombre} (${b.saldo_real.toFixed(2)})
+                    {b.nombre} (${Number(b.saldo_real).toFixed(2)})
                   </SelectItem>
                 ))}
               </SelectContent>
