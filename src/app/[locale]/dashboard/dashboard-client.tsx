@@ -1,13 +1,19 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { LogOut } from 'lucide-react'
-import { signOut } from 'next-auth/react'
+import { useState } from 'react'
+import { AppShell } from '@/presentation/components/layout/AppShell'
+import { Header } from '@/presentation/components/layout/Header'
+import { BottomNav, type TabType } from '@/presentation/components/layout/BottomNav'
+import { BilleterasScreen } from '@/presentation/components/screens/BilleterasScreen'
+import { SobresScreen } from '@/presentation/components/screens/SobresScreen'
+import { MetricasScreen } from '@/presentation/components/screens/MetricasScreen'
+import { ConfigScreen } from '@/presentation/components/screens/ConfigScreen'
 
 interface User {
   id: string
   name?: string | null
   email?: string | null
+  image?: string | null
 }
 
 interface DashboardClientProps {
@@ -16,34 +22,46 @@ interface DashboardClientProps {
 }
 
 export function DashboardClient({ locale, user }: DashboardClientProps) {
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: `/${locale}/auth/login` })
+  const [activeTab, setActiveTab] = useState<TabType>('billeteras')
+
+  // Acción contextual del botón central (+)
+  const handleContextualAction = () => {
+    alert(`Acción contextual para: ${activeTab.toUpperCase()}`)
+  }
+
+  // Renderizar screen según tab activo
+  const renderActiveScreen = () => {
+    switch (activeTab) {
+      case 'billeteras':
+        return <BilleterasScreen />
+      case 'sobres':
+        return <SobresScreen />
+      case 'metricas':
+        return <MetricasScreen />
+      case 'config':
+        return <ConfigScreen />
+      default:
+        return <BilleterasScreen />
+    }
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Bienvenido, {user.name || user.email}
-            </p>
-          </div>
-          <Button variant="outline" onClick={handleLogout}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Cerrar sesión
-          </Button>
-        </div>
-
-        {/* Placeholder content */}
-        <div className="rounded-lg border bg-card p-8 text-center">
-          <p className="text-card-foreground">
-            Dashboard en construcción
-          </p>
-        </div>
-      </div>
-    </div>
+    <AppShell
+      header={
+        <Header
+          userName={user.name}
+          userImage={user.image}
+        />
+      }
+      footer={
+        <BottomNav
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onContextualAction={handleContextualAction}
+        />
+      }
+    >
+      {renderActiveScreen()}
+    </AppShell>
   )
 }
