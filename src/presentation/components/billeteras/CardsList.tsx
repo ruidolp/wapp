@@ -38,7 +38,7 @@ export function CardsList({
       {billeteras.map((billetera) => (
         <div
           key={billetera.id}
-          className="rounded-lg border bg-card p-4 space-y-3"
+          className="rounded-lg border bg-wallet-card p-4 space-y-3"
         >
           {/* Header con nombre y tipo */}
           <div className="flex items-start justify-between">

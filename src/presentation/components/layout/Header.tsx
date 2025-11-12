@@ -3,11 +3,14 @@
  *
  * Header fijo superior con:
  * - Avatar del usuario (izquierda)
- * - Logo WAPP (centro)
+ * - Logo WAPP (centro) - Click para cerrar sesión
  * - Menú hamburguesa (derecha)
  */
 
-import { Menu } from 'lucide-react'
+'use client'
+
+import { Menu, LogOut } from 'lucide-react'
+import { signOut } from 'next-auth/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 
@@ -34,10 +37,16 @@ export function Header({ userName, userImage }: HeaderProps) {
         </Avatar>
       </Button>
 
-      {/* Logo WAPP */}
-      <h1 className="text-xl font-bold tracking-tight text-foreground">
-        WAPP
-      </h1>
+      {/* Logo WAPP - Click para cerrar sesión */}
+      <Button
+        variant="ghost"
+        className="text-xl font-bold tracking-tight text-foreground hover:bg-transparent"
+        onClick={() => signOut({ callbackUrl: '/auth/login' })}
+        title="Cerrar sesión"
+      >
+        <span className="mr-2">WAPP</span>
+        <LogOut className="h-4 w-4 opacity-50" />
+      </Button>
 
       {/* Menú hamburguesa */}
       <Button variant="ghost" size="icon">

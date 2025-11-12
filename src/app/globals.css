@@ -25,6 +25,7 @@
     --foreground: 0 0% 9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 9%;
+    --wallet-card: 0 0% 97%;
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 100%;
     --muted: 0 0% 96%;
@@ -42,6 +43,7 @@
     --foreground: 180 100% 85%;
     --card: 250 30% 11%;
     --card-foreground: 180 100% 85%;
+    --wallet-card: 250 30% 13%;
     --primary: 174 100% 51%;
     --primary-foreground: 250 35% 8%;
     --muted: 250 20% 18%;
@@ -59,6 +61,7 @@
     --foreground: 0 0% 9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 9%;
+    --wallet-card: 0 0% 97%;
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 100%;
     --muted: 0 0% 96%;
@@ -76,6 +79,7 @@
     --foreground: 0 0% 98%;
     --card: 0 0% 12%;
     --card-foreground: 0 0% 98%;
+    --wallet-card: 0 0% 14%;
     --primary: 0 0% 98%;
     --primary-foreground: 0 0% 9%;
     --muted: 0 0% 18%;
@@ -93,6 +97,7 @@
     --foreground: 330 45% 12%;
     --card: 0 0% 100%;
     --card-foreground: 330 45% 12%;
+    --wallet-card: 28 35% 95%;
     --primary: 350 85% 60%;
     --primary-foreground: 0 0% 100%;
     --muted: 28 35% 93%;

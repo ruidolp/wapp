@@ -92,11 +92,11 @@ export function CardInfoDrawer({
         <DrawerFooter>
           <Button onClick={onEdit} className="w-full">
             <Pencil className="h-4 w-4 mr-2" />
-            {t('edit')}
+            {t('actions.edit')}
           </Button>
           <Button onClick={onTransfer} variant="outline" className="w-full">
             <ArrowRightLeft className="h-4 w-4 mr-2" />
-            {t('transfer')}
+            {t('actions.transfer')}
           </Button>
           <DrawerClose asChild>
             <Button variant="outline" className="w-full">
