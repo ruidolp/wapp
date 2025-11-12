@@ -232,22 +232,37 @@ export function CardManageDrawer({
           )}
 
           {/* Ajustar Saldo (solo editar) */}
-          {isEdit && (
-            <div className="space-y-2">
-              <Label htmlFor="ajusteSaldo">
-                {t('fields.adjustBalance')}
-              </Label>
-              <Input
-                id="ajusteSaldo"
-                type="number"
-                step="0.01"
-                value={ajusteSaldo}
-                onChange={(e) => setAjusteSaldo(e.target.value)}
-                placeholder={t('fields.adjustPlaceholder')}
-              />
-              <p className="text-xs text-muted-foreground">
-                Usa + para agregar o - para restar
-              </p>
+          {isEdit && billetera && (
+            <div className="space-y-3">
+              {/* Current Balances Display */}
+              <div className="rounded-lg border bg-muted/50 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">{t('balance.real')}</span>
+                  <span className="font-semibold">${Number(billetera.saldo_real).toFixed(2)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">{t('balance.projected')}</span>
+                  <span className="font-semibold">${Number(billetera.saldo_proyectado).toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* Adjust Field */}
+              <div className="space-y-2">
+                <Label htmlFor="ajusteSaldo">
+                  {t('fields.adjustBalance')}
+                </Label>
+                <Input
+                  id="ajusteSaldo"
+                  type="number"
+                  step="0.01"
+                  value={ajusteSaldo}
+                  onChange={(e) => setAjusteSaldo(e.target.value)}
+                  placeholder={t('fields.adjustPlaceholder')}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t('fields.adjustHint')}
+                </p>
+              </div>
             </div>
           )}
 

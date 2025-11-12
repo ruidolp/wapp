@@ -369,7 +369,8 @@
       "initialBalance": "Saldo Inicial",
       "initialBalancePlaceholder": "0.00",
       "adjustBalance": "Ajustar Saldo",
-      "adjustPlaceholder": "+500 o -250"
+      "adjustPlaceholder": "+500 o -250",
+      "adjustHint": "Usa + para agregar o - para restar"
     },
     "types": {
       "DEBITO": "Débito",

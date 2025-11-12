@@ -8,6 +8,7 @@
  * - Validación de reglas de negocio
  */
 
+import { db } from '@/infrastructure/database/kysely'
 import {
   createBilletera,
   findBilleteraById,
@@ -77,13 +78,25 @@ export async function crearBilletera(
 
     if (!monedaPrincipalId) {
       const userConfig = await findUserConfig(input.userId)
-      if (!userConfig) {
-        return {
-          success: false,
-          error: 'Configuración de usuario no encontrada',
+      if (userConfig && userConfig.moneda_principal_id) {
+        monedaPrincipalId = userConfig.moneda_principal_id
+      } else {
+        // Si no tiene config, usar la primera moneda activa como default
+        const monedasActivas = await db.selectFrom('monedas')
+          .selectAll()
+          .where('activa', '=', true)
+          .orderBy('orden', 'asc')
+          .limit(1)
+          .execute()
+
+        if (monedasActivas.length === 0) {
+          return {
+            success: false,
+            error: 'No hay monedas disponibles en el sistema',
+          }
         }
+        monedaPrincipalId = monedasActivas[0].id
       }
-      monedaPrincipalId = userConfig.moneda_principal_id
     }
 
     // Validar que la moneda existe

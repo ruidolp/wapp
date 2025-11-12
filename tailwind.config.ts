@@ -53,6 +53,7 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        'wallet-card': 'hsl(var(--wallet-card))',
       },
       borderRadius: {
         lg: 'var(--radius)',

@@ -368,7 +368,8 @@
       "initialBalance": "Initial Balance",
       "initialBalancePlaceholder": "0.00",
       "adjustBalance": "Adjust Balance",
-      "adjustPlaceholder": "+500 or -250"
+      "adjustPlaceholder": "+500 or -250",
+      "adjustHint": "Use + to add or - to subtract"
     },
     "types": {
       "DEBITO": "Debit",
