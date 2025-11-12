@@ -65,16 +65,16 @@ export function CardsList({
               <p className="text-xs text-muted-foreground mb-1">
                 {t('balance.real')}
               </p>
-              <p className={`text-lg font-bold ${billetera.saldo_real < 0 ? 'text-red-600' : 'text-foreground'}`}>
-                ${billetera.saldo_real.toFixed(2)}
+              <p className={`text-lg font-bold ${Number(billetera.saldo_real) < 0 ? 'text-red-600' : 'text-foreground'}`}>
+                ${Number(billetera.saldo_real).toFixed(2)}
               </p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">
                 {t('balance.projected')}
               </p>
-              <p className={`text-lg font-bold ${billetera.saldo_proyectado < 0 ? 'text-red-600' : 'text-foreground'}`}>
-                ${billetera.saldo_proyectado.toFixed(2)}
+              <p className={`text-lg font-bold ${Number(billetera.saldo_proyectado) < 0 ? 'text-red-600' : 'text-foreground'}`}>
+                ${Number(billetera.saldo_proyectado).toFixed(2)}
               </p>
             </div>
           </div>

@@ -346,6 +346,7 @@
   },
   "billeteras": {
     "title": "Billeteras",
+    "loading": "Cargando billeteras...",
     "empty": "Aún no tienes billeteras",
     "emptyDescription": "Crea tu primera billetera para comenzar",
     "addCard": "Agregar Billetera",
