@@ -15,10 +15,11 @@ import { CardDeleteConfirm } from '@/presentation/components/billeteras/CardDele
 import { ContextualDrawer } from '@/presentation/components/billeteras/ContextualDrawer'
 
 interface BilleterasScreenProps {
-  onOpenContextual: () => void
+  contextualOpen: boolean
+  onContextualOpenChange: (open: boolean) => void
 }
 
-export function BilleterasScreen({ onOpenContextual }: BilleterasScreenProps) {
+export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: BilleterasScreenProps) {
   const t = useTranslations('billeteras')
   const { data: billeteras = [], isLoading } = useBilleteras()
 
@@ -125,10 +126,10 @@ export function BilleterasScreen({ onOpenContextual }: BilleterasScreenProps) {
         billetera={selectedBilletera}
       />
 
-      {/* Expuesto para uso externo desde dashboard */}
+      {/* Contextual Drawer */}
       <ContextualDrawer
-        open={false}
-        onOpenChange={() => {}}
+        open={contextualOpen}
+        onOpenChange={onContextualOpenChange}
         onAddWallet={handleCreate}
         onTransfer={() => handleTransfer()}
       />

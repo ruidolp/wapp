@@ -23,17 +23,26 @@ interface DashboardClientProps {
 
 export function DashboardClient({ locale, user }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState<TabType>('billeteras')
+  const [contextualOpen, setContextualOpen] = useState(false)
 
   // Acción contextual del botón central (+)
   const handleContextualAction = () => {
-    alert(`Acción contextual para: ${activeTab.toUpperCase()}`)
+    if (activeTab === 'billeteras') {
+      setContextualOpen(true)
+    }
+    // Otros tabs no tienen acciones contextuales por ahora
   }
 
   // Renderizar screen según tab activo
   const renderActiveScreen = () => {
     switch (activeTab) {
       case 'billeteras':
-        return <BilleterasScreen />
+        return (
+          <BilleterasScreen
+            contextualOpen={contextualOpen}
+            onContextualOpenChange={setContextualOpen}
+          />
+        )
       case 'sobres':
         return <SobresScreen />
       case 'metricas':
@@ -41,27 +50,34 @@ export function DashboardClient({ locale, user }: DashboardClientProps) {
       case 'config':
         return <ConfigScreen />
       default:
-        return <BilleterasScreen />
+        return (
+          <BilleterasScreen
+            contextualOpen={false}
+            onContextualOpenChange={() => {}}
+          />
+        )
     }
   }
 
   return (
-    <AppShell
-      header={
-        <Header
-          userName={user.name}
-          userImage={user.image}
-        />
-      }
-      footer={
-        <BottomNav
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onContextualAction={handleContextualAction}
-        />
-      }
-    >
-      {renderActiveScreen()}
-    </AppShell>
+    <>
+      <AppShell
+        header={
+          <Header
+            userName={user.name}
+            userImage={user.image}
+          />
+        }
+        footer={
+          <BottomNav
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            onContextualAction={handleContextualAction}
+          />
+        }
+      >
+        {renderActiveScreen()}
+      </AppShell>
+    </>
   )
 }

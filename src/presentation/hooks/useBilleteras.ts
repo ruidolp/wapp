@@ -14,7 +14,7 @@ export interface Billetera {
   saldo_proyectado: number
   is_compartida: boolean
   tasa_interes: number | null
-  moneda_id: string
+  moneda_principal_id: string
   usuario_id: string
   created_at: string
   updated_at: string

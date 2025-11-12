@@ -66,6 +66,7 @@ export async function POST(
       .values({
         usuario_id: session.user.id,
         billetera_id: id,
+        moneda_id: billetera.moneda_principal_id,
         tipo: monto > 0 ? 'INGRESO' : 'GASTO',
         monto: Math.abs(monto),
         descripcion: descripcion || `Ajuste de saldo: ${monto > 0 ? '+' : ''}${monto}`,

@@ -41,7 +41,7 @@ export async function GET(
     const sobresVinculados = await db
       .selectFrom('sobres')
       .select(['id', 'nombre', 'presupuesto_asignado'])
-      .where('moneda_principal_id', '=', billetera.moneda_id)
+      .where('moneda_principal_id', '=', billetera.moneda_principal_id)
       .where('usuario_id', '=', session.user.id)
       .where('deleted_at', 'is', null)
       .execute()
