@@ -17,9 +17,6 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ activeTab, onTabChange, onContextualAction }: BottomNavProps) {
-  // Mostrar MailOpen solo cuando está en billeteras o sobres
-  const showSobresIcon = activeTab === 'billeteras' || activeTab === 'sobres'
-
   return (
     <div className="h-full flex items-center justify-around border-t bg-card px-2">
       {/* BILLETERAS */}
@@ -30,23 +27,20 @@ export function BottomNav({ activeTab, onTabChange, onContextualAction }: Bottom
         onClick={() => onTabChange('billeteras')}
       />
 
-      {/* SOBRES */}
-      <div className="flex flex-col items-center justify-center relative flex-1">
+      {/* SOBRES + BUTTON CONTEXTUAL */}
+      <div className="flex-1 flex flex-col items-center justify-center relative">
+        {/* Botón Contextual Central - Simple + sin icono */}
         <Button
           variant="ghost"
           size="icon"
           onClick={onContextualAction}
-          className="absolute top-0 h-12 w-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 z-10"
+          className="h-12 w-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
         >
           <Plus className="h-6 w-6" />
         </Button>
-        <NavButton
-          icon={MailOpen}
-          label="SOBRES"
-          active={activeTab === 'sobres'}
-          onClick={() => onTabChange('sobres')}
-          className={showSobresIcon ? 'opacity-0' : ''}
-        />
+
+        {/* Etiqueta SOBRES (invisible pero mantiene layout) */}
+        <span className="text-[10px] font-medium text-muted-foreground invisible">SOBRES</span>
       </div>
 
       {/* MÉTRICAS */}
@@ -73,14 +67,13 @@ interface NavButtonProps {
   label: string
   active: boolean
   onClick: () => void
-  className?: string
 }
 
-function NavButton({ icon: Icon, label, active, onClick, className = '' }: NavButtonProps) {
+function NavButton({ icon: Icon, label, active, onClick }: NavButtonProps) {
   return (
     <button
       onClick={onClick}
-      className={`flex flex-1 flex-col items-center justify-center gap-1 py-2 ${className}`}
+      className="flex flex-1 flex-col items-center justify-center gap-1 py-2"
     >
       <Icon
         className={`h-5 w-5 ${
