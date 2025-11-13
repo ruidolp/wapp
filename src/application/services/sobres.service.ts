@@ -526,3 +526,78 @@ export async function obtenerCategoriasSobre(
   }
 }
 
+/**
+ * ============================================================================
+ * OPERACIONES DE PRESUPUESTO (Budget operations)
+ * ============================================================================
+ */
+
+/**
+ * Obtener asignaciones de presupuesto de un sobre
+ * Retorna billeteras asignadas con sus montos
+ */
+export async function obtenerAsignacionesSobre(
+  sobreId: string,
+  userId: string
+): Promise<SobreResult> {
+  try {
+    // Verificar que el sobre existe y el usuario tiene acceso
+    const sobreResult = await obtenerSobre(sobreId, userId)
+    if (!sobreResult.success) {
+      return sobreResult
+    }
+
+    const { findAsignacionesBySobre, getResumenAsignacionesBySobre } =
+      await import('@/infrastructure/database/queries/sobres.queries')
+
+    const asignaciones = await findAsignacionesBySobre(sobreId)
+    const resumen = await getResumenAsignacionesBySobre(sobreId)
+
+    return {
+      success: true,
+      data: {
+        asignaciones,
+        resumen,
+      },
+    }
+  } catch (error) {
+    console.error('Error al obtener asignaciones:', error)
+    return {
+      success: false,
+      error: 'Error al obtener asignaciones',
+    }
+  }
+}
+
+/**
+ * Obtener asignaciones de un usuario específico en un sobre
+ */
+export async function obtenerAsignacionesUsuarioInSobre(
+  sobreId: string,
+  userId: string
+): Promise<SobreResult> {
+  try {
+    // Verificar que el sobre existe y el usuario tiene acceso
+    const sobreResult = await obtenerSobre(sobreId, userId)
+    if (!sobreResult.success) {
+      return sobreResult
+    }
+
+    const { findAsignacionesByUsuarioInSobre } =
+      await import('@/infrastructure/database/queries/sobres.queries')
+
+    const asignaciones = await findAsignacionesByUsuarioInSobre(sobreId, userId)
+
+    return {
+      success: true,
+      data: asignaciones,
+    }
+  } catch (error) {
+    console.error('Error al obtener asignaciones del usuario:', error)
+    return {
+      success: false,
+      error: 'Error al obtener asignaciones',
+    }
+  }
+}
+
