@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { nombre, tipo, monedaPrincipalId, saldoInicial, color, emoji, isCompartida, tasaInteres } = body
+    const { nombre, tipo, monedaPrincipalId, saldoInicial, color, emoji, isCompartida } = body
 
     // Validaciones
     if (!nombre || !tipo) {
@@ -86,7 +86,6 @@ export async function POST(req: NextRequest) {
       color,
       emoji,
       isCompartida,
-      tasaInteres,
       userId: session.user.id,
     })
 

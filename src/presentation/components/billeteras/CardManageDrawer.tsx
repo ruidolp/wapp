@@ -53,8 +53,6 @@ export function CardManageDrawer({
   const [nombre, setNombre] = useState('')
   const [tipo, setTipo] = useState<typeof TIPOS[number]>('DEBITO')
   const [isCompartida, setIsCompartida] = useState(false)
-  const [tieneInteres, setTieneInteres] = useState(false)
-  const [tasaInteres, setTasaInteres] = useState('')
   const [saldoInicial, setSaldoInicial] = useState('')
 
   // Reset form cuando abre/cierra o cambia billetera
@@ -64,15 +62,11 @@ export function CardManageDrawer({
         setNombre(billetera.nombre)
         setTipo(billetera.tipo)
         setIsCompartida(billetera.is_compartida)
-        setTieneInteres(!!billetera.tasa_interes)
-        setTasaInteres(billetera.tasa_interes?.toString() || '')
         setSaldoInicial('')
       } else {
         setNombre('')
         setTipo('DEBITO')
         setIsCompartida(false)
-        setTieneInteres(false)
-        setTasaInteres('')
         setSaldoInicial('')
       }
     }
@@ -81,27 +75,21 @@ export function CardManageDrawer({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const tasaInteresValue = tieneInteres && tasaInteres
-      ? parseFloat(tasaInteres)
-      : null
-
     if (isEdit && billetera) {
       // Actualizar billetera
       await updateMutation.mutateAsync({
         id: billetera.id,
         nombre,
         tipo,
-        isCompartida: isCompartida,
-        tasaInteres: tasaInteresValue,
+        is_compartida: isCompartida,
       })
     } else {
       // Crear billetera
       await createMutation.mutateAsync({
         nombre,
         tipo,
-        saldoInicial: parseFloat(saldoInicial) || 0,
-        isCompartida: isCompartida,
-        tasaInteres: tasaInteresValue,
+        saldo_inicial: parseFloat(saldoInicial) || 0,
+        is_compartida: isCompartida,
       })
     }
 
@@ -165,35 +153,6 @@ export function CardManageDrawer({
               </p>
             </div>
             <Switch checked={isCompartida} onCheckedChange={setIsCompartida} />
-          </div>
-
-          {/* Interés */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between rounded-lg border p-3">
-              <div className="space-y-0.5">
-                <Label>{t('fields.interest')}</Label>
-                <p className="text-sm text-muted-foreground">
-                  {t('fields.interestDescription')}
-                </p>
-              </div>
-              <Switch checked={tieneInteres} onCheckedChange={setTieneInteres} />
-            </div>
-
-            {tieneInteres && (
-              <div className="space-y-2">
-                <Label htmlFor="tasaInteres">
-                  {t('fields.interestRate')}
-                </Label>
-                <Input
-                  id="tasaInteres"
-                  type="number"
-                  step="0.01"
-                  value={tasaInteres}
-                  onChange={(e) => setTasaInteres(e.target.value)}
-                  placeholder={t('fields.interestRatePlaceholder')}
-                />
-              </div>
-            )}
           </div>
 
           {/* Saldo Inicial (solo crear) */}
