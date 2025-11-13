@@ -18,8 +18,11 @@
 -- No schema changes needed - tipo is TEXT, already flexible
 -- This migration serves as documentation and validation layer
 
+-- Drop existing type if it exists (safe to run multiple times)
+DROP TYPE IF EXISTS billetera_transaccion_tipo CASCADE;
+
 -- Create enum type for reference (PostgreSQL best practice)
-CREATE TYPE IF NOT EXISTS billetera_transaccion_tipo AS ENUM (
+CREATE TYPE billetera_transaccion_tipo AS ENUM (
   'CREACION',
   'DEPOSITO',
   'RETIRO',
