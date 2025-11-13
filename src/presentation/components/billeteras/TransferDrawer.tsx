@@ -3,7 +3,7 @@
  */
 
 import { useTranslations } from 'next-intl'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
@@ -13,6 +13,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerBody,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,6 +28,7 @@ import {
   useTransferBetween,
   type Billetera,
 } from '@/presentation/hooks/useBilleteras'
+import { useInputFocus } from '@/presentation/hooks/useInputFocus'
 import { notify } from '@/infrastructure/lib/notifications'
 
 interface TransferDrawerProps {
@@ -44,6 +46,12 @@ export function TransferDrawer({
 }: TransferDrawerProps) {
   const t = useTranslations('billeteras')
   const transferMutation = useTransferBetween()
+
+  // Refs para inputs
+  const montoInputRef = useRef<HTMLInputElement>(null)
+
+  // Hook para auto-scroll en inputs
+  useInputFocus(montoInputRef, 350)
 
   const [fromId, setFromId] = useState('')
   const [toId, setToId] = useState('')
@@ -121,83 +129,87 @@ export function TransferDrawer({
           <DrawerTitle>{t('transfer.title')}</DrawerTitle>
         </DrawerHeader>
 
-        <form onSubmit={handleSubmit} className="px-4 space-y-4">
-          {/* Desde */}
-          <div className="space-y-2">
-            <Label htmlFor="from">
-              {t('transfer.from')} <span className="text-red-500">*</span>
-            </Label>
-            <Select value={fromId} onValueChange={setFromId}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('transfer.selectOrigin')} />
-              </SelectTrigger>
-              <SelectContent>
-                {billeteras.map((b) => (
-                  <SelectItem key={b.id} value={b.id}>
-                    {b.nombre} (${Number(b.saldo_real).toFixed(2)})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <DrawerBody>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Desde */}
+            <div className="space-y-2">
+              <Label htmlFor="from">
+                {t('transfer.from')} <span className="text-red-500">*</span>
+              </Label>
+              <Select value={fromId} onValueChange={setFromId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('transfer.selectOrigin')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {billeteras.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>
+                      {b.nombre} (${Number(b.saldo_real).toFixed(2)})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Hacia */}
-          <div className="space-y-2">
-            <Label htmlFor="to">
-              {t('transfer.to')} <span className="text-red-500">*</span>
-            </Label>
-            <Select value={toId} onValueChange={setToId} disabled={!fromId}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('transfer.selectDestination')} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableDestinations.map((b) => (
-                  <SelectItem key={b.id} value={b.id}>
-                    {b.nombre} (${Number(b.saldo_real).toFixed(2)})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            {/* Hacia */}
+            <div className="space-y-2">
+              <Label htmlFor="to">
+                {t('transfer.to')} <span className="text-red-500">*</span>
+              </Label>
+              <Select value={toId} onValueChange={setToId} disabled={!fromId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('transfer.selectDestination')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableDestinations.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>
+                      {b.nombre} (${Number(b.saldo_real).toFixed(2)})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Monto */}
-          <div className="space-y-2">
-            <Label htmlFor="monto">
-              {t('transfer.amount')} <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="monto"
-              type="number"
-              step="0.01"
-              min="0.01"
-              value={monto}
-              onChange={(e) => setMonto(e.target.value)}
-              placeholder={t('transfer.amountPlaceholder')}
-              required
-            />
-          </div>
+            {/* Monto */}
+            <div className="space-y-2">
+              <Label htmlFor="monto">
+                {t('transfer.amount')} <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                ref={montoInputRef}
+                id="monto"
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={monto}
+                onChange={(e) => setMonto(e.target.value)}
+                placeholder={t('transfer.amountPlaceholder')}
+                required
+              />
+            </div>
+          </form>
+        </DrawerBody>
 
-          <DrawerFooter className="px-0 pt-4 pb-2">
+        <DrawerFooter>
+          <Button
+            type="submit"
+            disabled={transferMutation.isPending || !fromId || !toId}
+            className="w-full"
+            onClick={handleSubmit}
+          >
+            {transferMutation.isPending
+              ? t('transfer.submitting')
+              : t('transfer.submit')}
+          </Button>
+          <DrawerClose asChild>
             <Button
-              type="submit"
-              disabled={transferMutation.isPending || !fromId || !toId}
+              variant="outline"
+              disabled={transferMutation.isPending}
               className="w-full"
             >
-              {transferMutation.isPending
-                ? t('transfer.submitting')
-                : t('transfer.submit')}
+              {t('delete.cancel')}
             </Button>
-            <DrawerClose asChild>
-              <Button
-                variant="outline"
-                disabled={transferMutation.isPending}
-                className="w-full mb-4"
-              >
-                {t('delete.cancel')}
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </form>
+          </DrawerClose>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   )

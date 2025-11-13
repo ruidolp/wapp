@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { HexColorPicker } from 'react-colorful'
 import { Button } from '@/components/ui/button'
@@ -12,10 +12,12 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerBody,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { notify } from '@/infrastructure/lib/notifications'
+import { useInputFocus } from '@/presentation/hooks/useInputFocus'
 
 interface CrearSobreDrawerProps {
   open: boolean
@@ -50,6 +52,16 @@ export function CrearSobreDrawer({
   const [color, setColor] = useState(COLORES_SUGERIDOS[0])
   const [emoji, setEmoji] = useState(EMOJIS_SUGERIDOS[0])
   const [showColorPicker, setShowColorPicker] = useState(false)
+
+  // Refs for input focus
+  const nombreRef = useRef<HTMLInputElement>(null)
+  const presupuestoRef = useRef<HTMLInputElement>(null)
+  const colorHexRef = useRef<HTMLInputElement>(null)
+
+  // Focus handlers
+  useInputFocus(nombreRef, 350)
+  useInputFocus(presupuestoRef, 350)
+  useInputFocus(colorHexRef, 350)
 
   // Cargar sobres existentes para validar duplicados
   useEffect(() => {
@@ -143,37 +155,40 @@ export function CrearSobreDrawer({
           </DrawerDescription>
         </DrawerHeader>
 
-        <form onSubmit={handleSubmit} className="px-4 space-y-4">
-          {/* Nombre */}
-          <div className="space-y-2">
-            <Label htmlFor="nombre">
-              Nombre <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="nombre"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              placeholder="Ej: Hogar, Comida, Transporte"
-              required
-            />
-          </div>
+        <DrawerBody>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Nombre */}
+            <div className="space-y-2">
+              <Label htmlFor="nombre">
+                Nombre <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                ref={nombreRef}
+                id="nombre"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                placeholder="Ej: Hogar, Comida, Transporte"
+                required
+              />
+            </div>
 
-          {/* Presupuesto */}
-          <div className="space-y-2">
-            <Label htmlFor="presupuesto">
-              Presupuesto Asignado <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="presupuesto"
-              type="number"
-              step="0.01"
-              min="0"
-              value={presupuesto}
-              onChange={(e) => setPresupuesto(e.target.value)}
-              placeholder="0"
-              required
-            />
-          </div>
+            {/* Presupuesto */}
+            <div className="space-y-2">
+              <Label htmlFor="presupuesto">
+                Presupuesto Asignado <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                ref={presupuestoRef}
+                id="presupuesto"
+                type="number"
+                step="0.01"
+                min="0"
+                value={presupuesto}
+                onChange={(e) => setPresupuesto(e.target.value)}
+                placeholder="0"
+                required
+              />
+            </div>
 
           {/* Emoji */}
           <div className="space-y-2">
@@ -243,6 +258,7 @@ export function CrearSobreDrawer({
                     style={{ backgroundColor: color }}
                   />
                   <Input
+                    ref={colorHexRef}
                     type="text"
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
@@ -252,22 +268,23 @@ export function CrearSobreDrawer({
               </div>
             )}
           </div>
+          </form>
+        </DrawerBody>
 
-          <DrawerFooter className="px-0 pt-4 pb-2">
-            <Button
-              type="submit"
-              disabled={loading || !nombre.trim()}
-              className="w-full"
-            >
-              {loading ? 'Creando...' : 'Crear Sobre'}
+        <DrawerFooter>
+          <Button
+            onClick={handleSubmit}
+            disabled={loading || !nombre.trim()}
+            className="w-full"
+          >
+            {loading ? 'Creando...' : 'Crear Sobre'}
+          </Button>
+          <DrawerClose asChild>
+            <Button variant="outline" disabled={loading} className="w-full mb-4">
+              Cancelar
             </Button>
-            <DrawerClose asChild>
-              <Button variant="outline" disabled={loading} className="w-full mb-4">
-                Cancelar
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </form>
+          </DrawerClose>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   )

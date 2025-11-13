@@ -7,6 +7,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerDescription,
+  DrawerBody,
 } from '@/components/ui/drawer'
 
 interface ProfileDrawerProps {
@@ -55,7 +56,7 @@ export function ProfileDrawer({
         </DrawerHeader>
 
         {/* Contenido del menú */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <DrawerBody>
           <div className="space-y-2">
             {/* Botón Cerrar Sesión */}
             <button
@@ -81,7 +82,7 @@ export function ProfileDrawer({
             {/* Más opciones de menú en el futuro */}
             {/* <button>...</button> */}
           </div>
-        </div>
+        </DrawerBody>
       </DrawerContent>
     </Drawer>
   )

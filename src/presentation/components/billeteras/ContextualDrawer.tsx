@@ -13,6 +13,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerBody,
 } from '@/components/ui/drawer'
 
 interface ContextualDrawerProps {
@@ -47,55 +48,57 @@ export function ContextualDrawer({
           </DrawerDescription>
         </DrawerHeader>
 
-        <div className="px-4 space-y-2 pb-4">
-          <Button
-            variant="outline"
-            className="w-full h-14 flex items-center justify-start gap-3"
-            onClick={() => handleAction(onAddWallet)}
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <Wallet className="h-5 w-5 text-primary" />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="font-medium">{t('actions.addCard')}</p>
-              <p className="text-sm text-muted-foreground">
-                {t('emptyDescription')}
-              </p>
-            </div>
-          </Button>
+        <DrawerBody>
+          <div className="space-y-2">
+            <Button
+              variant="outline"
+              className="w-full h-14 flex items-center justify-start gap-3"
+              onClick={() => handleAction(onAddWallet)}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Wallet className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-medium">{t('actions.addCard')}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t('emptyDescription')}
+                </p>
+              </div>
+            </Button>
 
-          <Button
-            variant="outline"
-            className="w-full h-14 flex items-center justify-start gap-3"
-            onClick={() => handleAction(onTransfer)}
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <ArrowRightLeft className="h-5 w-5 text-primary" />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="font-medium">{t('actions.transfer')}</p>
-              <p className="text-sm text-muted-foreground">
-                {t('contextual.transferDescription')}
-              </p>
-            </div>
-          </Button>
+            <Button
+              variant="outline"
+              className="w-full h-14 flex items-center justify-start gap-3"
+              onClick={() => handleAction(onTransfer)}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <ArrowRightLeft className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-medium">{t('actions.transfer')}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t('contextual.transferDescription')}
+                </p>
+              </div>
+            </Button>
 
-          <Button
-            variant="outline"
-            className="w-full h-14 flex items-center justify-start gap-3"
-            onClick={() => handleAction(onDeposito)}
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <Plus className="h-5 w-5 text-primary" />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="font-medium">{t('contextual.depositoLabel')}</p>
-              <p className="text-sm text-muted-foreground">
-                {t('contextual.depositoDescription')}
-              </p>
-            </div>
-          </Button>
-        </div>
+            <Button
+              variant="outline"
+              className="w-full h-14 flex items-center justify-start gap-3"
+              onClick={() => handleAction(onDeposito)}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Plus className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-medium">{t('contextual.depositoLabel')}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t('contextual.depositoDescription')}
+                </p>
+              </div>
+            </Button>
+          </div>
+        </DrawerBody>
 
         <DrawerFooter>
           <DrawerClose asChild>

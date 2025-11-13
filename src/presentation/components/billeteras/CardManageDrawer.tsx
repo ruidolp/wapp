@@ -3,7 +3,7 @@
  */
 
 import { useTranslations } from 'next-intl'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
@@ -13,6 +13,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerBody,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,6 +30,7 @@ import {
   useUpdateBilletera,
   type Billetera,
 } from '@/presentation/hooks/useBilleteras'
+import { useInputFocus } from '@/presentation/hooks/useInputFocus'
 
 interface CardManageDrawerProps {
   open: boolean
@@ -48,6 +50,16 @@ export function CardManageDrawer({
 
   const createMutation = useCreateBilletera()
   const updateMutation = useUpdateBilletera()
+
+  // Refs para inputs
+  const nombreInputRef = useRef<HTMLInputElement>(null)
+  const saldoInputRef = useRef<HTMLInputElement>(null)
+  const tasaInputRef = useRef<HTMLInputElement>(null)
+
+  // Hook para auto-scroll en inputs
+  useInputFocus(nombreInputRef, 350)
+  useInputFocus(saldoInputRef, 350)
+  useInputFocus(tasaInputRef, 350)
 
   // Form state
   const [nombre, setNombre] = useState('')
@@ -122,111 +134,116 @@ export function CardManageDrawer({
           </DrawerDescription>
         </DrawerHeader>
 
-        <form onSubmit={handleSubmit} className="px-4 space-y-4">
-          {/* Nombre */}
-          <div className="space-y-2">
-            <Label htmlFor="nombre">
-              {t('fields.name')} <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="nombre"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              placeholder={t('fields.namePlaceholder')}
-              required
-            />
-          </div>
-
-          {/* Tipo */}
-          <div className="space-y-2">
-            <Label htmlFor="tipo">
-              {t('fields.type')} <span className="text-red-500">*</span>
-            </Label>
-            <Select value={tipo} onValueChange={(v) => setTipo(v as typeof TIPOS[number])}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TIPOS.map((t_tipo) => (
-                  <SelectItem key={t_tipo} value={t_tipo}>
-                    {t(`types.${t_tipo}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Compartida */}
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div className="space-y-0.5">
-              <Label>{t('fields.shared')}</Label>
-              <p className="text-sm text-muted-foreground">
-                {t('fields.sharedDescription')}
-              </p>
-            </div>
-            <Switch checked={isCompartida} onCheckedChange={setIsCompartida} />
-          </div>
-
-          {/* Interés */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between rounded-lg border p-3">
-              <div className="space-y-0.5">
-                <Label>{t('fields.interest')}</Label>
-                <p className="text-sm text-muted-foreground">
-                  {t('fields.interestDescription')}
-                </p>
-              </div>
-              <Switch checked={tieneInteres} onCheckedChange={setTieneInteres} />
-            </div>
-
-            {tieneInteres && (
-              <div className="space-y-2">
-                <Label htmlFor="tasaInteres">
-                  {t('fields.interestRate')}
-                </Label>
-                <Input
-                  id="tasaInteres"
-                  type="number"
-                  step="0.01"
-                  value={tasaInteres}
-                  onChange={(e) => setTasaInteres(e.target.value)}
-                  placeholder={t('fields.interestRatePlaceholder')}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Saldo Inicial (solo crear) */}
-          {!isEdit && (
+        <DrawerBody>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Nombre */}
             <div className="space-y-2">
-              <Label htmlFor="saldoInicial">
-                {t('fields.initialBalance')} <span className="text-red-500">*</span>
+              <Label htmlFor="nombre">
+                {t('fields.name')} <span className="text-red-500">*</span>
               </Label>
               <Input
-                id="saldoInicial"
-                type="number"
-                step="0.01"
-                value={saldoInicial}
-                onChange={(e) => setSaldoInicial(e.target.value)}
-                placeholder={t('fields.initialBalancePlaceholder')}
+                ref={nombreInputRef}
+                id="nombre"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                placeholder={t('fields.namePlaceholder')}
                 required
               />
             </div>
-          )}
 
-          <DrawerFooter className="px-0 pt-4 pb-2">
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading
-                ? isEdit ? t('edit.submitting') : t('create.submitting')
-                : isEdit ? t('edit.submit') : t('create.submit')}
+            {/* Tipo */}
+            <div className="space-y-2">
+              <Label htmlFor="tipo">
+                {t('fields.type')} <span className="text-red-500">*</span>
+              </Label>
+              <Select value={tipo} onValueChange={(v) => setTipo(v as typeof TIPOS[number])}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIPOS.map((t_tipo) => (
+                    <SelectItem key={t_tipo} value={t_tipo}>
+                      {t(`types.${t_tipo}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Compartida */}
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="space-y-0.5">
+                <Label>{t('fields.shared')}</Label>
+                <p className="text-sm text-muted-foreground">
+                  {t('fields.sharedDescription')}
+                </p>
+              </div>
+              <Switch checked={isCompartida} onCheckedChange={setIsCompartida} />
+            </div>
+
+            {/* Interés */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div className="space-y-0.5">
+                  <Label>{t('fields.interest')}</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {t('fields.interestDescription')}
+                  </p>
+                </div>
+                <Switch checked={tieneInteres} onCheckedChange={setTieneInteres} />
+              </div>
+
+              {tieneInteres && (
+                <div className="space-y-2">
+                  <Label htmlFor="tasaInteres">
+                    {t('fields.interestRate')}
+                  </Label>
+                  <Input
+                    ref={tasaInputRef}
+                    id="tasaInteres"
+                    type="number"
+                    step="0.01"
+                    value={tasaInteres}
+                    onChange={(e) => setTasaInteres(e.target.value)}
+                    placeholder={t('fields.interestRatePlaceholder')}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Saldo Inicial (solo crear) */}
+            {!isEdit && (
+              <div className="space-y-2">
+                <Label htmlFor="saldoInicial">
+                  {t('fields.initialBalance')} <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  ref={saldoInputRef}
+                  id="saldoInicial"
+                  type="number"
+                  step="0.01"
+                  value={saldoInicial}
+                  onChange={(e) => setSaldoInicial(e.target.value)}
+                  placeholder={t('fields.initialBalancePlaceholder')}
+                  required
+                />
+              </div>
+            )}
+          </form>
+        </DrawerBody>
+
+        <DrawerFooter>
+          <Button type="submit" disabled={loading} className="w-full" onClick={handleSubmit}>
+            {loading
+              ? isEdit ? t('edit.submitting') : t('create.submitting')
+              : isEdit ? t('edit.submit') : t('create.submit')}
+          </Button>
+          <DrawerClose asChild>
+            <Button variant="outline" disabled={loading} className="w-full">
+              {t('delete.cancel')}
             </Button>
-            <DrawerClose asChild>
-              <Button variant="outline" disabled={loading} className="w-full mb-4">
-                {t('delete.cancel')}
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </form>
+          </DrawerClose>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   )
