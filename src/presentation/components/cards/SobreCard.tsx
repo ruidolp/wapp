@@ -43,9 +43,13 @@ export function SobreCard({
   onDetalle,
   onDevolver,
 }: SobreCardProps) {
-  const presupuestoLibre = presupuestoAsignado - gastado
-  const porcentajeGastado = presupuestoAsignado > 0 ? (gastado / presupuestoAsignado) * 100 : 0
-  const isOverspent = gastado > presupuestoAsignado
+  // Asegurar que son números (pueden venir como strings/Decimal de la BD)
+  const presupuesto = Number(presupuestoAsignado) || 0
+  const gastadoNum = Number(gastado) || 0
+
+  const presupuestoLibre = presupuesto - gastadoNum
+  const porcentajeGastado = presupuesto > 0 ? (gastadoNum / presupuesto) * 100 : 0
+  const isOverspent = gastadoNum > presupuesto
 
   // Agrupar asignaciones por pares (2 billeteras por fila)
   const pares = useMemo(() => {
@@ -63,18 +67,15 @@ export function SobreCard({
       className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
       onClick={onDetalle}
     >
-      {/* Header con color y emoji */}
+      {/* Header con color */}
       <div
-        className="p-4 text-white flex items-center gap-3"
+        className="p-4 text-white"
         style={{ backgroundColor: bgColor }}
       >
-        <span className="text-3xl">{emoji || '📋'}</span>
-        <div className="flex-1">
-          <h3 className="font-bold text-lg">{nombre}</h3>
-          <p className="text-sm opacity-90">
-            ${presupuestoAsignado.toFixed(2)}
-          </p>
-        </div>
+        <h3 className="font-bold text-lg">{nombre}</h3>
+        <p className="text-sm opacity-90">
+          ${presupuesto.toFixed(2)}
+        </p>
       </div>
 
       {/* Contenido */}
@@ -83,13 +84,13 @@ export function SobreCard({
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="font-medium">
-              Gastado: ${gastado.toFixed(2)}
+              Gastado: ${gastadoNum.toFixed(2)}
             </span>
             <span className={`font-medium ${
               isOverspent ? 'text-red-600' : 'text-green-600'
             }`}>
               {isOverspent
-                ? `Exceso: $${(gastado - presupuestoAsignado).toFixed(2)}`
+                ? `Exceso: $${(gastadoNum - presupuesto).toFixed(2)}`
                 : `Libre: $${presupuestoLibre.toFixed(2)}`}
             </span>
           </div>
@@ -123,10 +124,10 @@ export function SobreCard({
                     className="p-2 rounded-lg border bg-slate-50 space-y-1"
                   >
                     <p className="text-xs font-medium truncate">
-                      {asignacion.billetera?.emoji} {asignacion.billetera?.nombre}
+                      {asignacion.billetera?.nombre}
                     </p>
                     <p className="text-sm font-bold">
-                      ${asignacion.monto_asignado.toFixed(2)}
+                      ${Number(asignacion.monto_asignado || 0).toFixed(2)}
                     </p>
                   </div>
                 ))}

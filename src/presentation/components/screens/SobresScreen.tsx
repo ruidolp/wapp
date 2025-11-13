@@ -89,12 +89,17 @@ export function SobresScreen({ userId }: { userId: string }) {
     console.log('Detalle de sobre:', sobre.id)
   }
 
-  const handleCrearSobreSuccess = () => {
+  const handleSobreCreated = (sobre: Sobre) => {
+    // Actualizar lista de sobres
     fetchSobres()
+    // Automáticamente abrir AgregarPresupuestoDrawer para asignar presupuesto
+    setSobreSeleccionado(sobre)
+    setAgregarPresupuestoOpen(true)
   }
 
   const handleAgregarPresupuestoSuccess = () => {
     fetchSobres()
+    setAgregarPresupuestoOpen(false)
   }
 
   return (
@@ -150,6 +155,7 @@ export function SobresScreen({ userId }: { userId: string }) {
         open={crearSobreOpen}
         onOpenChange={setCrearSobreOpen}
         userId={userId}
+        onSobreCreated={handleSobreCreated}
       />
 
       <AgregarPresupuestoDrawer
