@@ -28,8 +28,8 @@ export function BottomNav({ activeTab, onTabChange, onContextualAction }: Bottom
       />
 
       {/* SOBRES + BUTTON CONTEXTUAL */}
-      <div className="flex-1 flex flex-col items-center justify-center relative">
-        {/* Botón Contextual Central - Simple + sin icono */}
+      <div className="flex-1 flex flex-col items-center justify-center">
+        {/* Botón Contextual Central - Simple + */}
         <Button
           variant="ghost"
           size="icon"
@@ -39,8 +39,8 @@ export function BottomNav({ activeTab, onTabChange, onContextualAction }: Bottom
           <Plus className="h-6 w-6" />
         </Button>
 
-        {/* Etiqueta SOBRES (invisible pero mantiene layout) */}
-        <span className="text-[10px] font-medium text-muted-foreground invisible">SOBRES</span>
+        {/* Icono de SOBRES siempre visible */}
+        <MailOpen className="h-5 w-5 text-muted-foreground" />
       </div>
 
       {/* MÉTRICAS */}
