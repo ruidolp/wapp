@@ -10,6 +10,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerBody,
 } from '@/components/ui/drawer'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -55,6 +56,9 @@ export function OnboardingDrawer({ open, onOpenChange }: OnboardingDrawerProps) 
 
   // Detectar locale del navegador
   const [locale, setLocale] = useState('es-CL')
+
+  // Note: Select components don't need useInputFocus as they open as dropdowns
+  // and don't push content off screen like text inputs do on mobile
 
   useEffect(() => {
     // Detectar locale automáticamente
@@ -134,84 +138,86 @@ export function OnboardingDrawer({ open, onOpenChange }: OnboardingDrawerProps) 
           </DrawerDescription>
         </DrawerHeader>
 
-        <form onSubmit={handleSubmit} className="px-4 pb-4 space-y-6">
-          {/* Moneda Principal */}
-          <div className="space-y-2">
-            <Label htmlFor="moneda" className="text-base font-medium">
-              Moneda Principal <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              value={monedaSeleccionada}
-              onValueChange={setMonedaSeleccionada}
-              disabled={loadingMonedas}
-            >
-              <SelectTrigger id="moneda">
-                <SelectValue placeholder="Selecciona tu moneda" />
-              </SelectTrigger>
-              <SelectContent>
-                {monedas.map((moneda) => (
-                  <SelectItem key={moneda.id} value={moneda.id}>
-                    {moneda.simbolo} {moneda.codigo} - {moneda.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-sm text-muted-foreground">
-              Esta será la moneda que usarás para tus billeteras y sobres
-            </p>
-          </div>
+        <DrawerBody>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Moneda Principal */}
+            <div className="space-y-2">
+              <Label htmlFor="moneda" className="text-base font-medium">
+                Moneda Principal <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={monedaSeleccionada}
+                onValueChange={setMonedaSeleccionada}
+                disabled={loadingMonedas}
+              >
+                <SelectTrigger id="moneda">
+                  <SelectValue placeholder="Selecciona tu moneda" />
+                </SelectTrigger>
+                <SelectContent>
+                  {monedas.map((moneda) => (
+                    <SelectItem key={moneda.id} value={moneda.id}>
+                      {moneda.simbolo} {moneda.codigo} - {moneda.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground">
+                Esta será la moneda que usarás para tus billeteras y sobres
+              </p>
+            </div>
 
-          {/* Timezone */}
-          <div className="space-y-2">
-            <Label htmlFor="timezone" className="text-base font-medium">
-              Zona Horaria
-            </Label>
-            <Select value={timezone} onValueChange={setTimezone}>
-              <SelectTrigger id="timezone">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TIMEZONES.map((tz) => (
-                  <SelectItem key={tz.value} value={tz.value}>
-                    {tz.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            {/* Timezone */}
+            <div className="space-y-2">
+              <Label htmlFor="timezone" className="text-base font-medium">
+                Zona Horaria
+              </Label>
+              <Select value={timezone} onValueChange={setTimezone}>
+                <SelectTrigger id="timezone">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIMEZONES.map((tz) => (
+                    <SelectItem key={tz.value} value={tz.value}>
+                      {tz.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Primer Día de la Semana */}
-          <div className="space-y-2">
-            <Label htmlFor="primer-dia" className="text-base font-medium">
-              Primer día de la semana
-            </Label>
-            <Select value={primerDiaSemana} onValueChange={setPrimerDiaSemana}>
-              <SelectTrigger id="primer-dia">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PRIMER_DIA_SEMANA.map((dia) => (
-                  <SelectItem key={dia.value} value={dia.value}>
-                    {dia.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            {/* Primer Día de la Semana */}
+            <div className="space-y-2">
+              <Label htmlFor="primer-dia" className="text-base font-medium">
+                Primer día de la semana
+              </Label>
+              <Select value={primerDiaSemana} onValueChange={setPrimerDiaSemana}>
+                <SelectTrigger id="primer-dia">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRIMER_DIA_SEMANA.map((dia) => (
+                    <SelectItem key={dia.value} value={dia.value}>
+                      {dia.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </form>
+        </DrawerBody>
 
-          <DrawerFooter className="px-0 pt-4">
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading || !monedaSeleccionada}
-            >
-              {loading ? 'Guardando...' : 'Comenzar'}
-            </Button>
-            <p className="text-xs text-center text-muted-foreground mt-2">
-              Podrás cambiar estas preferencias más adelante
-            </p>
-          </DrawerFooter>
-        </form>
+        <DrawerFooter>
+          <Button
+            onClick={handleSubmit}
+            className="w-full"
+            disabled={loading || !monedaSeleccionada}
+          >
+            {loading ? 'Guardando...' : 'Comenzar'}
+          </Button>
+          <p className="text-xs text-center text-muted-foreground mt-2">
+            Podrás cambiar estas preferencias más adelante
+          </p>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   )

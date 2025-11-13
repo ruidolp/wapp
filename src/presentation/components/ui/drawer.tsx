@@ -51,20 +51,20 @@ const DrawerContent = React.forwardRef<
         ref={ref}
         className={cn(
           'fixed z-50 flex h-auto flex-col rounded-t-[10px] border bg-background',
-          (!direction || direction === 'bottom') && 'inset-x-0 bottom-0 mt-24 max-h-[96vh]',
-          direction === 'top' && 'inset-x-0 top-0 rounded-b-[10px] rounded-t-none',
-          direction === 'right' && 'right-0 top-0 h-screen w-[90vw] max-w-md rounded-l-[10px] rounded-t-none',
-          direction === 'left' && 'left-0 top-0 h-screen w-[90vw] max-w-md rounded-r-[10px] rounded-t-none',
+          (!direction || direction === 'bottom') && 'inset-x-0 bottom-0 mt-24 max-h-[100dvh] flex flex-col',
+          direction === 'top' && 'inset-x-0 top-0 rounded-b-[10px] rounded-t-none h-[100dvh] flex flex-col',
+          direction === 'right' && 'right-0 top-0 h-[100dvh] w-[90vw] max-w-md rounded-l-[10px] rounded-t-none overflow-hidden flex flex-col',
+          direction === 'left' && 'left-0 top-0 h-[100dvh] w-[90vw] max-w-md rounded-r-[10px] rounded-t-none overflow-hidden flex flex-col',
           className
         )}
         {...props}
       >
         {(!direction || direction === 'bottom') && (
-          <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
+          <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted flex-shrink-0" />
         )}
         {children}
         {direction === 'top' && (
-          <div className="mx-auto mb-4 h-2 w-[100px] rounded-full bg-muted" />
+          <div className="mx-auto mb-4 h-2 w-[100px] rounded-full bg-muted flex-shrink-0" />
         )}
       </DrawerPrimitive.Content>
     </DrawerPortal>
@@ -78,19 +78,35 @@ const DrawerHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn('grid gap-1.5 p-4 text-center sm:text-left', className)}
+    className={cn('grid gap-1.5 p-4 text-center sm:text-left flex-shrink-0', className)}
     {...props}
   />
 )
 
 DrawerHeader.displayName = 'DrawerHeader'
 
+/**
+ * DrawerBody - Scrolleable container for drawer content
+ * Use this to wrap your form/content to allow scrolling when keyboard appears
+ */
+const DrawerBody = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn('flex-1 overflow-y-auto overflow-x-hidden px-4 py-4', className)}
+    {...props}
+  />
+)
+
+DrawerBody.displayName = 'DrawerBody'
+
 const DrawerFooter = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn('mt-auto flex flex-col gap-2 p-4', className)}
+    className={cn('flex flex-col gap-2 p-4 flex-shrink-0 border-t bg-background sticky bottom-0', className)}
     {...props}
   />
 )
@@ -128,6 +144,7 @@ DrawerDescription.displayName = DrawerPrimitive.Description.displayName
 
 export {
   Drawer,
+  DrawerBody,
   DrawerClose,
   DrawerContent,
   DrawerDescription,

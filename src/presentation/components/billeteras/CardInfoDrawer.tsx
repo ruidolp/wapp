@@ -12,6 +12,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerBody,
 } from '@/components/ui/drawer'
 import type { Billetera } from '@/presentation/hooks/useBilleteras'
 
@@ -41,53 +42,55 @@ export function CardInfoDrawer({
           <DrawerTitle>{billetera.nombre}</DrawerTitle>
         </DrawerHeader>
 
-        <div className="px-4 space-y-4">
-          {/* Tipo */}
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">
-              {t('fields.type')}
-            </p>
-            <p className="font-medium">{t(`types.${billetera.tipo}`)}</p>
-          </div>
-
-          {/* Saldo Real */}
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">
-              {t('balance.real')}
-            </p>
-            <p className={`text-2xl font-bold ${Number(billetera.saldo_real) < 0 ? 'text-red-600' : 'text-foreground'}`}>
-              ${Number(billetera.saldo_real).toFixed(2)}
-            </p>
-          </div>
-
-          {/* Saldo Proyectado */}
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">
-              {t('balance.projected')}
-            </p>
-            <p className={`text-2xl font-bold ${Number(billetera.saldo_proyectado) < 0 ? 'text-red-600' : 'text-foreground'}`}>
-              ${Number(billetera.saldo_proyectado).toFixed(2)}
-            </p>
-          </div>
-
-          {/* Compartida */}
-          {billetera.is_compartida && (
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-primary" />
-              <p className="text-sm">{t('fields.shared')}</p>
-            </div>
-          )}
-
-          {/* Interés */}
-          {billetera.tasa_interes && (
+        <DrawerBody>
+          <div className="space-y-4">
+            {/* Tipo */}
             <div>
               <p className="text-sm text-muted-foreground mb-1">
-                {t('fields.interestRate')}
+                {t('fields.type')}
               </p>
-              <p className="font-medium">{billetera.tasa_interes}%</p>
+              <p className="font-medium">{t(`types.${billetera.tipo}`)}</p>
             </div>
-          )}
-        </div>
+
+            {/* Saldo Real */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">
+                {t('balance.real')}
+              </p>
+              <p className={`text-2xl font-bold ${Number(billetera.saldo_real) < 0 ? 'text-red-600' : 'text-foreground'}`}>
+                ${Number(billetera.saldo_real).toFixed(2)}
+              </p>
+            </div>
+
+            {/* Saldo Proyectado */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">
+                {t('balance.projected')}
+              </p>
+              <p className={`text-2xl font-bold ${Number(billetera.saldo_proyectado) < 0 ? 'text-red-600' : 'text-foreground'}`}>
+                ${Number(billetera.saldo_proyectado).toFixed(2)}
+              </p>
+            </div>
+
+            {/* Compartida */}
+            {billetera.is_compartida && (
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-primary" />
+                <p className="text-sm">{t('fields.shared')}</p>
+              </div>
+            )}
+
+            {/* Interés */}
+            {billetera.tasa_interes && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  {t('fields.interestRate')}
+                </p>
+                <p className="font-medium">{billetera.tasa_interes}%</p>
+              </div>
+            )}
+          </div>
+        </DrawerBody>
 
         <DrawerFooter>
           <Button onClick={onEdit} className="w-full">
