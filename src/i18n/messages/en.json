@@ -407,7 +407,7 @@
       "invalidAmount": "Invalid amount"
     },
     "deposit": {
-      "title": "Deposit or Withdraw",
+      "title": "Deposit",
       "tabLabel": "Deposit",
       "description": "Record incoming or outgoing money",
       "submit": "Record",
