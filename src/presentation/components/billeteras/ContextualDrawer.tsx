@@ -3,7 +3,7 @@
  */
 
 import { useTranslations } from 'next-intl'
-import { Wallet, ArrowRightLeft } from 'lucide-react'
+import { Wallet, ArrowRightLeft, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
@@ -20,6 +20,7 @@ interface ContextualDrawerProps {
   onOpenChange: (open: boolean) => void
   onAddWallet: () => void
   onTransfer: () => void
+  onDeposito: () => void
 }
 
 export function ContextualDrawer({
@@ -27,6 +28,7 @@ export function ContextualDrawer({
   onOpenChange,
   onAddWallet,
   onTransfer,
+  onDeposito,
 }: ContextualDrawerProps) {
   const t = useTranslations('billeteras')
 
@@ -74,6 +76,22 @@ export function ContextualDrawer({
               <p className="font-medium">{t('actions.transfer')}</p>
               <p className="text-sm text-muted-foreground">
                 {t('contextual.transferDescription')}
+              </p>
+            </div>
+          </Button>
+
+          <Button
+            variant="outline"
+            className="w-full h-14 flex items-center justify-start gap-3"
+            onClick={() => handleAction(onDeposito)}
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+              <Plus className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="font-medium">{t('contextual.depositoLabel')}</p>
+              <p className="text-sm text-muted-foreground">
+                {t('contextual.depositoDescription')}
               </p>
             </div>
           </Button>

@@ -42,6 +42,7 @@ export type ThemeCategory = 'preestablished' | 'custom'
  */
 export type TipoMoneda = 'FIAT' | 'INDICE' | 'CRYPTO'
 export type TipoBilletera = 'DEBITO' | 'CREDITO' | 'EFECTIVO' | 'AHORRO' | 'INVERSION' | 'PRESTAMO'
+export type TipoBilleteraTransaccion = 'CREACION' | 'DEPOSITO' | 'RETIRO' | 'TRANSFERENCIA' | 'AJUSTE'
 export type TipoSobre = 'GASTO' | 'AHORRO' | 'DEUDA'
 export type TipoTransaccion = 'GASTO' | 'INGRESO' | 'TRANSFERENCIA' | 'DEPOSITO' | 'PAGO_TC' | 'AJUSTE'
 export type FrecuenciaIngreso = 'SEMANAL' | 'QUINCENAL' | 'MENSUAL' | 'ANUAL'
@@ -335,6 +336,7 @@ export interface BilleterasTable {
   color: string | null
   emoji: string | null
   is_compartida: Generated<boolean>
+  tasa_interes: number | null // DECIMAL(5,2) - Interest rate for savings/investment
   usuario_id: string
   created_at: Generated<Timestamp>
   updated_at: Timestamp
@@ -389,6 +391,25 @@ export interface InvitacionesSobresTable {
   created_at: Generated<Timestamp>
   expires_at: Timestamp
   accepted_at: Timestamp | null
+}
+
+/**
+ * Tabla: billeteras_transacciones (Wallet operation history with balance tracking)
+ */
+export interface BilleterasTransaccionesTable {
+  id: Generated<string>
+  billetera_id: string
+  usuario_id: string
+  tipo: TipoBilleteraTransaccion
+  monto: number // DECIMAL(15,2)
+  moneda_id: string
+  billetera_origen_id: string | null
+  billetera_destino_id: string | null
+  saldo_real_post: number // DECIMAL(15,2) - Historical saldo after operation
+  descripcion: string | null
+  fecha: Timestamp
+  created_at: Generated<Timestamp>
+  deleted_at: Timestamp | null
 }
 
 /**
@@ -528,6 +549,7 @@ export interface Database {
   tipos_cambio: TiposCambioTable
   user_config: UserConfigTable
   billeteras: BilleterasTable
+  billeteras_transacciones: BilleterasTransaccionesTable
   sobres: SobresTable
   sobres_usuarios: SobresUsuariosTable
   invitaciones_sobres: InvitacionesSobresTable

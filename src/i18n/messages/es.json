@@ -352,6 +352,7 @@
     "actions": {
       "addCard": "Agregar Billetera",
       "transfer": "Transferir",
+      "deposit": "Depositar",
       "delete": "Eliminar",
       "edit": "Editar",
       "info": "Información"
@@ -404,9 +405,27 @@
       "selectOrigin": "Selecciona billetera origen",
       "selectDestination": "Selecciona billetera destino",
       "noWallets": "Necesitas al menos 2 billeteras para transferir",
-      "invalidAmount": "Monto inválido",
-      "undeclaredOrigin": "Origen no declarado (ajuste manual)",
-      "undeclaredDestination": "Destino no declarado (ajuste manual)"
+      "invalidAmount": "Monto inválido"
+    },
+    "deposit": {
+      "title": "Depositar o Retirar",
+      "tabLabel": "Depositar",
+      "description": "Registra ingresos o egresos de dinero",
+      "submit": "Registrar",
+      "submitting": "Registrando...",
+      "wallet": "Billetera"
+    },
+    "withdraw": {
+      "title": "Retirar",
+      "tabLabel": "Retirar",
+      "description": "Registra un retiro de dinero"
+    },
+    "fields": {
+      "amount": "Monto",
+      "amountPlaceholder": "100.00",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Ej: Depósito en efectivo, Retiro cajero",
+      "wallet": "Billetera"
     },
     "delete": {
       "title": "Eliminar Billetera",
@@ -421,7 +440,9 @@
     },
     "contextual": {
       "title": "Acciones Rápidas",
-      "transferDescription": "Entre tus billeteras"
+      "transferDescription": "Entre tus billeteras",
+      "depositoLabel": "Nuevo DEPOSITO/RETIRO",
+      "depositoDescription": "Registra ingresos o egresos externos"
     },
     "notifications": {
       "created": "Billetera creada exitosamente",

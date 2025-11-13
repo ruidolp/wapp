@@ -20,8 +20,39 @@ import {
 import { findMonedaById } from '@/infrastructure/database/queries/monedas.queries'
 import { findUserConfig } from '@/infrastructure/database/queries/user-config.queries'
 import { createTransaccion } from '@/infrastructure/database/queries/transacciones.queries'
-import type { TipoBilletera } from '@/infrastructure/database/types'
+import type { TipoBilletera, TipoBilleteraTransaccion } from '@/infrastructure/database/types'
 import { appConfig } from '@/config/app.config'
+
+/**
+ * Helper: Registrar operación en billeteras_transacciones
+ */
+async function registrarBilleteraTransaccion(data: {
+  billetera_id: string
+  usuario_id: string
+  tipo: TipoBilleteraTransaccion
+  monto: number
+  moneda_id: string
+  billetera_origen_id?: string | null
+  billetera_destino_id?: string | null
+  saldo_real_post: number
+  descripcion?: string | null
+  fecha?: Date
+}) {
+  return db.insertInto('billeteras_transacciones')
+    .values({
+      billetera_id: data.billetera_id,
+      usuario_id: data.usuario_id,
+      tipo: data.tipo,
+      monto: data.monto,
+      moneda_id: data.moneda_id,
+      billetera_origen_id: data.billetera_origen_id || null,
+      billetera_destino_id: data.billetera_destino_id || null,
+      saldo_real_post: data.saldo_real_post,
+      descripcion: data.descripcion || null,
+      fecha: data.fecha || new Date(),
+    })
+    .execute()
+}
 
 /**
  * Datos para crear una billetera
@@ -57,6 +88,17 @@ export interface TransferenciaBilleterasInput {
   billeteraOrigenId: string
   billeteraDestinoId: string
   monto: number
+  descripcion?: string
+  userId: string
+}
+
+/**
+ * Datos para depositar o retirar
+ */
+export interface DepositarORetirarInput {
+  billeteraId: string
+  monto: number
+  tipo: 'DEPOSITO' | 'RETIRO'
   descripcion?: string
   userId: string
 }
@@ -507,6 +549,93 @@ export async function obtenerBalanceConsolidado(
     return {
       success: false,
       error: 'Error al obtener el balance',
+    }
+  }
+}
+
+/**
+ * Depositar o retirar dinero de una billetera
+ */
+export async function depositarORetirar(
+  input: DepositarORetirarInput
+): Promise<BilleteraResult> {
+  try {
+    const { billeteraId, monto, tipo, descripcion, userId } = input
+
+    // Validar monto
+    if (monto <= 0) {
+      return {
+        success: false,
+        error: 'El monto debe ser mayor a cero',
+      }
+    }
+
+    // Validar tipo
+    if (!['DEPOSITO', 'RETIRO'].includes(tipo)) {
+      return {
+        success: false,
+        error: 'Tipo debe ser DEPOSITO o RETIRO',
+      }
+    }
+
+    // Verificar que la billetera existe y pertenece al usuario
+    const billetera = await findBilleteraById(billeteraId)
+    if (!billetera) {
+      return {
+        success: false,
+        error: 'Billetera no encontrada',
+      }
+    }
+    if (billetera.usuario_id !== userId) {
+      return {
+        success: false,
+        error: 'No tienes permiso para usar esta billetera',
+      }
+    }
+
+    // Validar saldo si es retiro
+    if (tipo === 'RETIRO' && Number(billetera.saldo_real) < monto) {
+      return {
+        success: false,
+        error: 'Saldo insuficiente para el retiro',
+      }
+    }
+
+    // Calcular nuevo saldo
+    let nuevoSaldoReal = Number(billetera.saldo_real)
+    let nuevoSaldoProyectado = Number(billetera.saldo_proyectado)
+
+    if (tipo === 'DEPOSITO') {
+      nuevoSaldoReal += monto
+      nuevoSaldoProyectado += monto
+    } else if (tipo === 'RETIRO') {
+      nuevoSaldoReal -= monto
+      nuevoSaldoProyectado -= monto
+    }
+
+    // Actualizar saldo de billetera
+    await updateBilleteraSaldos(billeteraId, nuevoSaldoReal, nuevoSaldoProyectado)
+
+    // Registrar operación en billeteras_transacciones
+    await registrarBilleteraTransaccion({
+      billetera_id: billeteraId,
+      usuario_id: userId,
+      tipo: tipo,
+      monto,
+      moneda_id: billetera.moneda_principal_id,
+      saldo_real_post: nuevoSaldoReal,
+      descripcion: descripcion || null,
+    })
+
+    return {
+      success: true,
+      data: { message: 'Operación registrada correctamente' },
+    }
+  } catch (error) {
+    console.error('Error al registrar operación:', error)
+    return {
+      success: false,
+      error: 'Error al registrar la operación',
     }
   }
 }

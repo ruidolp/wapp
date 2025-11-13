@@ -11,6 +11,7 @@ import { CardsList } from '@/presentation/components/billeteras/CardsList'
 import { CardManageDrawer } from '@/presentation/components/billeteras/CardManageDrawer'
 import { CardInfoDrawer } from '@/presentation/components/billeteras/CardInfoDrawer'
 import { TransferDrawer } from '@/presentation/components/billeteras/TransferDrawer'
+import { DepositarRetirarDrawer } from '@/presentation/components/drawers/DepositarRetirarDrawer'
 import { CardDeleteConfirm } from '@/presentation/components/billeteras/CardDeleteConfirm'
 import { ContextualDrawer } from '@/presentation/components/billeteras/ContextualDrawer'
 
@@ -27,6 +28,7 @@ export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: Bil
   const [manageOpen, setManageOpen] = useState(false)
   const [infoOpen, setInfoOpen] = useState(false)
   const [transferOpen, setTransferOpen] = useState(false)
+  const [depositoOpen, setDepositoOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
   // Billetera seleccionada
@@ -34,9 +36,9 @@ export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: Bil
   const [preselectedTransferId, setPreselectedTransferId] = useState<string | null>(null)
 
   // Handlers
-  const handleEdit = (billetera: Billetera) => {
+  const handleDeposito = (billetera: Billetera) => {
     setSelectedBilletera(billetera)
-    setManageOpen(true)
+    setDepositoOpen(true)
   }
 
   const handleInfo = (billetera: Billetera) => {
@@ -91,7 +93,7 @@ export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: Bil
 
         <CardsList
           billeteras={billeteras}
-          onEdit={handleEdit}
+          onDeposito={handleDeposito}
           onDelete={handleDelete}
           onTransfer={handleTransfer}
           onInfo={handleInfo}
@@ -120,6 +122,11 @@ export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: Bil
         preselectedId={preselectedTransferId}
       />
 
+      <DepositarRetirarDrawer
+        open={depositoOpen}
+        onOpenChange={setDepositoOpen}
+      />
+
       <CardDeleteConfirm
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
@@ -132,6 +139,7 @@ export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: Bil
         onOpenChange={onContextualOpenChange}
         onAddWallet={handleCreate}
         onTransfer={() => handleTransfer()}
+        onDeposito={() => setDepositoOpen(true)}
       />
     </>
   )
