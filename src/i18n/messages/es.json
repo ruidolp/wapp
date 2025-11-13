@@ -404,7 +404,9 @@
       "selectOrigin": "Selecciona billetera origen",
       "selectDestination": "Selecciona billetera destino",
       "noWallets": "Necesitas al menos 2 billeteras para transferir",
-      "invalidAmount": "Monto inválido"
+      "invalidAmount": "Monto inválido",
+      "undeclaredOrigin": "Origen no declarado (ajuste manual)",
+      "undeclaredDestination": "Destino no declarado (ajuste manual)"
     },
     "delete": {
       "title": "Eliminar Billetera",

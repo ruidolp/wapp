@@ -329,8 +329,8 @@ export interface BilleterasTable {
   nombre: string
   tipo: TipoBilletera
   moneda_principal_id: Generated<string>
-  saldo_real: Generated<number> // DECIMAL(15,2)
-  saldo_proyectado: Generated<number> // DECIMAL(15,2)
+  saldo_real: number // DECIMAL(15,2) - permitte ser insertado
+  saldo_proyectado: number // DECIMAL(15,2) - permite ser insertado
   saldos_multimoneda: any | null // JSONB
   color: string | null
   emoji: string | null

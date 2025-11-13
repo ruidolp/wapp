@@ -123,6 +123,15 @@
 }
 
 /**
+ * SelectContent styling for non-transparent dropdowns
+ */
+@layer components {
+  [role="listbox"] {
+    @apply bg-background;
+  }
+}
+
+/**
  * Utilities - Solo esenciales
  */
 @layer utilities {
