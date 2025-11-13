@@ -5,7 +5,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { Button } from '@/components/ui/button'
 import { useBilleteras, type Billetera } from '@/presentation/hooks/useBilleteras'
 import { CardsList } from '@/presentation/components/billeteras/CardsList'
 import { CardManageDrawer } from '@/presentation/components/billeteras/CardManageDrawer'
@@ -14,13 +16,16 @@ import { TransferDrawer } from '@/presentation/components/billeteras/TransferDra
 import { DepositarRetirarDrawer } from '@/presentation/components/drawers/DepositarRetirarDrawer'
 import { CardDeleteConfirm } from '@/presentation/components/billeteras/CardDeleteConfirm'
 import { ContextualDrawer } from '@/presentation/components/billeteras/ContextualDrawer'
+import { CrearSobreDrawer } from '@/components/drawers/CrearSobreDrawer'
 
 interface BilleterasScreenProps {
+  userId: string
   contextualOpen: boolean
   onContextualOpenChange: (open: boolean) => void
 }
 
-export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: BilleterasScreenProps) {
+export function BilleterasScreen({ userId, contextualOpen, onContextualOpenChange }: BilleterasScreenProps) {
+  const router = useRouter()
   const t = useTranslations('billeteras')
   const { billeteras, isLoading } = useBilleteras()
 
@@ -30,6 +35,7 @@ export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: Bil
   const [transferOpen, setTransferOpen] = useState(false)
   const [depositoOpen, setDepositoOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [crearSobreOpen, setCrearSobreOpen] = useState(false)
 
   // Billetera seleccionada
   const [selectedBilletera, setSelectedBilletera] = useState<Billetera | null>(null)
@@ -141,6 +147,30 @@ export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: Bil
         onTransfer={() => handleTransfer()}
         onDeposito={() => setDepositoOpen(true)}
       />
+
+      {/* CrearSobreDrawer */}
+      <CrearSobreDrawer
+        open={crearSobreOpen}
+        onOpenChange={setCrearSobreOpen}
+        userId={userId}
+        onSobreCreated={() => {
+          setCrearSobreOpen(false)
+          router.refresh()
+        }}
+      />
+
+      {/* Botón flotante "Agregar Sobre" - arriba a la derecha */}
+      {!isLoading && billeteras.length > 0 && (
+        <div className="fixed right-4 top-20 z-40">
+          <Button
+            onClick={() => setCrearSobreOpen(true)}
+            className="rounded-full shadow-lg"
+            size="lg"
+          >
+            ➕ Agregar Sobre
+          </Button>
+        </div>
+      )}
     </>
   )
 }
