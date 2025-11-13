@@ -371,7 +371,12 @@
       "initialBalancePlaceholder": "0.00",
       "adjustBalance": "Ajustar Saldo",
       "adjustPlaceholder": "+500 o -250",
-      "adjustHint": "Usa + para agregar o - para restar"
+      "adjustHint": "Usa + para agregar o - para restar",
+      "amount": "Monto",
+      "amountPlaceholder": "100.00",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Ej: Depósito en efectivo, Retiro cajero",
+      "wallet": "Billetera"
     },
     "types": {
       "DEBITO": "Débito",
@@ -419,13 +424,6 @@
       "title": "Retirar",
       "tabLabel": "Retirar",
       "description": "Registra un retiro de dinero"
-    },
-    "fields": {
-      "amount": "Monto",
-      "amountPlaceholder": "100.00",
-      "description": "Descripción",
-      "descriptionPlaceholder": "Ej: Depósito en efectivo, Retiro cajero",
-      "wallet": "Billetera"
     },
     "delete": {
       "title": "Eliminar Billetera",
