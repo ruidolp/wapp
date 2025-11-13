@@ -396,7 +396,7 @@ export async function transferirEntreBilleteras(
 
     // Crear transacción de salida (origen)
     if (billeteraOrigenId !== 'UNDECLARED') {
-      await createTransaccion({
+      const transactionData: any = {
         monto: monto,
         moneda_id: monedaId,
         billetera_id: billeteraOrigenId,
@@ -404,8 +404,14 @@ export async function transferirEntreBilleteras(
         descripcion: descripcion || (billeteraDestino ? `Transferencia a ${billeteraDestino.nombre}` : 'Transferencia a destino no declarado'),
         fecha: new Date(),
         usuario_id: userId,
-        billetera_destino_id: billeteraDestinoId === 'UNDECLARED' ? null : billeteraDestinoId,
-      })
+      }
+
+      // Solo agregar billetera_destino_id si es una billetera real
+      if (billeteraDestinoId !== 'UNDECLARED') {
+        transactionData.billetera_destino_id = billeteraDestinoId
+      }
+
+      await createTransaccion(transactionData)
 
       // Actualizar saldo origen
       const nuevoSaldoOrigen = Number(billeteraOrigen.saldo_real) - monto
