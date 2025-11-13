@@ -156,7 +156,7 @@ export function AgregarPresupuestoDrawer({
                       <span className="mr-2">{b.emoji || '💳'}</span>
                       <span className="font-medium">{b.nombre}</span>
                       <span className="ml-2 text-xs text-muted-foreground">
-                        ${b.saldo_real.toFixed(2)}
+                        ${Number(b.saldo_real || 0).toFixed(2)}
                       </span>
                     </SelectItem>
                   ))}
@@ -164,7 +164,7 @@ export function AgregarPresupuestoDrawer({
               </Select>
               {billeteraActual && (
                 <p className="text-xs text-muted-foreground">
-                  Saldo disponible: ${billeteraActual.saldo_real.toFixed(2)}
+                  Saldo disponible: ${Number(billeteraActual.saldo_real || 0).toFixed(2)}
                 </p>
               )}
             </div>

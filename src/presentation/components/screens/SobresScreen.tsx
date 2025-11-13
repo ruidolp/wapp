@@ -36,6 +36,7 @@ export function SobresScreen({ userId }: { userId: string }) {
   // Drawers y modales
   const [crearSobreOpen, setCrearSobreOpen] = useState(false)
   const [agregarPresupuestoOpen, setAgregarPresupuestoOpen] = useState(false)
+  const [crearGastoOpen, setCrearGastoOpen] = useState(false)
   const [sobreSeleccionado, setSobreSeleccionado] = useState<Sobre | null>(null)
   const [warning, setWarning] = useState<WarningType | null>(null)
   const [warningModalOpen, setWarningModalOpen] = useState(false)
@@ -181,6 +182,19 @@ export function SobresScreen({ userId }: { userId: string }) {
         }}
         loading={false}
       />
+
+      {/* Botón flotante "Crear Gasto" - solo visible cuando hay sobres */}
+      {!loading && sobres.length > 0 && (
+        <div className="fixed right-4 bottom-[calc(4rem+2px)] z-40">
+          <Button
+            onClick={() => setCrearGastoOpen(true)}
+            className="rounded-full shadow-lg"
+            size="lg"
+          >
+            ➕ Crear Gasto
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
