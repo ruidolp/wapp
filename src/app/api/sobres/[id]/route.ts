@@ -10,12 +10,20 @@ import {
   obtenerSobre,
   actualizarSobre,
   eliminarSobre,
+  obtenerAsignacionesSobre,
+  obtenerAsignacionesUsuarioInSobre,
 } from '@/application/services/sobres.service'
 
 /**
  * GET /api/sobres/[id]
  *
- * Obtener un sobre por ID
+ * Obtener un sobre por ID con detalles de asignaciones
+ *
+ * Response includes:
+ * - sobre: Base sobre data
+ * - asignaciones: All wallet allocations for this envelope
+ * - miAsignacion: Current user's allocations (private)
+ * - resumen: Summary with user breakdowns (no wallet names for others)
  */
 export async function GET(
   req: NextRequest,
@@ -36,9 +44,19 @@ export async function GET(
       return NextResponse.json({ error: result.error }, { status: 404 })
     }
 
+    // Obtener asignaciones
+    const asignacionesResult = await obtenerAsignacionesSobre(id, session.user.id)
+    const miAsignacionResult = await obtenerAsignacionesUsuarioInSobre(
+      id,
+      session.user.id
+    )
+
     return NextResponse.json({
       success: true,
       sobre: result.data,
+      asignaciones: asignacionesResult.success ? asignacionesResult.data?.asignaciones : [],
+      resumen: asignacionesResult.success ? asignacionesResult.data?.resumen : [],
+      miAsignacion: miAsignacionResult.success ? miAsignacionResult.data : [],
     })
   } catch (error: any) {
     console.error('Error al obtener sobre:', error)

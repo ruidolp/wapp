@@ -23,9 +23,25 @@ import {
   calcularTotalesByUser,
 } from '@/infrastructure/database/queries/transacciones.queries'
 import { findBilleteraById, updateBilleteraSaldos } from '@/infrastructure/database/queries/billeteras.queries'
-import { findSobreById } from '@/infrastructure/database/queries/sobres.queries'
+import { findSobreById, findAsignacionesByUsuarioInSobre } from '@/infrastructure/database/queries/sobres.queries'
 import { findCategoriaById } from '@/infrastructure/database/queries/categorias.queries'
 import type { TipoTransaccion } from '@/infrastructure/database/types'
+
+/**
+ * Interfaz para warnings de transacción
+ */
+export interface TransaccionWarning {
+  type: 'OVERSPEND_SOBRE' | 'NEGATIVE_WALLET'
+  message: string
+  details: {
+    presupuesto_asignado: number
+    gastado: number
+    sobreNombre?: string
+    porcentajeExceso: number
+    saldoAnterior?: number
+    saldoNuevo?: number
+  }
+}
 
 /**
  * Datos para crear una transacción
@@ -74,6 +90,82 @@ export interface TransaccionResult {
   success: boolean
   data?: any
   error?: string
+}
+
+/**
+ * Calcular warnings para una transacción
+ */
+async function calcularWarningTransaccion(
+  billeteraId: string,
+  tipo: TipoTransaccion,
+  monto: number,
+  sobreId?: string,
+  userId?: string
+): Promise<TransaccionWarning | null> {
+  try {
+    // Solo calculamos warnings para GASTO
+    if (tipo !== 'GASTO' || !sobreId || !userId) {
+      return null
+    }
+
+    // Obtener asignaciones del usuario en el sobre
+    const asignaciones = await findAsignacionesByUsuarioInSobre(sobreId, userId)
+    const presupuestoAsignado = asignaciones.reduce((sum: number, a: any) => sum + Number(a.monto_total || 0), 0)
+
+    // Obtener gastos totales en el sobre para este usuario
+    const gastosBySobre = await findTransaccionesBySobre(sobreId)
+    const gastosUsuario = gastosBySobre
+      .filter((t: any) => t.usuario_id === userId && t.tipo === 'GASTO')
+      .reduce((sum: number, t: any) => sum + Number(t.monto || 0), 0)
+
+    const nuevoGastado = gastosUsuario + monto
+    const exceso = nuevoGastado - presupuestoAsignado
+
+    // Si hay exceso, retornar warning
+    if (exceso > 0) {
+      const sobre = await findSobreById(sobreId)
+      const porcentajeExceso = (exceso / presupuestoAsignado) * 100
+
+      return {
+        type: 'OVERSPEND_SOBRE',
+        message: `Excede el presupuesto del sobre "${sobre?.nombre}" en $${exceso.toFixed(2)} (${porcentajeExceso.toFixed(2)}%)`,
+        details: {
+          presupuesto_asignado: presupuestoAsignado,
+          gastado: nuevoGastado,
+          sobreNombre: sobre?.nombre,
+          porcentajeExceso,
+        },
+      }
+    }
+
+    // Verificar si el saldo de la billetera quedaría negativo
+    const billetera = await findBilleteraById(billeteraId)
+    if (billetera) {
+      const saldoAnterior = Number(billetera.saldo_real)
+      const saldoNuevo = saldoAnterior - monto
+
+      if (saldoNuevo < 0) {
+        const porcentajeExceso = (Math.abs(saldoNuevo) / saldoAnterior) * 100
+
+        return {
+          type: 'NEGATIVE_WALLET',
+          message: `El saldo de la billetera quedará en $${saldoNuevo.toFixed(2)}`,
+          details: {
+            presupuesto_asignado: 0,
+            gastado: monto,
+            porcentajeExceso,
+            saldoAnterior,
+            saldoNuevo,
+          },
+        }
+      }
+    }
+
+    return null
+  } catch (error) {
+    console.error('Error al calcular warning de transacción:', error)
+    return null
+  }
 }
 
 /**
@@ -174,9 +266,15 @@ export async function crearTransaccion(
     // Actualizar saldo de billetera según tipo de transacción
     await actualizarSaldoBilletera(billeteraId, tipo, monto)
 
+    // Calcular warnings si aplica
+    const warning = await calcularWarningTransaccion(billeteraId, tipo, monto, sobreId, userId)
+
     return {
       success: true,
-      data: transaccion,
+      data: {
+        ...transaccion,
+        ...(warning && { warnings: warning }),
+      },
     }
   } catch (error) {
     console.error('Error al crear transacción:', error)
