@@ -47,14 +47,16 @@ export async function POST(
       )
     }
 
-    // Calcular nuevo saldo
-    const nuevoSaldo = billetera.saldo_real + monto
+    // Calcular nuevos saldos
+    const nuevoSaldoReal = Number(billetera.saldo_real) + monto
+    const nuevoSaldoProyectado = Number(billetera.saldo_proyectado) + monto
 
-    // Actualizar saldo de billetera
+    // Actualizar saldos de billetera
     await db
       .updateTable('billeteras')
       .set({
-        saldo_real: nuevoSaldo,
+        saldo_real: nuevoSaldoReal,
+        saldo_proyectado: nuevoSaldoProyectado,
         updated_at: new Date(),
       })
       .where('id', '=', id)

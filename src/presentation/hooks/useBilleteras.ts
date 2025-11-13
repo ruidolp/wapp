@@ -23,16 +23,16 @@ export interface Billetera {
 export interface CreateBilleteraInput {
   nombre: string
   tipo: string
-  saldo_inicial: number
-  is_compartida: boolean
-  tasa_interes?: number | null
+  saldoInicial: number
+  isCompartida: boolean
+  tasaInteres?: number | null
 }
 
 export interface UpdateBilleteraInput {
   nombre?: string
   tipo?: string
-  is_compartida?: boolean
-  tasa_interes?: number | null
+  isCompartida?: boolean
+  tasaInteres?: number | null
 }
 
 export interface AdjustBalanceInput {

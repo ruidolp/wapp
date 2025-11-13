@@ -19,6 +19,7 @@ export type CreateBilleteraData = {
   color?: string
   emoji?: string
   is_compartida: boolean
+  tasa_interes?: number | null
   usuario_id: string
 }
 
@@ -27,10 +28,13 @@ export type CreateBilleteraData = {
  */
 export type UpdateBilleteraData = {
   nombre?: string
+  tipo?: TipoBilletera
   saldo_real?: number
   saldo_proyectado?: number
   color?: string
   emoji?: string
+  is_compartida?: boolean
+  tasa_interes?: number | null
 }
 
 /**
