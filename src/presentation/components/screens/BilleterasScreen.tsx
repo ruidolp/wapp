@@ -22,7 +22,7 @@ interface BilleterasScreenProps {
 
 export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: BilleterasScreenProps) {
   const t = useTranslations('billeteras')
-  const { data: billeteras = [], isLoading } = useBilleteras()
+  const { billeteras, isLoading } = useBilleteras()
 
   // Estado para drawers
   const [manageOpen, setManageOpen] = useState(false)
