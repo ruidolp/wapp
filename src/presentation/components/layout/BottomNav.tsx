@@ -17,6 +17,19 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ activeTab, onTabChange, onContextualAction }: BottomNavProps) {
+  // Determinar icono para mostrar debajo del botón +
+  const getContextualIcon = () => {
+    const iconMap = {
+      billeteras: Wallet,
+      sobres: MailOpen,
+      metricas: ChartColumn,
+      config: Settings,
+    }
+    return iconMap[activeTab] || Wallet
+  }
+
+  const ContextIcon = getContextualIcon()
+
   return (
     <div className="h-full flex items-center justify-around border-t bg-card px-2">
       {/* BILLETERAS */}
@@ -36,14 +49,17 @@ export function BottomNav({ activeTab, onTabChange, onContextualAction }: Bottom
       />
 
       {/* BOTÓN CONTEXTUAL CENTRAL */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onContextualAction}
-        className="h-12 w-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
+      <div className="flex flex-col items-center justify-center gap-0.5">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onContextualAction}
+          className="h-12 w-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+        <ContextIcon className="h-4 w-4 text-muted-foreground" />
+      </div>
 
       {/* MÉTRICAS */}
       <NavButton
