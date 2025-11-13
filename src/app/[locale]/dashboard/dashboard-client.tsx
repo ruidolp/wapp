@@ -59,6 +59,7 @@ export function DashboardClient({ locale, user }: DashboardClientProps) {
       case 'billeteras':
         return (
           <BilleterasScreen
+            userId={user.id}
             contextualOpen={contextualOpen}
             onContextualOpenChange={setContextualOpen}
           />
@@ -72,6 +73,7 @@ export function DashboardClient({ locale, user }: DashboardClientProps) {
       default:
         return (
           <BilleterasScreen
+            userId={user.id}
             contextualOpen={false}
             onContextualOpenChange={() => {}}
           />

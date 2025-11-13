@@ -38,10 +38,10 @@ const TIMEZONES = [
   { value: 'Europe/London', label: 'Londres (GMT+0)' },
 ]
 
-const PRIMER_DIA_SEMANA = [
-  { value: '0', label: 'Domingo' },
-  { value: '1', label: 'Lunes' },
-]
+const PRIMER_DIA_MES = Array.from({ length: 31 }, (_, i) => ({
+  value: String(i + 1),
+  label: `Día ${i + 1}`,
+}))
 
 export function OnboardingDrawer({ open, onOpenChange }: OnboardingDrawerProps) {
   const router = useRouter()
@@ -52,7 +52,7 @@ export function OnboardingDrawer({ open, onOpenChange }: OnboardingDrawerProps) 
   // Formulario
   const [monedaSeleccionada, setMonedaSeleccionada] = useState('')
   const [timezone, setTimezone] = useState('America/Santiago')
-  const [primerDiaSemana, setPrimerDiaSemana] = useState('1')
+  const [diaInicioPeriodo, setDiaInicioPeriodo] = useState('1')
 
   // Detectar locale del navegador
   const [locale, setLocale] = useState('es-CL')
@@ -107,7 +107,7 @@ export function OnboardingDrawer({ open, onOpenChange }: OnboardingDrawerProps) 
           monedaPrincipalId: monedaSeleccionada,
           timezone,
           locale,
-          primerDiaSemana: parseInt(primerDiaSemana),
+          diaInicioPeriodo: parseInt(diaInicioPeriodo),
         }),
       })
 
@@ -185,23 +185,26 @@ export function OnboardingDrawer({ open, onOpenChange }: OnboardingDrawerProps) 
               </Select>
             </div>
 
-            {/* Primer Día de la Semana */}
+            {/* Primer Día del Mes para reiniciar presupuesto */}
             <div className="space-y-2">
-              <Label htmlFor="primer-dia" className="text-base font-medium">
-                Primer día de la semana
+              <Label htmlFor="dia-inicio" className="text-base font-medium">
+                Primer día del mes para ciclos de presupuesto
               </Label>
-              <Select value={primerDiaSemana} onValueChange={setPrimerDiaSemana}>
-                <SelectTrigger id="primer-dia">
+              <Select value={diaInicioPeriodo} onValueChange={setDiaInicioPeriodo}>
+                <SelectTrigger id="dia-inicio">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {PRIMER_DIA_SEMANA.map((dia) => (
+                  {PRIMER_DIA_MES.map((dia) => (
                     <SelectItem key={dia.value} value={dia.value}>
                       {dia.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-sm text-muted-foreground">
+                Tus presupuestos se reiniciarán en este día cada mes
+              </p>
             </div>
           </form>
         </DrawerBody>

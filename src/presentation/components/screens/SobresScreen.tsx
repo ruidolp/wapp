@@ -143,9 +143,13 @@ export function SobresScreen({ userId }: { userId: string }) {
               presupuestoAsignado={sobre.presupuesto_asignado}
               gastado={sobre.gastado || 0}
               asignaciones={sobre.asignaciones || []}
-              onAgregar={() => handleAgregarPresupuesto(sobre)}
-              onDetalle={() => handleDetalleSobre(sobre)}
-              onDevolver={() => handleDevolverPresupuesto(sobre)}
+              onAgregarPresupuesto={() => handleAgregarPresupuesto(sobre)}
+              onVerDetalle={() => handleDetalleSobre(sobre)}
+              onDevolverPresupuesto={() => handleDevolverPresupuesto(sobre)}
+              onEditarCategorias={() => {
+                // TODO: Implementar editar categorías
+                console.log('Editar categorías del sobre:', sobre.id)
+              }}
             />
           ))}
         </div>
@@ -164,6 +168,7 @@ export function SobresScreen({ userId }: { userId: string }) {
         onOpenChange={setAgregarPresupuestoOpen}
         sobreId={sobreSeleccionado?.id || ''}
         sobreName={sobreSeleccionado?.nombre || ''}
+        userId={userId}
         onSuccess={handleAgregarPresupuestoSuccess}
       />
 

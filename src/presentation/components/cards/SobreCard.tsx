@@ -4,6 +4,12 @@ import { useMemo } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 interface Billetera {
   id: string
@@ -26,9 +32,10 @@ interface SobreCardProps {
   presupuestoAsignado: number
   gastado?: number
   asignaciones: Asignacion[]
-  onAgregar?: () => void
-  onDetalle?: () => void
-  onDevolver?: () => void
+  onAgregarPresupuesto?: () => void
+  onDevolverPresupuesto?: () => void
+  onEditarCategorias?: () => void
+  onVerDetalle?: () => void
 }
 
 export function SobreCard({
@@ -39,9 +46,10 @@ export function SobreCard({
   presupuestoAsignado,
   gastado = 0,
   asignaciones,
-  onAgregar,
-  onDetalle,
-  onDevolver,
+  onAgregarPresupuesto,
+  onDevolverPresupuesto,
+  onEditarCategorias,
+  onVerDetalle,
 }: SobreCardProps) {
   // Asegurar que son números (pueden venir como strings/Decimal de la BD)
   const presupuesto = Number(presupuestoAsignado) || 0
@@ -65,17 +73,61 @@ export function SobreCard({
   return (
     <Card
       className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-      onClick={onDetalle}
+      onClick={onVerDetalle}
     >
-      {/* Header con color */}
+      {/* Header con color y menu de 3 puntos */}
       <div
-        className="p-4 text-white"
+        className="p-4 text-white flex justify-between items-start"
         style={{ backgroundColor: bgColor }}
       >
-        <h3 className="font-bold text-lg">{nombre}</h3>
-        <p className="text-sm opacity-90">
-          ${presupuesto.toFixed(2)}
-        </p>
+        <div>
+          <h3 className="font-bold text-lg">{nombre}</h3>
+          <p className="text-sm opacity-90">
+            ${presupuesto.toFixed(2)}
+          </p>
+        </div>
+
+        {/* Menu de 3 puntos */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-white/20"
+            >
+              ⋮
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={(e) => {
+              e.stopPropagation()
+              onAgregarPresupuesto?.()
+            }}>
+              Aumentar Presupuesto
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onDevolverPresupuesto?.()
+              }}
+              disabled={presupuestoLibre <= 0}
+            >
+              Devolver Presupuesto
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={(e) => {
+              e.stopPropagation()
+              onEditarCategorias?.()
+            }}>
+              Editar Categorías
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={(e) => {
+              e.stopPropagation()
+              onVerDetalle?.()
+            }}>
+              Ver Detalle
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Contenido */}
@@ -142,43 +194,6 @@ export function SobreCard({
           </div>
         )}
 
-        {/* Acciones */}
-        <div className="grid grid-cols-3 gap-2 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              onAgregar?.()
-            }}
-            className="text-xs"
-          >
-            Agregar
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              onDevolver?.()
-            }}
-            className="text-xs"
-            disabled={presupuestoLibre <= 0}
-          >
-            Devolver
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              onDetalle?.()
-            }}
-            className="text-xs"
-          >
-            Detalle
-          </Button>
-        </div>
 
         {/* Badge de overspend */}
         {isOverspent && (
