@@ -351,6 +351,7 @@
     "actions": {
       "addCard": "Add Wallet",
       "transfer": "Transfer",
+      "deposit": "Deposit",
       "delete": "Delete",
       "edit": "Edit",
       "info": "Information"
@@ -403,9 +404,27 @@
       "selectOrigin": "Select origin wallet",
       "selectDestination": "Select destination wallet",
       "noWallets": "You need at least 2 wallets to transfer",
-      "invalidAmount": "Invalid amount",
-      "undeclaredOrigin": "Undeclared origin (manual adjustment)",
-      "undeclaredDestination": "Undeclared destination (manual adjustment)"
+      "invalidAmount": "Invalid amount"
+    },
+    "deposit": {
+      "title": "Deposit or Withdraw",
+      "tabLabel": "Deposit",
+      "description": "Record incoming or outgoing money",
+      "submit": "Record",
+      "submitting": "Recording...",
+      "wallet": "Wallet"
+    },
+    "withdraw": {
+      "title": "Withdraw",
+      "tabLabel": "Withdraw",
+      "description": "Record a money withdrawal"
+    },
+    "fields": {
+      "amount": "Amount",
+      "amountPlaceholder": "100.00",
+      "description": "Description",
+      "descriptionPlaceholder": "Eg: Cash deposit, ATM withdrawal",
+      "wallet": "Wallet"
     },
     "delete": {
       "title": "Delete Wallet",
@@ -420,7 +439,9 @@
     },
     "contextual": {
       "title": "Quick Actions",
-      "transferDescription": "Between your wallets"
+      "transferDescription": "Between your wallets",
+      "depositoLabel": "New DEPOSIT/WITHDRAWAL",
+      "depositoDescription": "Record external income or expenses"
     },
     "notifications": {
       "created": "Wallet created successfully",

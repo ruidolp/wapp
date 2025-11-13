@@ -138,12 +138,48 @@ async function fetchLinkedEnvelopes(id: string) {
   return res.json()
 }
 
+async function depositarORetirar(
+  id: string,
+  monto: number,
+  tipo: 'DEPOSITO' | 'RETIRO',
+  descripcion?: string
+): Promise<void> {
+  const res = await fetch(`/api/billeteras/${id}/deposito-retiro`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ monto, tipo, descripcion }),
+  })
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.error || 'Error al registrar operación')
+  }
+}
+
 // Hooks
 export function useBilleteras() {
-  return useQuery({
+  const queryClient = useQueryClient()
+  const { data = [], isLoading } = useQuery({
     queryKey: billeterasKeys.all,
     queryFn: fetchBilleteras,
   })
+
+  const depositarRetirarrMutation = useMutation({
+    mutationFn: ({ id, monto, tipo, descripcion }: { id: string; monto: number; tipo: 'DEPOSITO' | 'RETIRO'; descripcion?: string }) =>
+      depositarORetirar(id, monto, tipo, descripcion),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: billeterasKeys.all })
+      notify.success('Operación registrada correctamente')
+    },
+    onError: (error: Error) => {
+      notify.error(error.message)
+    },
+  })
+
+  const handleDeposito = async (id: string, monto: number, tipo: 'DEPOSITO' | 'RETIRO', descripcion?: string) => {
+    await depositarRetirarrMutation.mutateAsync({ id, monto, tipo, descripcion })
+  }
+
+  return { billeteras: data, isLoading, handleDeposito }
 }
 
 export function useBilletera(id: string) {

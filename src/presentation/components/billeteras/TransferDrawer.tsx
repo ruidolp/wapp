@@ -65,7 +65,7 @@ export function TransferDrawer({
     e.preventDefault()
 
     // Validaciones
-    if (fromId === toId && fromId !== 'UNDECLARED') {
+    if (fromId === toId) {
       notify.error(t('notifications.sameWallet'))
       return
     }
@@ -76,13 +76,11 @@ export function TransferDrawer({
       return
     }
 
-    // Solo validar saldo si es una billetera real (no "origen no declarado")
-    if (fromId !== 'UNDECLARED') {
-      const fromBilletera = billeteras.find((b) => b.id === fromId)
-      if (fromBilletera && Number(fromBilletera.saldo_real) < montoNum) {
-        notify.error(t('notifications.insufficientBalance'))
-        return
-      }
+    // Validar saldo del origen
+    const fromBilletera = billeteras.find((b) => b.id === fromId)
+    if (fromBilletera && Number(fromBilletera.saldo_real) < montoNum) {
+      notify.error(t('notifications.insufficientBalance'))
+      return
     }
 
     await transferMutation.mutateAsync({
@@ -139,9 +137,6 @@ export function TransferDrawer({
                     {b.nombre} (${Number(b.saldo_real).toFixed(2)})
                   </SelectItem>
                 ))}
-                <SelectItem value="UNDECLARED">
-                  {t('transfer.undeclaredOrigin')}
-                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -161,9 +156,6 @@ export function TransferDrawer({
                     {b.nombre} (${Number(b.saldo_real).toFixed(2)})
                   </SelectItem>
                 ))}
-                <SelectItem value="UNDECLARED">
-                  {t('transfer.undeclaredDestination')}
-                </SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -3,13 +3,13 @@
  */
 
 import { useTranslations } from 'next-intl'
-import { Pencil, Trash2, ArrowRightLeft, Info } from 'lucide-react'
+import { Plus, Trash2, ArrowRightLeft, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Billetera } from '@/presentation/hooks/useBilleteras'
 
 interface CardsListProps {
   billeteras: Billetera[]
-  onEdit: (billetera: Billetera) => void
+  onDeposito: (billetera: Billetera) => void
   onDelete: (billetera: Billetera) => void
   onTransfer: (billetera: Billetera) => void
   onInfo: (billetera: Billetera) => void
@@ -17,7 +17,7 @@ interface CardsListProps {
 
 export function CardsList({
   billeteras,
-  onEdit,
+  onDeposito,
   onDelete,
   onTransfer,
   onInfo,
@@ -101,10 +101,10 @@ export function CardsList({
               variant="outline"
               size="sm"
               className="flex-1"
-              onClick={() => onEdit(billetera)}
+              onClick={() => onDeposito(billetera)}
             >
-              <Pencil className="h-3 w-3 mr-2" />
-              {t('actions.edit')}
+              <Plus className="h-3 w-3 mr-2" />
+              {t('actions.deposit')}
             </Button>
             <Button
               variant="outline"
