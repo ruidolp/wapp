@@ -70,6 +70,11 @@ export function CrearBilleteraDrawer({
     setError(null)
 
     try {
+      // Convertir saldo a número válido
+      const saldoNumerico = saldoInicial && !isNaN(parseFloat(saldoInicial))
+        ? parseFloat(saldoInicial)
+        : 0
+
       const response = await fetch('/api/billeteras', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -77,7 +82,7 @@ export function CrearBilleteraDrawer({
           userId,
           nombre: nombre.trim(),
           tipo,
-          saldoInicial: parseFloat(saldoInicial) || 0,
+          saldoInicial: saldoNumerico,
           color,
           emoji,
         }),
