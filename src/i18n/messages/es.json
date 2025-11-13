@@ -408,7 +408,7 @@
       "invalidAmount": "Monto inválido"
     },
     "deposit": {
-      "title": "Depositar o Retirar",
+      "title": "Depositar",
       "tabLabel": "Depositar",
       "description": "Registra ingresos o egresos de dinero",
       "submit": "Registrar",

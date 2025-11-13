@@ -341,12 +341,16 @@ export async function eliminarBilletera(
 
     const billetera = billeteraResult.data
 
-    // Verificar que no tenga saldo
+    // Si la billetera tiene saldo, crear un registro de retiro para UNDECLARED
+    // para descontar el saldo de todos los sobres asociados
     if (billetera.saldo_real !== 0) {
-      return {
-        success: false,
-        error: 'No se puede eliminar una billetera con saldo. Transfiere el saldo primero.',
-      }
+      await transferirEntreBilleteras({
+        billeteraOrigenId: billeteraId,
+        billeteraDestinoId: 'UNDECLARED',
+        monto: Math.abs(Number(billetera.saldo_real)),
+        descripcion: `Retiro automático al eliminar billetera: ${billetera.nombre}`,
+        userId,
+      })
     }
 
     await softDeleteBilletera(billeteraId)
