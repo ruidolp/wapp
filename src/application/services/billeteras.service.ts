@@ -34,6 +34,7 @@ export interface CreateBilleteraInput {
   color?: string
   emoji?: string
   isCompartida?: boolean
+  tasaInteres?: number | null
   userId: string
 }
 
@@ -42,8 +43,11 @@ export interface CreateBilleteraInput {
  */
 export interface UpdateBilleteraInput {
   nombre?: string
+  tipo?: TipoBilletera
   color?: string
   emoji?: string
+  isCompartida?: boolean
+  tasaInteres?: number | null
 }
 
 /**
@@ -144,6 +148,7 @@ export async function crearBilletera(
       color: input.color,
       emoji: input.emoji,
       is_compartida: input.isCompartida || false,
+      tasa_interes: input.tasaInteres || null,
       usuario_id: input.userId,
     })
 
@@ -257,8 +262,11 @@ export async function actualizarBilletera(
 
     const updateData: any = {}
     if (input.nombre) updateData.nombre = input.nombre.trim()
+    if (input.tipo !== undefined) updateData.tipo = input.tipo
     if (input.color !== undefined) updateData.color = input.color
     if (input.emoji !== undefined) updateData.emoji = input.emoji
+    if (input.isCompartida !== undefined) updateData.is_compartida = input.isCompartida
+    if (input.tasaInteres !== undefined) updateData.tasa_interes = input.tasaInteres
 
     const billetera = await updateBilletera(billeteraId, updateData)
 

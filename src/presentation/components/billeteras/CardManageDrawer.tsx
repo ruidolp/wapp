@@ -91,17 +91,17 @@ export function CardManageDrawer({
         id: billetera.id,
         nombre,
         tipo,
-        is_compartida: isCompartida,
-        tasa_interes: tasaInteresValue,
+        isCompartida: isCompartida,
+        tasaInteres: tasaInteresValue,
       })
     } else {
       // Crear billetera
       await createMutation.mutateAsync({
         nombre,
         tipo,
-        saldo_inicial: parseFloat(saldoInicial) || 0,
-        is_compartida: isCompartida,
-        tasa_interes: tasaInteresValue,
+        saldoInicial: parseFloat(saldoInicial) || 0,
+        isCompartida: isCompartida,
+        tasaInteres: tasaInteresValue,
       })
     }
 

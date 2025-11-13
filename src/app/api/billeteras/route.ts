@@ -68,10 +68,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { nombre, tipo, monedaPrincipalId, saldoInicial, color, emoji, isCompartida } = body
-
-    // DEBUG: Log what we receive
-    console.log('[DEBUG] Create wallet request:', { nombre, tipo, saldoInicial, saldoInitialType: typeof saldoInicial })
+    const { nombre, tipo, monedaPrincipalId, saldoInicial, color, emoji, isCompartida, tasaInteres } = body
 
     // Validaciones
     if (!nombre || !tipo) {
@@ -89,6 +86,7 @@ export async function POST(req: NextRequest) {
       color,
       emoji,
       isCompartida,
+      tasaInteres,
       userId: session.user.id,
     })
 
