@@ -125,9 +125,25 @@
 /**
  * SelectContent styling for non-transparent dropdowns
  */
-@layer components {
-  [role="listbox"] {
-    @apply bg-background;
+@layer base {
+  :root {
+    --popover: 0 0% 100%;
+  }
+
+  [data-theme="neon"] {
+    --popover: 250 30% 11%;
+  }
+
+  [data-theme="blanco"] {
+    --popover: 0 0% 100%;
+  }
+
+  [data-theme="negro"] {
+    --popover: 0 0% 12%;
+  }
+
+  [data-theme="rosado"] {
+    --popover: 0 0% 100%;
   }
 }
 
