@@ -403,7 +403,9 @@
       "selectOrigin": "Select origin wallet",
       "selectDestination": "Select destination wallet",
       "noWallets": "You need at least 2 wallets to transfer",
-      "invalidAmount": "Invalid amount"
+      "invalidAmount": "Invalid amount",
+      "undeclaredOrigin": "Undeclared origin (manual adjustment)",
+      "undeclaredDestination": "Undeclared destination (manual adjustment)"
     },
     "delete": {
       "title": "Delete Wallet",

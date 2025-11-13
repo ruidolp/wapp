@@ -17,18 +17,8 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ activeTab, onTabChange, onContextualAction }: BottomNavProps) {
-  // Determinar icono para mostrar debajo del botón +
-  const getContextualIcon = () => {
-    const iconMap = {
-      billeteras: Wallet,
-      sobres: MailOpen,
-      metricas: ChartColumn,
-      config: Settings,
-    }
-    return iconMap[activeTab] || Wallet
-  }
-
-  const ContextIcon = getContextualIcon()
+  // Mostrar MailOpen solo cuando está en billeteras o sobres
+  const showSobresIcon = activeTab === 'billeteras' || activeTab === 'sobres'
 
   return (
     <div className="h-full flex items-center justify-around border-t bg-card px-2">
@@ -41,24 +31,22 @@ export function BottomNav({ activeTab, onTabChange, onContextualAction }: Bottom
       />
 
       {/* SOBRES */}
-      <NavButton
-        icon={MailOpen}
-        label="SOBRES"
-        active={activeTab === 'sobres'}
-        onClick={() => onTabChange('sobres')}
-      />
-
-      {/* BOTÓN CONTEXTUAL CENTRAL */}
-      <div className="flex flex-col items-center justify-center gap-0.5">
+      <div className="flex flex-col items-center justify-center relative flex-1">
         <Button
           variant="ghost"
           size="icon"
           onClick={onContextualAction}
-          className="h-12 w-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+          className="absolute top-0 h-12 w-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 z-10"
         >
           <Plus className="h-6 w-6" />
         </Button>
-        <ContextIcon className="h-4 w-4 text-muted-foreground" />
+        <NavButton
+          icon={MailOpen}
+          label="SOBRES"
+          active={activeTab === 'sobres'}
+          onClick={() => onTabChange('sobres')}
+          className={showSobresIcon ? 'opacity-0' : ''}
+        />
       </div>
 
       {/* MÉTRICAS */}
@@ -85,13 +73,14 @@ interface NavButtonProps {
   label: string
   active: boolean
   onClick: () => void
+  className?: string
 }
 
-function NavButton({ icon: Icon, label, active, onClick }: NavButtonProps) {
+function NavButton({ icon: Icon, label, active, onClick, className = '' }: NavButtonProps) {
   return (
     <button
       onClick={onClick}
-      className="flex flex-1 flex-col items-center justify-center gap-1 py-2"
+      className={`flex flex-1 flex-col items-center justify-center gap-1 py-2 ${className}`}
     >
       <Icon
         className={`h-5 w-5 ${

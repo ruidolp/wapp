@@ -134,14 +134,14 @@ export function TransferDrawer({
                 <SelectValue placeholder={t('transfer.selectOrigin')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="UNDECLARED">
-                  {t('transfer.undeclaredOrigin')} - Origen no declarado (ajuste manual)
-                </SelectItem>
                 {billeteras.map((b) => (
                   <SelectItem key={b.id} value={b.id}>
                     {b.nombre} (${Number(b.saldo_real).toFixed(2)})
                   </SelectItem>
                 ))}
+                <SelectItem value="UNDECLARED">
+                  {t('transfer.undeclaredOrigin')}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -156,14 +156,14 @@ export function TransferDrawer({
                 <SelectValue placeholder={t('transfer.selectDestination')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="UNDECLARED">
-                  {t('transfer.undeclaredDestination')} - Destino no declarado (ajuste manual)
-                </SelectItem>
                 {availableDestinations.map((b) => (
                   <SelectItem key={b.id} value={b.id}>
                     {b.nombre} (${Number(b.saldo_real).toFixed(2)})
                   </SelectItem>
                 ))}
+                <SelectItem value="UNDECLARED">
+                  {t('transfer.undeclaredDestination')}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
