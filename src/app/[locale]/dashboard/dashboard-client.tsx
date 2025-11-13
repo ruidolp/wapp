@@ -44,7 +44,7 @@ export function DashboardClient({ locale, user }: DashboardClientProps) {
           />
         )
       case 'sobres':
-        return <SobresScreen />
+        return <SobresScreen userId={user.id} />
       case 'metricas':
         return <MetricasScreen />
       case 'config':

@@ -42,7 +42,7 @@ export type ThemeCategory = 'preestablished' | 'custom'
  */
 export type TipoMoneda = 'FIAT' | 'INDICE' | 'CRYPTO'
 export type TipoBilletera = 'DEBITO' | 'CREDITO' | 'EFECTIVO' | 'AHORRO' | 'INVERSION' | 'PRESTAMO'
-export type TipoBilleteraTransaccion = 'CREACION' | 'DEPOSITO' | 'RETIRO' | 'TRANSFERENCIA' | 'AJUSTE'
+export type TipoBilleteraTransaccion = 'CREACION' | 'DEPOSITO' | 'RETIRO' | 'TRANSFERENCIA' | 'GASTO' | 'ASIGNACION_SOBRE' | 'DEVOLUCION_SOBRE' | 'AJUSTE'
 export type TipoSobre = 'GASTO' | 'AHORRO' | 'DEUDA'
 export type TipoTransaccion = 'GASTO' | 'INGRESO' | 'TRANSFERENCIA' | 'DEPOSITO' | 'PAGO_TC' | 'AJUSTE'
 export type FrecuenciaIngreso = 'SEMANAL' | 'QUINCENAL' | 'MENSUAL' | 'ANUAL'

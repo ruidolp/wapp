@@ -269,3 +269,143 @@ export async function removeParticipanteFromSobre(sobreId: string, userId: strin
     .where('usuario_id', '=', userId)
     .executeTakeFirst()
 }
+
+/**
+ * ============================================================================
+ * ASIGNACIONES DE PRESUPUESTO (Budget allocations from wallets to envelopes)
+ * ============================================================================
+ */
+
+/**
+ * Obtener todas las asignaciones de un sobre (agrupadas por billetera)
+ * Retorna estado ACTUAL del presupuesto asignado
+ */
+export async function findAsignacionesBySobre(sobreId: string) {
+  // Agrupar asignaciones_presupuesto por billetera para obtener estado actual
+  const asignaciones = await db
+    .selectFrom('asignaciones_presupuesto')
+    .select([
+      'billetera_id',
+      'usuario_id',
+      db.fn.sum('monto').as('monto_total'),
+    ])
+    .where('sobre_id', '=', sobreId)
+    .groupBy(['billetera_id', 'usuario_id'])
+    .execute()
+
+  // Enriquecer con datos de billetera
+  const result = await Promise.all(
+    asignaciones.map(async (a) => {
+      const billetera = await db
+        .selectFrom('billeteras')
+        .select(['id', 'nombre', 'emoji', 'saldo_real', 'moneda_principal_id'])
+        .where('id', '=', a.billetera_id)
+        .executeTakeFirst()
+
+      return {
+        billetera_id: a.billetera_id,
+        usuario_id: a.usuario_id,
+        monto_asignado: Number(a.monto_total || 0),
+        billetera: billetera || null,
+      }
+    })
+  )
+
+  return result
+}
+
+/**
+ * Obtener asignaciones de un usuario específico en un sobre
+ */
+export async function findAsignacionesByUsuarioInSobre(sobreId: string, userId: string) {
+  const asignaciones = await db
+    .selectFrom('asignaciones_presupuesto')
+    .select([
+      'billetera_id',
+      db.fn.sum('monto').as('monto_total'),
+    ])
+    .where('sobre_id', '=', sobreId)
+    .where('usuario_id', '=', userId)
+    .groupBy('billetera_id')
+    .execute()
+
+  // Enriquecer con datos de billetera
+  const result = await Promise.all(
+    asignaciones.map(async (a) => {
+      const billetera = await db
+        .selectFrom('billeteras')
+        .select(['id', 'nombre', 'emoji', 'saldo_real', 'moneda_principal_id'])
+        .where('id', '=', a.billetera_id)
+        .where('usuario_id', '=', userId) // Validar que es del usuario
+        .executeTakeFirst()
+
+      return {
+        billetera_id: a.billetera_id,
+        monto_asignado: Number(a.monto_total || 0),
+        billetera: billetera || null,
+      }
+    })
+  )
+
+  return result.filter((r) => r.billetera !== null)
+}
+
+/**
+ * Crear nueva asignación de presupuesto
+ */
+export async function createAsignacion(
+  sobreId: string,
+  billeteraId: string,
+  usuarioId: string,
+  monto: number,
+  monedaId: string,
+  tipo: 'INICIAL' | 'AUMENTO' | 'DISMINUCION' | 'TRANSFERENCIA' = 'INICIAL'
+) {
+  return await db
+    .insertInto('asignaciones_presupuesto')
+    .values({
+      sobre_id: sobreId,
+      billetera_id: billeteraId,
+      usuario_id: usuarioId,
+      monto,
+      moneda_id: monedaId,
+      tipo,
+      created_at: new Date(),
+    })
+    .returningAll()
+    .executeTakeFirstOrThrow()
+}
+
+/**
+ * Obtener presupuesto libre de usuario en un sobre
+ * presupuesto_libre = presupuesto_asignado - gastado (de sobres_usuarios)
+ */
+export async function getPresupuestoLibreUsuarioInSobre(sobreId: string, userId: string) {
+  const participante = await findParticipanteInSobre(sobreId, userId)
+  if (!participante) return null
+
+  return {
+    presupuesto_asignado: participante.presupuesto_asignado,
+    gastado: participante.gastado,
+    libre: participante.presupuesto_asignado - participante.gastado,
+  }
+}
+
+/**
+ * Obtener resumen de asignaciones de un sobre por usuario
+ * Para mostrar en UI: "Mi presupuesto: $X (libre), Pareja: $Y (libre)"
+ */
+export async function getResumenAsignacionesBySobre(sobreId: string) {
+  const participantes = await findParticipantesBySobre(sobreId)
+
+  return participantes.map((p) => ({
+    usuario_id: p.usuario_id,
+    presupuesto_asignado: p.presupuesto_asignado,
+    gastado: p.gastado,
+    libre: p.presupuesto_asignado - p.gastado,
+    porcentaje_gasto:
+      p.presupuesto_asignado > 0
+        ? Math.round((p.gastado / p.presupuesto_asignado) * 100)
+        : 0,
+  }))
+}

@@ -193,3 +193,42 @@ export async function calcularSaldoTotalByUser(userId: string) {
     total_proyectado: Number(result?.total_proyectado || 0),
   }
 }
+
+/**
+ * ============================================================================
+ * BILLETERAS TRANSACCIONES (Transaction history)
+ * ============================================================================
+ */
+
+/**
+ * Crear registro de transacción en billeteras_transacciones
+ */
+export async function createBilleteraTransaccion(
+  billeteraId: string,
+  usuarioId: string,
+  tipo: any, // TipoBilleteraTransaccion
+  monto: number,
+  monedaId: string,
+  saldoRealPost: number,
+  billeteraOrigenId?: string | null,
+  billeteraDestinoId?: string | null,
+  descripcion?: string | null,
+  fecha?: Date
+) {
+  return await db
+    .insertInto('billeteras_transacciones')
+    .values({
+      billetera_id: billeteraId,
+      usuario_id: usuarioId,
+      tipo,
+      monto,
+      moneda_id: monedaId,
+      saldo_real_post: saldoRealPost,
+      billetera_origen_id: billeteraOrigenId || null,
+      billetera_destino_id: billeteraDestinoId || null,
+      descripcion: descripcion || null,
+      fecha: fecha || new Date(),
+    })
+    .returningAll()
+    .executeTakeFirst()
+}

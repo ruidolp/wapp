@@ -81,9 +81,25 @@ export async function GET(req: NextRequest) {
  *   tipo: TipoTransaccion (requerido) - GASTO | INGRESO | TRANSFERENCIA | DEPOSITO | PAGO_TC | AJUSTE
  *   descripcion?: string
  *   fecha: string (ISO date, requerido)
- *   sobreId?: string
+ *   sobreId?: string (para gastos en sobre)
  *   categoriaId?: string
  *   subcategoriaId?: string
+ * }
+ *
+ * Response:
+ * {
+ *   success: true,
+ *   transaccion: {...},
+ *   warning?: {
+ *     type: 'OVERSPEND_SOBRE' | 'NEGATIVE_WALLET'
+ *     message: string
+ *     details: {
+ *       presupuesto_asignado: number
+ *       gastado: number
+ *       sobreNombre: string
+ *       porcentajeExceso: number
+ *     }
+ *   }
  * }
  */
 export async function POST(req: NextRequest) {
@@ -132,10 +148,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: result.error }, { status: 400 })
     }
 
+    // Calcular warnings si hay
+    const warnings = (result.data as any)?.warnings
+
     return NextResponse.json(
       {
         success: true,
         transaccion: result.data,
+        ...(warnings && { warning: warnings }),
       },
       { status: 201 }
     )
