@@ -27,21 +27,23 @@ export function BottomNav({ activeTab, onTabChange, onContextualAction }: Bottom
         onClick={() => onTabChange('billeteras')}
       />
 
-      {/* SOBRES + BUTTON CONTEXTUAL */}
-      <div className="flex-1 flex flex-col items-center justify-center">
-        {/* Botón Contextual Central - Simple + */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onContextualAction}
-          className="h-12 w-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
+      {/* SOBRES */}
+      <NavButton
+        icon={MailOpen}
+        label="SOBRES"
+        active={activeTab === 'sobres'}
+        onClick={() => onTabChange('sobres')}
+      />
 
-        {/* Icono de SOBRES siempre visible */}
-        <MailOpen className="h-5 w-5 text-muted-foreground" />
-      </div>
+      {/* BOTÓN CONTEXTUAL CENTRAL */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onContextualAction}
+        className="h-12 w-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
 
       {/* MÉTRICAS */}
       <NavButton
