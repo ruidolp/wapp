@@ -51,17 +51,21 @@ export async function GET(
 
 /**
  * PUT /api/billeteras/[id]
+ * PATCH /api/billeteras/[id]
  *
  * Actualizar una billetera
  *
  * Body:
  * {
  *   nombre?: string
+ *   tipo?: string
+ *   isCompartida?: boolean
+ *   tasaInteres?: number | null
  *   color?: string
  *   emoji?: string
  * }
  */
-export async function PUT(
+async function handleUpdate(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
@@ -74,10 +78,13 @@ export async function PUT(
 
     const { id } = await context.params
     const body = await req.json()
-    const { nombre, color, emoji } = body
+    const { nombre, tipo, isCompartida, tasaInteres, color, emoji } = body
 
     const result = await actualizarBilletera(id, session.user.id, {
       nombre,
+      tipo,
+      isCompartida,
+      tasaInteres,
       color,
       emoji,
     })
@@ -98,6 +105,9 @@ export async function PUT(
     )
   }
 }
+
+export const PUT = handleUpdate
+export const PATCH = handleUpdate
 
 /**
  * DELETE /api/billeteras/[id]
