@@ -1,20 +1,22 @@
 /**
  * /api/sobres/[id]/categorias
  *
- * API endpoints para gestión de categorías vinculadas a sobres
+ * API endpoints para gestión de categorías en un sobre
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/infrastructure/lib/auth'
 import {
-  obtenerCategoriasSobre,
-  vincularCategorias,
-} from '@/application/services/sobres.service'
+  obtenerCategoriasBySobre,
+  agregarCategoriaToSobre,
+  eliminarCategoriaFromSobre,
+} from '@/application/services/sobres-categorias.service'
 
 /**
  * GET /api/sobres/[id]/categorias
  *
- * Obtener todas las categorías vinculadas a un sobre
+ * Obtener todas las categorías de un sobre con cálculo de gastos y porcentajes
+ * Retorna ordenadas de mayor % a menor %
  */
 export async function GET(
   req: NextRequest,
@@ -27,12 +29,12 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = await context.params
+    const { id: sobreId } = await context.params
 
-    const result = await obtenerCategoriasSobre(id, session.user.id)
+    const result = await obtenerCategoriasBySobre(sobreId, session.user.id)
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 })
+      return NextResponse.json({ error: result.error }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -40,7 +42,7 @@ export async function GET(
       categorias: result.data,
     })
   } catch (error: any) {
-    console.error('Error al obtener categorías:', error)
+    console.error('Error al obtener categorías del sobre:', error)
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }
@@ -51,11 +53,11 @@ export async function GET(
 /**
  * POST /api/sobres/[id]/categorias
  *
- * Vincular categorías a un sobre
+ * Agregar una o más categorías a un sobre
  *
  * Body:
  * {
- *   categoriaIds: string[] (requerido) - Array de IDs de categorías
+ *   categoriaIds: string[] (requerido)
  * }
  */
 export async function POST(
@@ -69,30 +71,50 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = await context.params
+    const { id: sobreId } = await context.params
     const body = await req.json()
     const { categoriaIds } = body
 
     // Validaciones
-    if (!categoriaIds || !Array.isArray(categoriaIds) || categoriaIds.length === 0) {
+    if (!categoriaIds || !Array.isArray(categoriaIds)) {
       return NextResponse.json(
-        { error: 'categoriaIds debe ser un array con al menos un ID' },
+        { error: 'Campo requerido: categoriaIds (array)' },
         { status: 400 }
       )
     }
 
-    const result = await vincularCategorias(id, session.user.id, categoriaIds)
-
-    if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 })
+    if (categoriaIds.length === 0) {
+      return NextResponse.json(
+        { error: 'Debe proporcionar al menos una categoría' },
+        { status: 400 }
+      )
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Categorías vinculadas correctamente',
-    })
+    // Agregar cada categoría
+    const resultados = []
+    for (const categoriaId of categoriaIds) {
+      const result = await agregarCategoriaToSobre(sobreId, categoriaId, session.user.id)
+      resultados.push(result)
+    }
+
+    // Verificar si hubo errores
+    const errores = resultados.filter((r) => !r.success)
+    if (errores.length > 0) {
+      return NextResponse.json(
+        { error: errores[0].error },
+        { status: 400 }
+      )
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: `${categoriaIds.length} categoría(s) agregada(s) al sobre`,
+      },
+      { status: 201 }
+    )
   } catch (error: any) {
-    console.error('Error al vincular categorías:', error)
+    console.error('Error al agregar categoría al sobre:', error)
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }

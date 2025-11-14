@@ -409,3 +409,88 @@ export async function getResumenAsignacionesBySobre(sobreId: string) {
         : 0,
   }))
 }
+
+/**
+ * ============================================================================
+ * SOBRES_CATEGORIAS - Gestión de categorías en sobres
+ * ============================================================================
+ */
+
+/**
+ * Agregar una categoría a un sobre
+ */
+export async function addCategoriasToSobre(sobreId: string, categoriaId: string) {
+  return await db
+    .insertInto('sobres_categorias')
+    .values({
+      sobre_id: sobreId,
+      categoria_id: categoriaId,
+      created_at: new Date(),
+    })
+    .onConflict((oc) => oc.columns(['sobre_id', 'categoria_id']).doNothing())
+    .returningAll()
+    .executeTakeFirst()
+}
+
+/**
+ * Eliminar una categoría de un sobre (soft delete en sobres_categorias)
+ * En realidad, solo la sacamos de la relación, pero los gastos siguen existiendo
+ */
+export async function removeCategoriasFromSobre(sobreId: string, categoriaId: string) {
+  return await db
+    .deleteFrom('sobres_categorias')
+    .where('sobre_id', '=', sobreId)
+    .where('categoria_id', '=', categoriaId)
+    .executeTakeFirst()
+}
+
+/**
+ * Obtener categorías de un sobre CON cálculo de gastos y porcentajes
+ * Retorna: categorías ordenadas por porcentaje de gasto descendente
+ */
+export async function findCategoriasWithGastosBySobre(sobreId: string) {
+  const sobre = await findSobreById(sobreId)
+  if (!sobre) return []
+
+  const categorias = await db
+    .selectFrom('sobres_categorias')
+    .innerJoin('categorias', 'categorias.id', 'sobres_categorias.categoria_id')
+    .select([
+      'categorias.id',
+      'categorias.nombre',
+      'categorias.emoji',
+      'categorias.color',
+    ])
+    .where('sobres_categorias.sobre_id', '=', sobreId)
+    .where('categorias.deleted_at', 'is', null)
+    .execute()
+
+  // Para cada categoría, calcular gastos
+  const categoriasWithGastos = await Promise.all(
+    categorias.map(async (cat) => {
+      const gastos = await db
+        .selectFrom('transacciones')
+        .select(db.fn.sum('monto').as('total'))
+        .where('categoria_id', '=', cat.id)
+        .where('sobre_id', '=', sobreId)
+        .where('deleted_at', 'is', null)
+        .executeTakeFirst()
+
+      const totalGastado = Number(gastos?.total || 0)
+      const presupuestoAsignado = Number(sobre.presupuesto_asignado || 0)
+      const porcentaje =
+        presupuestoAsignado > 0
+          ? Math.round((totalGastado / presupuestoAsignado) * 100)
+          : 0
+
+      return {
+        ...cat,
+        gastado: totalGastado,
+        porcentaje,
+      }
+    })
+  )
+
+  // Ordenar por porcentaje descendente
+  return categoriasWithGastos.sort((a, b) => b.porcentaje - a.porcentaje)
+}
