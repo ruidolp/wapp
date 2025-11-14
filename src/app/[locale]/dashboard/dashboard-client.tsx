@@ -8,6 +8,7 @@ import { BilleterasScreen } from '@/presentation/components/screens/BilleterasSc
 import { SobresScreen } from '@/presentation/components/screens/SobresScreen'
 import { MetricasScreen } from '@/presentation/components/screens/MetricasScreen'
 import { ConfigScreen } from '@/presentation/components/screens/ConfigScreen'
+import { OnboardingDrawer } from '@/components/drawers/OnboardingDrawer'
 
 interface User {
   id: string
@@ -25,6 +26,8 @@ export function DashboardClient({ locale, user }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState<TabType>('billeteras')
   const [contextualOpen, setContextualOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [onboardingOpen, setOnboardingOpen] = useState(false)
+  const [needsOnboarding, setNeedsOnboarding] = useState(false)
 
   // Mantener la página activa al refrescar usando localStorage
   useEffect(() => {
@@ -33,7 +36,30 @@ export function DashboardClient({ locale, user }: DashboardClientProps) {
     if (savedTab && ['billeteras', 'sobres', 'metricas', 'config'].includes(savedTab)) {
       setActiveTab(savedTab)
     }
+
+    // Detectar si el usuario necesita onboarding
+    checkNeedsOnboarding()
   }, [])
+
+  const checkNeedsOnboarding = async () => {
+    try {
+      const response = await fetch('/api/user/config')
+      if (response.ok) {
+        const data = await response.json()
+        // Si no existe configuración o viene vacía, necesita onboarding
+        if (!data.success || !data.config) {
+          setNeedsOnboarding(true)
+          setOnboardingOpen(true)
+        }
+      } else if (response.status === 404) {
+        // No existe configuración
+        setNeedsOnboarding(true)
+        setOnboardingOpen(true)
+      }
+    } catch (error) {
+      console.error('Error checking onboarding status:', error)
+    }
+  }
 
   // Guardar tab activo cuando cambia
   useEffect(() => {
@@ -59,7 +85,6 @@ export function DashboardClient({ locale, user }: DashboardClientProps) {
       case 'billeteras':
         return (
           <BilleterasScreen
-            userId={user.id}
             contextualOpen={contextualOpen}
             onContextualOpenChange={setContextualOpen}
           />
@@ -73,7 +98,6 @@ export function DashboardClient({ locale, user }: DashboardClientProps) {
       default:
         return (
           <BilleterasScreen
-            userId={user.id}
             contextualOpen={false}
             onContextualOpenChange={() => {}}
           />
@@ -100,6 +124,12 @@ export function DashboardClient({ locale, user }: DashboardClientProps) {
       >
         {renderActiveScreen()}
       </AppShell>
+
+      {/* OnboardingDrawer para usuarios nuevos */}
+      <OnboardingDrawer
+        open={onboardingOpen}
+        onOpenChange={setOnboardingOpen}
+      />
     </>
   )
 }
