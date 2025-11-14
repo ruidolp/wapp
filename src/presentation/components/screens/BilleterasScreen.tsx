@@ -144,7 +144,7 @@ export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: Bil
       />
 
       {/* Botón flotante "Nueva Billetera" - arriba a la derecha, siempre visible */}
-      <div className="fixed right-4 bottom-[calc(4rem+2px)] z-40">
+      <div className="fixed right-4 top-24 z-40">
         <Button
           onClick={handleCreate}
           className="rounded-full shadow-lg"
