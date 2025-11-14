@@ -76,7 +76,8 @@ export function CrearGastoDrawer({
   const [sobres, setSobres] = useState<Sobre[]>([])
   const [billeteras, setBilleteras] = useState<Billetera[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
-  const [subcategorias, setSubcategorias] = useState<Subcategoria[]>([])
+  const [todasSubcategorias, setTodasSubcategorias] = useState<Subcategoria[]>([])
+  const [subcategoriasFiltradas, setSubcategoriasFiltradas] = useState<Subcategoria[]>([])
 
   const [sobreSeleccionado, setSobreSeleccionado] = useState<string>('')
   const [billeteraSeleccionada, setBilleteraSeleccionada] = useState<string>('')
@@ -85,7 +86,13 @@ export function CrearGastoDrawer({
   const [monto, setMonto] = useState('')
   const [comentario, setComentario] = useState('')
 
+  // Estados para autocomplete de marcas
+  const [inputMarca, setInputMarca] = useState('')
+  const [sugerenciasMarcas, setSugerenciasMarcas] = useState<Subcategoria[]>([])
+  const [showSugerenciasMarcas, setShowSugerenciasMarcas] = useState(false)
+
   const montoRef = useRef<HTMLInputElement>(null)
+  const marcaRef = useRef<HTMLInputElement>(null)
   useInputFocus(montoRef, 350)
 
   const { crearGasto } = useCrearGasto()
@@ -98,8 +105,11 @@ export function CrearGastoDrawer({
       setSobreSeleccionado(preselectedSobreId || '')
       setCategoriaSeleccionada(preselectedCategoriaId || '')
       setSubcategoriaSeleccionada('')
+      setInputMarca('')
       setMonto('')
       setComentario('')
+      setSugerenciasMarcas([])
+      setShowSugerenciasMarcas(false)
     }
   }, [open, preselectedSobreId, preselectedCategoriaId])
 
@@ -122,15 +132,28 @@ export function CrearGastoDrawer({
     fetchCategoriasSobre()
   }, [sobreSeleccionado])
 
-  // Filtrar subcategorías cuando cambia la categoría seleccionada
+  // Cargar subcategorías cuando cambia la categoría seleccionada
   useEffect(() => {
-    if (categoriaSeleccionada) {
-      const filtered = subcategorias.filter(
-        (sub) => sub.categoria_id === categoriaSeleccionada
-      )
-      setSubcategorias(filtered)
-      setSubcategoriaSeleccionada('')
+    const fetchSubcategorias = async () => {
+      if (!categoriaSeleccionada) {
+        setSubcategoriasFiltradas([])
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/subcategorias?categoriaId=${categoriaSeleccionada}`)
+        if (response.ok) {
+          const data = await response.json()
+          setSubcategoriasFiltradas(data.subcategorias || [])
+        }
+      } catch (error) {
+        console.error('Error al cargar subcategorías:', error)
+      }
     }
+
+    fetchSubcategorias()
+    setSubcategoriaSeleccionada('')
+    setInputMarca('')
   }, [categoriaSeleccionada])
 
   // Auto-select billetera si solo hay una
@@ -161,15 +184,102 @@ export function CrearGastoDrawer({
         setBilleteras(billeterasList)
       }
 
-      // Fetch todas las subcategorías (las filtraremos por categoría seleccionada)
+      // Fetch todas las subcategorías del usuario (para autocomplete)
       const subcategoriasResponse = await fetch('/api/subcategorias')
       if (subcategoriasResponse.ok) {
         const subcategoriasData = await subcategoriasResponse.json()
-        setSubcategorias(subcategoriasData.subcategorias || [])
+        setTodasSubcategorias(subcategoriasData.subcategorias || [])
       }
     } catch (error) {
       console.error('Error al cargar datos:', error)
       notify.error('Error al cargar formulario')
+    }
+  }
+
+  // Manejar cambios en el input de marca
+  const handleInputMarcaChange = (value: string) => {
+    setInputMarca(value)
+
+    if (!value.trim()) {
+      setSugerenciasMarcas([])
+      setShowSugerenciasMarcas(false)
+      return
+    }
+
+    // Filtrar subcategorías de la categoría actual que coincidan con la búsqueda
+    const filtered = subcategoriasFiltradas.filter((sub) =>
+      sub.nombre.toLowerCase().includes(value.toLowerCase())
+    )
+
+    setSugerenciasMarcas(filtered)
+    setShowSugerenciasMarcas(filtered.length > 0)
+  }
+
+  // Click en sugerencia de marca
+  const handleSelectMarca = (subcategoria: Subcategoria) => {
+    setSubcategoriaSeleccionada(subcategoria.id)
+    setInputMarca(subcategoria.nombre)
+    setSugerenciasMarcas([])
+    setShowSugerenciasMarcas(false)
+  }
+
+  // Manejar ENTER en el input de marca
+  const handleMarcaKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') return
+    e.preventDefault()
+
+    const trimmedValue = inputMarca.trim()
+    if (!trimmedValue) return
+
+    // Buscar si ya existe una subcategoría con ese nombre
+    const existe = subcategoriasFiltradas.find(
+      (s) => s.nombre.toLowerCase() === trimmedValue.toLowerCase()
+    )
+
+    if (existe) {
+      // Si existe, seleccionarla
+      setSubcategoriaSeleccionada(existe.id)
+      setInputMarca(existe.nombre)
+    } else {
+      // Si no existe, crearla
+      await crearNuevaMarca(trimmedValue)
+    }
+
+    setSugerenciasMarcas([])
+    setShowSugerenciasMarcas(false)
+  }
+
+  // Crear nueva marca/subcategoría
+  const crearNuevaMarca = async (nombre: string) => {
+    if (!categoriaSeleccionada) {
+      notify.error('Selecciona una categoría primero')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/subcategorias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, categoriaId: categoriaSeleccionada }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Error al crear marca')
+      }
+
+      const data = await response.json()
+      const nuevaMarca = data.subcategoria
+
+      // Actualizar listas
+      setTodasSubcategorias([...todasSubcategorias, nuevaMarca])
+      setSubcategoriasFiltradas([...subcategoriasFiltradas, nuevaMarca])
+      setSubcategoriaSeleccionada(nuevaMarca.id)
+      setInputMarca(nuevaMarca.nombre)
+
+      notify.success(`Marca "${nombre}" creada`)
+    } catch (error: any) {
+      notify.error(error.message || 'Error al crear marca')
     }
   }
 
@@ -237,9 +347,6 @@ export function CrearGastoDrawer({
 
   const billeteraActual = billeteras.find((b) => b.id === billeteraSeleccionada)
   const sobreActual = sobres.find((s) => s.id === sobreSeleccionado)
-  const subcategoriasFiltered = subcategorias.filter(
-    (sub) => sub.categoria_id === categoriaSeleccionada
-  )
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -337,23 +444,51 @@ export function CrearGastoDrawer({
               </Select>
             </div>
 
-            {/* Subcategoría */}
-            {categoriaSeleccionada && subcategoriasFiltered.length > 0 && (
+            {/* Marca/Subcategoría con autocomplete */}
+            {categoriaSeleccionada && (
               <div className="space-y-2">
-                <Label htmlFor="subcategoria">Subcategoría (opcional)</Label>
-                <Select value={subcategoriaSeleccionada} onValueChange={setSubcategoriaSeleccionada}>
-                  <SelectTrigger id="subcategoria">
-                    <SelectValue placeholder="Seleccionar marca/empresa" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {subcategoriasFiltered.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        <span className="mr-2">{s.emoji || '🏢'}</span>
-                        <span className="font-medium">{s.nombre}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="marca">Marca (opcional)</Label>
+                <div className="relative">
+                  <Input
+                    ref={marcaRef}
+                    id="marca"
+                    type="text"
+                    placeholder="Escribe nombre de marca (Ej: Walmart)"
+                    value={inputMarca}
+                    onChange={(e) => handleInputMarcaChange(e.target.value)}
+                    onKeyDown={handleMarcaKeyDown}
+                    onFocus={() => {
+                      if (inputMarca && sugerenciasMarcas.length > 0) {
+                        setShowSugerenciasMarcas(true)
+                      }
+                    }}
+                    onBlur={() => {
+                      // Delay para permitir click en sugerencia
+                      setTimeout(() => setShowSugerenciasMarcas(false), 200)
+                    }}
+                  />
+
+                  {/* Sugerencias */}
+                  {showSugerenciasMarcas && sugerenciasMarcas.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 border rounded-md bg-white shadow-lg z-10 max-h-48 overflow-y-auto">
+                      {sugerenciasMarcas.map((marca) => (
+                        <button
+                          key={marca.id}
+                          onClick={() => handleSelectMarca(marca)}
+                          className="w-full text-left px-3 py-2 hover:bg-slate-100 flex items-center gap-2 text-sm"
+                          type="button"
+                        >
+                          <span className="text-green-600">✓</span>
+                          <span>{marca.emoji && `${marca.emoji} `}</span>
+                          <span>{marca.nombre}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Presiona <kbd className="px-2 py-1 bg-slate-100 rounded text-xs">ENTER</kbd> para crear nueva
+                </p>
               </div>
             )}
 
