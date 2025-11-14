@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { SobreCard } from '@/components/cards/SobreCard'
 import { CrearSobreDrawer } from '@/components/drawers/CrearSobreDrawer'
 import { AgregarPresupuestoDrawer } from '@/components/drawers/AgregarPresupuestoDrawer'
+import { CrearGastoDrawer } from '@/components/drawers/CrearGastoDrawer'
+import { AgregarCategoriaDrawer } from '@/components/drawers/AgregarCategoriaDrawer'
 import { OverspendWarningModal } from '@/components/modals/OverspendWarningModal'
 import { notify } from '@/infrastructure/lib/notifications'
 import { useSobre, useDevolverPresupuesto } from '@/presentation/hooks/useSobres'
@@ -38,7 +40,10 @@ export function SobresScreen({ userId }: { userId: string }) {
   const [crearSobreOpen, setCrearSobreOpen] = useState(false)
   const [agregarPresupuestoOpen, setAgregarPresupuestoOpen] = useState(false)
   const [crearGastoOpen, setCrearGastoOpen] = useState(false)
+  const [agregarCategoriaOpen, setAgregarCategoriaOpen] = useState(false)
   const [sobreSeleccionado, setSobreSeleccionado] = useState<Sobre | null>(null)
+  const [sobreSeleccionadoParaGasto, setSobreSeleccionadoParaGasto] = useState<string>('')
+  const [categoriaPreseleccionada, setCategoriaPreseleccionada] = useState<string>('')
   const [warning, setWarning] = useState<WarningType | null>(null)
   const [warningModalOpen, setWarningModalOpen] = useState(false)
 
@@ -128,6 +133,28 @@ export function SobresScreen({ userId }: { userId: string }) {
     setAgregarPresupuestoOpen(false)
   }
 
+  const handleCrearGasto = (sobre: Sobre) => {
+    setSobreSeleccionadoParaGasto(sobre.id)
+    setCrearGastoOpen(true)
+  }
+
+  const handleAgregarCategoria = (sobre: Sobre) => {
+    setSobreSeleccionado(sobre)
+    setAgregarCategoriaOpen(true)
+  }
+
+  const handleCrearGastoSuccess = () => {
+    fetchSobres()
+    setCrearGastoOpen(false)
+    setSobreSeleccionadoParaGasto('')
+    setCategoriaPreseleccionada('')
+  }
+
+  const handleAgregarCategoriaSuccess = () => {
+    fetchSobres()
+    setAgregarCategoriaOpen(false)
+  }
+
   const scrollToSlide = (index: number) => {
     if (!emblaApi) return
     emblaApi.scrollTo(index)
@@ -187,6 +214,7 @@ export function SobresScreen({ userId }: { userId: string }) {
                       // TODO: Implementar editar categorías
                       console.log('Editar categorías del sobre:', sobre.id)
                     }}
+                    onAgregarCategoria={() => handleAgregarCategoria(sobre)}
                   />
                 </div>
               ))}
@@ -195,7 +223,7 @@ export function SobresScreen({ userId }: { userId: string }) {
 
           {/* Dot Indicators */}
           {sobres.length > 1 && (
-            <div className="fixed bottom-[calc(4rem+2px)] left-1/2 -translate-x-1/2 z-40 flex gap-2">
+            <div className="absolute bottom-[calc(2rem)] left-1/2 -translate-x-1/2 z-40 flex gap-2">
               {sobres.map((_, index) => (
                 <button
                   key={index}
@@ -230,6 +258,24 @@ export function SobresScreen({ userId }: { userId: string }) {
         onSuccess={handleAgregarPresupuestoSuccess}
       />
 
+      <CrearGastoDrawer
+        open={crearGastoOpen}
+        onOpenChange={setCrearGastoOpen}
+        userId={userId}
+        preselectedSobreId={sobreSeleccionadoParaGasto}
+        preselectedCategoriaId={categoriaPreseleccionada}
+        onSuccess={handleCrearGastoSuccess}
+      />
+
+      <AgregarCategoriaDrawer
+        open={agregarCategoriaOpen}
+        onOpenChange={setAgregarCategoriaOpen}
+        sobreId={sobreSeleccionado?.id || ''}
+        sobreName={sobreSeleccionado?.nombre || ''}
+        userId={userId}
+        onSuccess={handleAgregarCategoriaSuccess}
+      />
+
       {/* Warning Modal */}
       <OverspendWarningModal
         open={warningModalOpen}
@@ -248,15 +294,22 @@ export function SobresScreen({ userId }: { userId: string }) {
 
       {/* Botones flotantes para sobre */}
       {/* Botón abajo: Agregar Gasto a sobre existente */}
-      <div className="fixed right-4 bottom-[calc(4rem+2px)] z-40">
-        <Button
-          onClick={() => setCrearGastoOpen(true)}
-          className="rounded-full shadow-lg"
-          size="lg"
-        >
-          ➕ Agregar Gasto
-        </Button>
-      </div>
+      {sobres.length > 0 && (
+        <div className="fixed right-4 bottom-[calc(6rem-2px)] z-40">
+          <Button
+            onClick={() => {
+              const sobreActual = sobres[selectedIndex]
+              if (sobreActual) {
+                handleCrearGasto(sobreActual)
+              }
+            }}
+            className="rounded-full shadow-lg"
+            size="lg"
+          >
+            ➕ Agregar Gasto
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

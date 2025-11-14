@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +10,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { CategoriaCard } from '@/components/cards/CategoriaCard'
+import { useSobreCategories } from '@/presentation/hooks/useSobres'
 
 interface Billetera {
   id: string
@@ -35,6 +37,7 @@ interface SobreCardProps {
   onAgregarPresupuesto?: () => void
   onDevolverPresupuesto?: () => void
   onEditarCategorias?: () => void
+  onAgregarCategoria?: () => void
   onVerDetalle?: () => void
 }
 
@@ -49,8 +52,11 @@ export function SobreCard({
   onAgregarPresupuesto,
   onDevolverPresupuesto,
   onEditarCategorias,
+  onAgregarCategoria,
   onVerDetalle,
 }: SobreCardProps) {
+  const [categoriasLoading, setCategoriasLoading] = useState(false)
+
   // Asegurar que son números (pueden venir como strings/Decimal de la BD)
   const presupuesto = Number(presupuestoAsignado) || 0
   const gastadoNum = Number(gastado) || 0
@@ -58,6 +64,14 @@ export function SobreCard({
   const presupuestoLibre = presupuesto - gastadoNum
   const porcentajeGastado = presupuesto > 0 ? (gastadoNum / presupuesto) * 100 : 0
   const isOverspent = gastadoNum > presupuesto
+
+  // Hook para obtener categorías
+  const { categorias, loading: categoriasLoadingHook, refetch: refetchCategorias } = useSobreCategories(id)
+
+  // Sincronizar loading state
+  useEffect(() => {
+    setCategoriasLoading(categoriasLoadingHook)
+  }, [categoriasLoadingHook])
 
   // Agrupar asignaciones por pares (2 billeteras por fila)
   const pares = useMemo(() => {
@@ -67,6 +81,15 @@ export function SobreCard({
     }
     return pairs
   }, [asignaciones])
+
+  // Ordenar categorías por porcentaje descendente
+  const categoriasOrdenadas = useMemo(() => {
+    return [...categorias].sort((a, b) => {
+      const pctA = Number(a.porcentaje) || 0
+      const pctB = Number(b.porcentaje) || 0
+      return pctB - pctA
+    })
+  }, [categorias])
 
   const bgColor = color || '#3b82f6'
 
@@ -194,6 +217,66 @@ export function SobreCard({
           </div>
         )}
 
+        {/* Categorías */}
+        {categoriasLoading ? (
+          <div className="p-3 rounded-lg bg-slate-50 text-center">
+            <p className="text-sm text-muted-foreground">
+              Cargando categorías...
+            </p>
+          </div>
+        ) : categoriasOrdenadas.length > 0 ? (
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <p className="text-sm font-medium text-muted-foreground">
+                Categorías ({categoriasOrdenadas.length})
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onAgregarCategoria?.()
+                }}
+                className="h-6 px-2"
+              >
+                ➕
+              </Button>
+            </div>
+
+            <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
+              {categoriasOrdenadas.map((categoria) => (
+                <CategoriaCard
+                  key={categoria.id}
+                  id={categoria.id}
+                  nombre={categoria.nombre}
+                  emoji={categoria.emoji}
+                  color={categoria.color}
+                  gastado={categoria.gastado || 0}
+                  porcentaje={categoria.porcentaje || 0}
+                  presupuestoAsignado={presupuesto}
+                  onClick={() => {}}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="p-3 rounded-lg bg-slate-50 text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Sin categorías aún
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                onAgregarCategoria?.()
+              }}
+              className="w-full"
+            >
+              ➕ Agregar Categorías
+            </Button>
+          </div>
+        )}
 
         {/* Badge de overspend */}
         {isOverspent && (
