@@ -3,8 +3,14 @@
  */
 
 import { useTranslations } from 'next-intl'
-import { Plus, Trash2, ArrowRightLeft, Info } from 'lucide-react'
+import { Plus, ArrowRightLeft, MoreVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import type { Billetera } from '@/presentation/hooks/useBilleteras'
 
 interface CardsListProps {
@@ -50,13 +56,31 @@ export function CardsList({
                 {t(`types.${billetera.tipo}`)}
               </p>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onInfo(billetera)}
-            >
-              <Info className="h-4 w-4" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onInfo(billetera)}>
+                  {t('actions.edit')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onTransfer(billetera)}>
+                  {t('actions.transfer')}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => onDelete(billetera)}
+                  className="text-red-600"
+                >
+                  {t('actions.delete')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Saldos */}
@@ -114,13 +138,6 @@ export function CardsList({
             >
               <ArrowRightLeft className="h-3 w-3 mr-2" />
               {t('actions.transfer')}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDelete(billetera)}
-            >
-              <Trash2 className="h-3 w-3" />
             </Button>
           </div>
         </div>
