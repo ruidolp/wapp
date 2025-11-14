@@ -108,31 +108,33 @@ async function calcularWarningTransaccion(
       return null
     }
 
-    // Obtener asignaciones del usuario en el sobre
-    const asignaciones = await findAsignacionesByUsuarioInSobre(sobreId, userId)
-    const presupuestoAsignado = asignaciones.reduce((sum: number, a: any) => sum + Number(a.monto_total || 0), 0)
+    // Obtener el sobre
+    const sobre = await findSobreById(sobreId)
+    if (!sobre) return null
 
-    // Obtener gastos totales en el sobre para este usuario
+    // Obtener presupuesto asignado del sobre
+    const presupuestoAsignado = Number(sobre.presupuesto_asignado || 0)
+
+    // Obtener gastos totales en el sobre
     const gastosBySobre = await findTransaccionesBySobre(sobreId)
-    const gastosUsuario = gastosBySobre
-      .filter((t: any) => t.usuario_id === userId && t.tipo === 'GASTO')
+    const gastadoActual = gastosBySobre
+      .filter((t: any) => t.tipo === 'GASTO')
       .reduce((sum: number, t: any) => sum + Number(t.monto || 0), 0)
 
-    const nuevoGastado = gastosUsuario + monto
+    const nuevoGastado = gastadoActual + monto
     const exceso = nuevoGastado - presupuestoAsignado
 
     // Si hay exceso, retornar warning
-    if (exceso > 0) {
-      const sobre = await findSobreById(sobreId)
+    if (exceso > 0 && presupuestoAsignado > 0) {
       const porcentajeExceso = (exceso / presupuestoAsignado) * 100
 
       return {
         type: 'OVERSPEND_SOBRE',
-        message: `Excede el presupuesto del sobre "${sobre?.nombre}" en $${exceso.toFixed(2)} (${porcentajeExceso.toFixed(2)}%)`,
+        message: `Excede el presupuesto del sobre "${sobre.nombre}" en $${exceso.toFixed(2)} (${porcentajeExceso.toFixed(2)}%)`,
         details: {
           presupuesto_asignado: presupuestoAsignado,
           gastado: nuevoGastado,
-          sobreNombre: sobre?.nombre,
+          sobreNombre: sobre.nombre,
           porcentajeExceso,
         },
       }
@@ -145,7 +147,7 @@ async function calcularWarningTransaccion(
       const saldoNuevo = saldoAnterior - monto
 
       if (saldoNuevo < 0) {
-        const porcentajeExceso = (Math.abs(saldoNuevo) / saldoAnterior) * 100
+        const porcentajeExceso = saldoAnterior > 0 ? (Math.abs(saldoNuevo) / saldoAnterior) * 100 : 0
 
         return {
           type: 'NEGATIVE_WALLET',
@@ -266,6 +268,11 @@ export async function crearTransaccion(
     // Actualizar saldo de billetera según tipo de transacción
     await actualizarSaldoBilletera(billeteraId, tipo, monto)
 
+    // Actualizar gastado del sobre si es un GASTO
+    if (tipo === 'GASTO' && sobreId) {
+      await actualizarGastadoSobre(sobreId)
+    }
+
     // Calcular warnings si aplica
     const warning = await calcularWarningTransaccion(billeteraId, tipo, monto, sobreId, userId)
 
@@ -314,6 +321,24 @@ async function actualizarSaldoBilletera(
   // AJUSTE puede ser positivo o negativo (se maneja en la lógica de creación)
 
   await updateBilleteraSaldos(billeteraId, nuevoSaldoReal, nuevoSaldoProyectado)
+}
+
+/**
+ * Actualizar gastado del sobre basado en las transacciones
+ */
+async function actualizarGastadoSobre(sobreId: string) {
+  const sobre = await findSobreById(sobreId)
+  if (!sobre) return
+
+  // Calcular total gastado del sobre
+  const transacciones = await findTransaccionesBySobre(sobreId)
+  const totalGastado = transacciones
+    .filter((t: any) => t.tipo === 'GASTO')
+    .reduce((sum: number, t: any) => sum + Number(t.monto || 0), 0)
+
+  // Actualizar campo gastado del sobre
+  const { updateSobreGastado } = await import('@/infrastructure/database/queries/sobres.queries')
+  await updateSobreGastado(sobreId, totalGastado)
 }
 
 /**
@@ -527,6 +552,11 @@ export async function eliminarTransaccion(
     )
 
     await softDeleteTransaccion(transaccionId)
+
+    // Actualizar gastado del sobre si era un GASTO
+    if (transaccion.tipo === 'GASTO' && transaccion.sobre_id) {
+      await actualizarGastadoSobre(transaccion.sobre_id)
+    }
 
     return {
       success: true,

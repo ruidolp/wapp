@@ -73,15 +73,6 @@ export function SobreCard({
     setCategoriasLoading(categoriasLoadingHook)
   }, [categoriasLoadingHook])
 
-  // Agrupar asignaciones por pares (2 billeteras por fila)
-  const pares = useMemo(() => {
-    const pairs = []
-    for (let i = 0; i < asignaciones.length; i += 2) {
-      pairs.push([asignaciones[i], asignaciones[i + 1]].filter(Boolean))
-    }
-    return pairs
-  }, [asignaciones])
-
   // Ordenar categorías por porcentaje descendente
   const categoriasOrdenadas = useMemo(() => {
     return [...categorias].sort((a, b) => {
@@ -183,39 +174,6 @@ export function SobreCard({
             {porcentajeGastado.toFixed(1)}% del presupuesto
           </p>
         </div>
-
-        {/* Asignaciones de billeteras - Grid 2 columnas */}
-        {asignaciones.length > 0 ? (
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-muted-foreground">
-              Asignaciones ({asignaciones.length})
-            </p>
-
-            {pares.map((par, parIdx) => (
-              <div key={parIdx} className="grid grid-cols-2 gap-2">
-                {par.map((asignacion) => (
-                  <div
-                    key={asignacion.billetera_id}
-                    className="p-2 rounded-lg border bg-slate-50 space-y-1"
-                  >
-                    <p className="text-xs font-medium truncate">
-                      {asignacion.billetera?.nombre}
-                    </p>
-                    <p className="text-sm font-bold">
-                      ${Number(asignacion.monto_asignado || 0).toFixed(2)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="p-3 rounded-lg bg-slate-50 text-center">
-            <p className="text-sm text-muted-foreground">
-              Sin asignaciones aún
-            </p>
-          </div>
-        )}
 
         {/* Categorías */}
         {categoriasLoading ? (

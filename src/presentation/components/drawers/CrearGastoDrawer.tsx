@@ -103,6 +103,25 @@ export function CrearGastoDrawer({
     }
   }, [open, preselectedSobreId, preselectedCategoriaId])
 
+  // Cargar categorías del sobre cuando se selecciona
+  useEffect(() => {
+    const fetchCategoriasSobre = async () => {
+      if (!sobreSeleccionado) return
+
+      try {
+        const response = await fetch(`/api/sobres/${sobreSeleccionado}/categorias`)
+        if (response.ok) {
+          const data = await response.json()
+          setCategorias(data.categorias || [])
+        }
+      } catch (error) {
+        console.error('Error al cargar categorías del sobre:', error)
+      }
+    }
+
+    fetchCategoriasSobre()
+  }, [sobreSeleccionado])
+
   // Filtrar subcategorías cuando cambia la categoría seleccionada
   useEffect(() => {
     if (categoriaSeleccionada) {
@@ -140,13 +159,6 @@ export function CrearGastoDrawer({
         const billeterasData = await billeterasResponse.json()
         const billeterasList = billeterasData.billeteras || []
         setBilleteras(billeterasList)
-      }
-
-      // Fetch categorías
-      const categoriasResponse = await fetch('/api/categorias')
-      if (categoriasResponse.ok) {
-        const categoriasData = await categoriasResponse.json()
-        setCategorias(categoriasData.categorias || [])
       }
 
       // Fetch todas las subcategorías (las filtraremos por categoría seleccionada)
