@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { CategoriaCard } from '@/components/cards/CategoriaCard'
 import { useSobreCategories } from '@/presentation/hooks/useSobres'
+import { EditarCategoriaDrawer } from '@/components/drawers/EditarCategoriaDrawer'
 
 interface Billetera {
   id: string
@@ -56,6 +57,8 @@ export function SobreCard({
   onVerDetalle,
 }: SobreCardProps) {
   const [categoriasLoading, setCategoriasLoading] = useState(false)
+  const [editarCategoriaOpen, setEditarCategoriaOpen] = useState(false)
+  const [selectedCategoria, setSelectedCategoria] = useState<{ id: string; nombre: string } | null>(null)
 
   // Asegurar que son números (pueden venir como strings/Decimal de la BD)
   const presupuesto = Number(presupuestoAsignado) || 0
@@ -212,7 +215,11 @@ export function SobreCard({
                   gastado={categoria.gastado || 0}
                   porcentaje={categoria.porcentaje || 0}
                   presupuestoAsignado={presupuesto}
-                  onClick={() => {}}
+                  onClick={(e) => {
+                    e?.stopPropagation()
+                    setSelectedCategoria({ id: categoria.id, nombre: categoria.nombre })
+                    setEditarCategoriaOpen(true)
+                  }}
                 />
               ))}
             </div>
@@ -243,6 +250,19 @@ export function SobreCard({
           </Badge>
         )}
       </div>
+
+      {/* Drawer editar categoría */}
+      {selectedCategoria && (
+        <EditarCategoriaDrawer
+          open={editarCategoriaOpen}
+          onOpenChange={setEditarCategoriaOpen}
+          categoriaId={selectedCategoria.id}
+          categoriaNombre={selectedCategoria.nombre}
+          onSuccess={() => {
+            refetchCategorias()
+          }}
+        />
+      )}
     </Card>
   )
 }

@@ -10,7 +10,7 @@ interface CategoriaCardProps {
   gastado: number
   porcentaje: number
   presupuestoAsignado: number
-  onClick?: () => void
+  onClick?: (e?: React.MouseEvent) => void
 }
 
 export function CategoriaCard({
@@ -32,7 +32,7 @@ export function CategoriaCard({
   return (
     <Card
       className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow p-3"
-      onClick={onClick}
+      onClick={(e) => onClick?.(e)}
     >
       <div className="space-y-2">
         {/* Header: emoji + nombre | gastado + % */}

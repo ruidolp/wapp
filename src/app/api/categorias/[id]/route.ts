@@ -1,7 +1,7 @@
 /**
  * /api/categorias/[id]
  *
- * API endpoints para operaciones sobre una categoría específica
+ * API endpoints para gestión de una categoría específica
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -102,7 +102,7 @@ export async function PUT(
 /**
  * DELETE /api/categorias/[id]
  *
- * Eliminar una categoría (soft delete)
+ * Eliminar una categoría
  */
 export async function DELETE(
   req: NextRequest,
