@@ -233,9 +233,46 @@ export function EditarCategoriaDrawer({
               />
             </div>
 
-            {/* Input con búsqueda para subcategorías */}
+            {/* Separador */}
+            <div className="border-t border-gray-200 my-4" />
+
+            {/* Texto descriptivo */}
+            <div className="space-y-1">
+              <Label>¿Dónde compras?</Label>
+              <p className="text-xs text-muted-foreground">
+                Agrega tus marcas recurrentes para que puedas medir tus gastos
+              </p>
+            </div>
+
+            {/* Marcas agregadas - Mostrar arriba */}
+            {selectedSubcategorias.length > 0 && (
+              <div className="space-y-2">
+                <Label>Marcas agregadas</Label>
+                <div className="flex flex-wrap gap-2">
+                  {selectedSubcategorias.map((sub) => (
+                    <Badge
+                      key={sub.id}
+                      variant="default"
+                      className="cursor-pointer gap-1 pl-2"
+                    >
+                      {sub.emoji && <span>{sub.emoji}</span>}
+                      <span>{sub.nombre}</span>
+                      <button
+                        onClick={() => handleRemoveSubcategoria(sub.id)}
+                        className="ml-1 hover:opacity-70"
+                        type="button"
+                      >
+                        ✕
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Campo de búsqueda/creación - Abajo */}
             <div className="space-y-2">
-              <Label htmlFor="marca">Marcas/Empresas</Label>
+              <Label htmlFor="marca">Buscar o crear marca</Label>
               <div className="relative">
                 <Input
                   ref={inputRef}
@@ -278,32 +315,6 @@ export function EditarCategoriaDrawer({
                 Presiona <kbd className="px-2 py-1 bg-slate-100 rounded text-xs">ENTER</kbd> para crear nueva
               </p>
             </div>
-
-            {/* Subcategorías seleccionadas */}
-            {selectedSubcategorias.length > 0 && (
-              <div className="space-y-2">
-                <Label>Marcas agregadas</Label>
-                <div className="flex flex-wrap gap-2">
-                  {selectedSubcategorias.map((sub) => (
-                    <Badge
-                      key={sub.id}
-                      variant="default"
-                      className="cursor-pointer gap-1 pl-2"
-                    >
-                      {sub.emoji && <span>{sub.emoji}</span>}
-                      <span>{sub.nombre}</span>
-                      <button
-                        onClick={() => handleRemoveSubcategoria(sub.id)}
-                        className="ml-1 hover:opacity-70"
-                        type="button"
-                      >
-                        ✕
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </DrawerBody>
 
