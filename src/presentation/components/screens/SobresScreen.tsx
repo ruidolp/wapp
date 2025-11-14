@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import useEmblaCarousel from 'embla-carousel-react'
 import { Button } from '@/components/ui/button'
 import { SobreCard } from '@/components/cards/SobreCard'
 import { CrearSobreDrawer } from '@/components/drawers/CrearSobreDrawer'
@@ -41,6 +42,14 @@ export function SobresScreen({ userId }: { userId: string }) {
   const [warning, setWarning] = useState<WarningType | null>(null)
   const [warningModalOpen, setWarningModalOpen] = useState(false)
 
+  // Carousel state
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: 'start',
+    loop: false,
+    dragFree: true,
+  })
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
   // Hook para devolver presupuesto
   const { devolverPresupuesto, loading: devolverLoading } = useDevolverPresupuesto(
     sobreSeleccionado?.id || ''
@@ -50,6 +59,22 @@ export function SobresScreen({ userId }: { userId: string }) {
   useEffect(() => {
     fetchSobres()
   }, [])
+
+  // Carousel effect para actualizar selected index
+  useEffect(() => {
+    if (!emblaApi) return
+
+    const onSelect = () => {
+      setSelectedIndex(emblaApi.selectedScrollSnap())
+    }
+
+    emblaApi.on('select', onSelect)
+    onSelect()
+
+    return () => {
+      emblaApi.off('select', onSelect)
+    }
+  }, [emblaApi])
 
   const fetchSobres = async () => {
     setLoading(true)
@@ -103,6 +128,11 @@ export function SobresScreen({ userId }: { userId: string }) {
     setAgregarPresupuestoOpen(false)
   }
 
+  const scrollToSlide = (index: number) => {
+    if (!emblaApi) return
+    emblaApi.scrollTo(index)
+  }
+
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
@@ -132,26 +162,53 @@ export function SobresScreen({ userId }: { userId: string }) {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sobres.map((sobre) => (
-            <SobreCard
-              key={sobre.id}
-              id={sobre.id}
-              nombre={sobre.nombre}
-              emoji={sobre.emoji}
-              color={sobre.color}
-              presupuestoAsignado={sobre.presupuesto_asignado}
-              gastado={sobre.gastado || 0}
-              asignaciones={sobre.asignaciones || []}
-              onAgregarPresupuesto={() => handleAgregarPresupuesto(sobre)}
-              onVerDetalle={() => handleDetalleSobre(sobre)}
-              onDevolverPresupuesto={() => handleDevolverPresupuesto(sobre)}
-              onEditarCategorias={() => {
-                // TODO: Implementar editar categorías
-                console.log('Editar categorías del sobre:', sobre.id)
-              }}
-            />
-          ))}
+        <div className="relative pb-20">
+          {/* Carousel Container */}
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex gap-4">
+              {sobres.map((sobre) => (
+                <div
+                  key={sobre.id}
+                  className="flex-[0_0_100%] sm:flex-[0_0_calc(50%-0.5rem)] lg:flex-[0_0_calc(33.333%-0.75rem)] min-w-0"
+                >
+                  <SobreCard
+                    id={sobre.id}
+                    nombre={sobre.nombre}
+                    emoji={sobre.emoji}
+                    color={sobre.color}
+                    presupuestoAsignado={sobre.presupuesto_asignado}
+                    gastado={sobre.gastado || 0}
+                    asignaciones={sobre.asignaciones || []}
+                    onAgregarPresupuesto={() => handleAgregarPresupuesto(sobre)}
+                    onVerDetalle={() => handleDetalleSobre(sobre)}
+                    onDevolverPresupuesto={() => handleDevolverPresupuesto(sobre)}
+                    onEditarCategorias={() => {
+                      // TODO: Implementar editar categorías
+                      console.log('Editar categorías del sobre:', sobre.id)
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Dot Indicators */}
+          {sobres.length > 1 && (
+            <div className="fixed bottom-[calc(4rem+2px)] left-1/2 -translate-x-1/2 z-40 flex gap-2">
+              {sobres.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToSlide(index)}
+                  className={`h-2 rounded-full transition-all cursor-pointer ${
+                    index === selectedIndex
+                      ? 'w-6 bg-primary'
+                      : 'w-2 bg-muted'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
