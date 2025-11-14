@@ -116,8 +116,7 @@ export function AgregarCategoriaDrawer({
     }
   }
 
-  const handleCrearCategoria = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleCrearCategoria = async (e?: any) => {
     if (!nombreNuevaCategoria.trim()) {
       notify.error('Ingresa un nombre para la categoría')
       return
@@ -154,8 +153,7 @@ export function AgregarCategoriaDrawer({
     }
   }
 
-  const handleCrearSubcategoria = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleCrearSubcategoria = async (e?: any) => {
     if (!nombreNuevaSubcategoria.trim()) {
       notify.error('Ingresa un nombre para la marca/empresa')
       return
@@ -206,8 +204,7 @@ export function AgregarCategoriaDrawer({
     setCategoriasSeleccionadas(categoriasSeleccionadas.filter((id) => id !== categoriaId))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (e?: any) => {
     if (categoriasSeleccionadas.length === 0) {
       notify.error('Selecciona al menos una categoría')
       return
@@ -253,7 +250,7 @@ export function AgregarCategoriaDrawer({
         </DrawerHeader>
 
         <DrawerBody>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-6">
             {/* Categorías Seleccionadas */}
             {categoriasSeleccionadas.length > 0 && (
               <div className="space-y-2">
@@ -281,7 +278,7 @@ export function AgregarCategoriaDrawer({
               <Label htmlFor="categoria">Agregar Categoría</Label>
 
               {creandoCategoria ? (
-                <form onSubmit={handleCrearCategoria} className="space-y-2">
+                <div className="space-y-2">
                   <Input
                     ref={categoriaNuevaRef}
                     type="text"
@@ -292,7 +289,7 @@ export function AgregarCategoriaDrawer({
                   />
                   <div className="flex gap-2">
                     <Button
-                      type="submit"
+                      onClick={handleCrearCategoria}
                       disabled={loading || !nombreNuevaCategoria.trim()}
                       size="sm"
                       className="flex-1"
@@ -300,7 +297,6 @@ export function AgregarCategoriaDrawer({
                       Crear
                     </Button>
                     <Button
-                      type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => {
@@ -313,7 +309,7 @@ export function AgregarCategoriaDrawer({
                       Cancelar
                     </Button>
                   </div>
-                </form>
+                </div>
               ) : (
                 <div className="space-y-2">
                   {categoriasDisponibles.length > 0 ? (
@@ -338,7 +334,6 @@ export function AgregarCategoriaDrawer({
                     </Alert>
                   )}
                   <Button
-                    type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => setCreandoCategoria(true)}
@@ -358,7 +353,7 @@ export function AgregarCategoriaDrawer({
                 </Label>
 
                 {creandoSubcategoria ? (
-                  <form onSubmit={handleCrearSubcategoria} className="space-y-2">
+                  <div className="space-y-2">
                     <Input
                       ref={subcategoriaNuevaRef}
                       type="text"
@@ -369,7 +364,7 @@ export function AgregarCategoriaDrawer({
                     />
                     <div className="flex gap-2">
                       <Button
-                        type="submit"
+                        onClick={handleCrearSubcategoria}
                         disabled={loading || !nombreNuevaSubcategoria.trim()}
                         size="sm"
                         className="flex-1"
@@ -377,7 +372,6 @@ export function AgregarCategoriaDrawer({
                         Crear
                       </Button>
                       <Button
-                        type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => {
@@ -390,7 +384,7 @@ export function AgregarCategoriaDrawer({
                         Cancelar
                       </Button>
                     </div>
-                  </form>
+                  </div>
                 ) : (
                   <div className="space-y-2">
                     {subcategorias.length > 0 ? (
@@ -415,7 +409,6 @@ export function AgregarCategoriaDrawer({
                       </Alert>
                     )}
                     <Button
-                      type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => setCreandoSubcategoria(true)}
@@ -427,12 +420,12 @@ export function AgregarCategoriaDrawer({
                 )}
               </div>
             )}
-          </form>
+          </div>
         </DrawerBody>
 
         <DrawerFooter>
           <Button
-            onClick={handleSubmit}
+            onClick={() => handleSubmit()}
             disabled={loading || categoriasSeleccionadas.length === 0}
             className="w-full"
           >
