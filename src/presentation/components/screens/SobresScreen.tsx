@@ -46,7 +46,7 @@ export function SobresScreen({ userId }: { userId: string }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     loop: false,
-    dragFree: true,
+    dragFree: false,
   })
   const [selectedIndex, setSelectedIndex] = useState(0)
 
@@ -138,6 +138,13 @@ export function SobresScreen({ userId }: { userId: string }) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-foreground">Sobres</h2>
+        <Button
+          onClick={() => setCrearSobreOpen(true)}
+          className="shadow-lg"
+          size="lg"
+        >
+          ➕ Nuevo Sobre
+        </Button>
       </div>
 
       {/* Contenido */}
@@ -240,17 +247,6 @@ export function SobresScreen({ userId }: { userId: string }) {
       />
 
       {/* Botones flotantes para sobre */}
-      {/* Botón arriba: Crear Nuevo Sobre */}
-      <div className="fixed right-4 top-24 z-40">
-        <Button
-          onClick={() => setCrearSobreOpen(true)}
-          className="shadow-lg"
-          size="lg"
-        >
-          ➕ Nuevo Sobre
-        </Button>
-      </div>
-
       {/* Botón abajo: Agregar Gasto a sobre existente */}
       <div className="fixed right-4 bottom-[calc(4rem+2px)] z-40">
         <Button

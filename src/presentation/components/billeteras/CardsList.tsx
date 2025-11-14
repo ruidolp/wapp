@@ -120,7 +120,7 @@ export function CardsList({
           )}
 
           {/* Acciones */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-2.5">
             <Button
               variant="outline"
               size="sm"
