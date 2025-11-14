@@ -170,6 +170,7 @@ export function CrearGastoDrawer({
     setInputMarca('')
     setSuggestionsMarca([])
     setShowSuggestionsMarca(false)
+    inputMarcaRef.current?.focus()
   }
 
   // Remover marca seleccionada
@@ -194,7 +195,6 @@ export function CrearGastoDrawer({
       await crearYAgregarMarca(trimmedValue)
     }
 
-    setInputMarca('')
     setSuggestionsMarca([])
     setShowSuggestionsMarca(false)
     inputMarcaRef.current?.focus()
@@ -225,6 +225,7 @@ export function CrearGastoDrawer({
 
       setMarcas([...marcas, nuevaMarca])
       setMarcaSeleccionada(nuevaMarca.id)
+      setInputMarca('')
       notify.success(`Marca "${nombre}" creada`)
     } catch (error: any) {
       notify.error(error.message || 'Error al crear marca')
