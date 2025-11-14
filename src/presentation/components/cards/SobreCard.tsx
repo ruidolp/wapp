@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { CategoriaCard } from '@/components/cards/CategoriaCard'
 import { useSobreCategories } from '@/presentation/hooks/useSobres'
+import { EditarCategoriaDrawer } from '@/components/drawers/EditarCategoriaDrawer'
 
 interface Billetera {
   id: string
@@ -56,6 +57,8 @@ export function SobreCard({
   onVerDetalle,
 }: SobreCardProps) {
   const [categoriasLoading, setCategoriasLoading] = useState(false)
+  const [editarCategoriaOpen, setEditarCategoriaOpen] = useState(false)
+  const [selectedCategoria, setSelectedCategoria] = useState<{ id: string; nombre: string } | null>(null)
 
   // Asegurar que son números (pueden venir como strings/Decimal de la BD)
   const presupuesto = Number(presupuestoAsignado) || 0
@@ -72,15 +75,6 @@ export function SobreCard({
   useEffect(() => {
     setCategoriasLoading(categoriasLoadingHook)
   }, [categoriasLoadingHook])
-
-  // Agrupar asignaciones por pares (2 billeteras por fila)
-  const pares = useMemo(() => {
-    const pairs = []
-    for (let i = 0; i < asignaciones.length; i += 2) {
-      pairs.push([asignaciones[i], asignaciones[i + 1]].filter(Boolean))
-    }
-    return pairs
-  }, [asignaciones])
 
   // Ordenar categorías por porcentaje descendente
   const categoriasOrdenadas = useMemo(() => {
@@ -184,39 +178,6 @@ export function SobreCard({
           </p>
         </div>
 
-        {/* Asignaciones de billeteras - Grid 2 columnas */}
-        {asignaciones.length > 0 ? (
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-muted-foreground">
-              Asignaciones ({asignaciones.length})
-            </p>
-
-            {pares.map((par, parIdx) => (
-              <div key={parIdx} className="grid grid-cols-2 gap-2">
-                {par.map((asignacion) => (
-                  <div
-                    key={asignacion.billetera_id}
-                    className="p-2 rounded-lg border bg-slate-50 space-y-1"
-                  >
-                    <p className="text-xs font-medium truncate">
-                      {asignacion.billetera?.nombre}
-                    </p>
-                    <p className="text-sm font-bold">
-                      ${Number(asignacion.monto_asignado || 0).toFixed(2)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="p-3 rounded-lg bg-slate-50 text-center">
-            <p className="text-sm text-muted-foreground">
-              Sin asignaciones aún
-            </p>
-          </div>
-        )}
-
         {/* Categorías */}
         {categoriasLoading ? (
           <div className="p-3 rounded-lg bg-slate-50 text-center">
@@ -254,7 +215,11 @@ export function SobreCard({
                   gastado={categoria.gastado || 0}
                   porcentaje={categoria.porcentaje || 0}
                   presupuestoAsignado={presupuesto}
-                  onClick={() => {}}
+                  onClick={(e) => {
+                    e?.stopPropagation()
+                    setSelectedCategoria({ id: categoria.id, nombre: categoria.nombre })
+                    setEditarCategoriaOpen(true)
+                  }}
                 />
               ))}
             </div>
@@ -285,6 +250,19 @@ export function SobreCard({
           </Badge>
         )}
       </div>
+
+      {/* Drawer editar categoría */}
+      {selectedCategoria && (
+        <EditarCategoriaDrawer
+          open={editarCategoriaOpen}
+          onOpenChange={setEditarCategoriaOpen}
+          categoriaId={selectedCategoria.id}
+          categoriaNombre={selectedCategoria.nombre}
+          onSuccess={() => {
+            refetchCategorias()
+          }}
+        />
+      )}
     </Card>
   )
 }

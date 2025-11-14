@@ -43,11 +43,12 @@ export async function GET(req: NextRequest) {
       })
     } else {
       // Obtener todas las subcategorías del usuario
-      // Para esto, necesitaríamos una función en el service que obtenga todas
-      // Por ahora, retornar array vacío si no se especifica categoriaId
+      const { findSubcategoriasByUser } = await import('@/infrastructure/database/queries/subcategorias.queries')
+      const subcategorias = await findSubcategoriasByUser(session.user.id)
+
       return NextResponse.json({
         success: true,
-        subcategorias: [],
+        subcategorias,
       })
     }
   } catch (error: any) {
