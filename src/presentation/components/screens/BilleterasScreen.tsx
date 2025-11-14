@@ -147,7 +147,7 @@ export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: Bil
       <div className="fixed right-4 top-24 z-40">
         <Button
           onClick={handleCreate}
-          className="rounded-full shadow-lg"
+          className="shadow-lg"
           size="lg"
         >
           ➕ Nueva Billetera

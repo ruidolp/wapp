@@ -138,12 +138,6 @@ export function SobresScreen({ userId }: { userId: string }) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-foreground">Sobres</h2>
-        <Button
-          onClick={() => setCrearSobreOpen(true)}
-          size="sm"
-        >
-          + Nuevo Sobre
-        </Button>
       </div>
 
       {/* Contenido */}
@@ -169,7 +163,7 @@ export function SobresScreen({ userId }: { userId: string }) {
               {sobres.map((sobre) => (
                 <div
                   key={sobre.id}
-                  className="flex-[0_0_100%] sm:flex-[0_0_calc(50%-0.5rem)] lg:flex-[0_0_calc(33.333%-0.75rem)] min-w-0"
+                  className="flex-[0_0_100%] min-w-0"
                 >
                   <SobreCard
                     id={sobre.id}
@@ -250,7 +244,7 @@ export function SobresScreen({ userId }: { userId: string }) {
       <div className="fixed right-4 top-24 z-40">
         <Button
           onClick={() => setCrearSobreOpen(true)}
-          className="rounded-full shadow-lg"
+          className="shadow-lg"
           size="lg"
         >
           ➕ Nuevo Sobre
