@@ -188,18 +188,16 @@ export function SobresScreen({ userId }: { userId: string }) {
         loading={false}
       />
 
-      {/* Botón flotante "Crear Gasto" - solo visible cuando hay sobres */}
-      {!loading && sobres.length > 0 && (
-        <div className="fixed right-4 bottom-[calc(4rem+2px)] z-40">
-          <Button
-            onClick={() => setCrearGastoOpen(true)}
-            className="rounded-full shadow-lg"
-            size="lg"
-          >
-            ➕ Crear Gasto
-          </Button>
-        </div>
-      )}
+      {/* Botón flotante "Nuevo Sobre" - siempre visible */}
+      <div className="fixed right-4 bottom-[calc(4rem+2px)] z-40">
+        <Button
+          onClick={() => setCrearSobreOpen(true)}
+          className="rounded-full shadow-lg"
+          size="lg"
+        >
+          ➕ Nuevo Sobre
+        </Button>
+      </div>
     </div>
   )
 }
