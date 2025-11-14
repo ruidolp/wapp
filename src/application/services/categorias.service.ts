@@ -24,6 +24,9 @@ import {
   updateSubcategoria,
   softDeleteSubcategoria,
 } from '@/infrastructure/database/queries/subcategorias.queries'
+import {
+  findTransaccionesByCategoria,
+} from '@/infrastructure/database/queries/transacciones.queries'
 
 /**
  * Datos para crear una categoría
@@ -233,6 +236,9 @@ export async function actualizarCategoria(
 
 /**
  * Eliminar una categoría (soft delete)
+ *
+ * VALIDACIÓN: Si la categoría tiene transacciones, retorna error pidiendo
+ * que se eliminen primero las transacciones
  */
 export async function eliminarCategoria(
   categoriaId: string,
@@ -243,6 +249,16 @@ export async function eliminarCategoria(
     const categoriaResult = await obtenerCategoria(categoriaId, userId)
     if (!categoriaResult.success) {
       return categoriaResult
+    }
+
+    // VALIDACIÓN: Contar transacciones asociadas a esta categoría
+    const transacciones = await findTransaccionesByCategoria(categoriaId)
+
+    if (transacciones && transacciones.length > 0) {
+      return {
+        success: false,
+        error: `No se puede eliminar la categoría. Tiene ${transacciones.length} transacciones registradas. Debe eliminarlas primero.`,
+      }
     }
 
     await softDeleteCategoria(categoriaId)
