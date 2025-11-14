@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 
 /**
  * Hook para obtener detalles de un sobre
@@ -278,6 +278,11 @@ export function useSobreCategories(sobreId: string) {
       setLoading(false)
     }
   }, [sobreId])
+
+  // Ejecutar fetch al montar y cuando cambie sobreId
+  useEffect(() => {
+    fetchCategories()
+  }, [fetchCategories])
 
   return {
     categorias,
