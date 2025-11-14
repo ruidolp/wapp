@@ -218,9 +218,10 @@ export function CrearGastoDrawer({
   // Click en sugerencia de marca
   const handleSelectMarca = (subcategoria: Subcategoria) => {
     setSubcategoriaSeleccionada(subcategoria.id)
-    setInputMarca(subcategoria.nombre)
+    setInputMarca('')
     setSugerenciasMarcas([])
     setShowSugerenciasMarcas(false)
+    marcaRef.current?.focus()
   }
 
   // Manejar ENTER en el input de marca
@@ -239,7 +240,7 @@ export function CrearGastoDrawer({
     if (existe) {
       // Si existe, seleccionarla
       setSubcategoriaSeleccionada(existe.id)
-      setInputMarca(existe.nombre)
+      setInputMarca('')
     } else {
       // Si no existe, crearla
       await crearNuevaMarca(trimmedValue)
@@ -247,6 +248,7 @@ export function CrearGastoDrawer({
 
     setSugerenciasMarcas([])
     setShowSugerenciasMarcas(false)
+    marcaRef.current?.focus()
   }
 
   // Crear nueva marca/subcategoría
@@ -275,7 +277,7 @@ export function CrearGastoDrawer({
       setTodasSubcategorias([...todasSubcategorias, nuevaMarca])
       setSubcategoriasFiltradas([...subcategoriasFiltradas, nuevaMarca])
       setSubcategoriaSeleccionada(nuevaMarca.id)
-      setInputMarca(nuevaMarca.nombre)
+      setInputMarca('')
 
       notify.success(`Marca "${nombre}" creada`)
     } catch (error: any) {
@@ -446,50 +448,99 @@ export function CrearGastoDrawer({
 
             {/* Marca/Subcategoría con autocomplete */}
             {categoriaSeleccionada && (
-              <div className="space-y-2">
-                <Label htmlFor="marca">Marca (opcional)</Label>
-                <div className="relative">
-                  <Input
-                    ref={marcaRef}
-                    id="marca"
-                    type="text"
-                    placeholder="Escribe nombre de marca (Ej: Walmart)"
-                    value={inputMarca}
-                    onChange={(e) => handleInputMarcaChange(e.target.value)}
-                    onKeyDown={handleMarcaKeyDown}
-                    onFocus={() => {
-                      if (inputMarca && sugerenciasMarcas.length > 0) {
-                        setShowSugerenciasMarcas(true)
-                      }
-                    }}
-                    onBlur={() => {
-                      // Delay para permitir click en sugerencia
-                      setTimeout(() => setShowSugerenciasMarcas(false), 200)
-                    }}
-                  />
+              <>
+                {/* Separador */}
+                <div className="border-t border-gray-200 my-4" />
 
-                  {/* Sugerencias */}
-                  {showSugerenciasMarcas && sugerenciasMarcas.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 border rounded-md bg-white shadow-lg z-10 max-h-48 overflow-y-auto">
-                      {sugerenciasMarcas.map((marca) => (
-                        <button
-                          key={marca.id}
-                          onClick={() => handleSelectMarca(marca)}
-                          className="w-full text-left px-3 py-2 hover:bg-slate-100 flex items-center gap-2 text-sm"
-                          type="button"
-                        >
-                          <span className="text-green-600">✓</span>
-                          <span>{marca.emoji && `${marca.emoji} `}</span>
-                          <span>{marca.nombre}</span>
-                        </button>
-                      ))}
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label>¿Dónde compras?</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Agrega tus marcas recurrentes para que puedas medir tus gastos
+                    </p>
+                  </div>
+
+                  {/* Marca seleccionada (solo 1) */}
+                  {subcategoriaSeleccionada && (
+                    <div className="space-y-2">
+                      <Label>Marca seleccionada</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {(() => {
+                          const marcaSeleccionada = subcategoriasFiltradas.find(
+                            (s) => s.id === subcategoriaSeleccionada
+                          )
+                          return marcaSeleccionada ? (
+                            <Badge
+                              key={marcaSeleccionada.id}
+                              variant="default"
+                              className="cursor-pointer gap-1 pl-2"
+                            >
+                              {marcaSeleccionada.emoji && <span>{marcaSeleccionada.emoji}</span>}
+                              <span>{marcaSeleccionada.nombre}</span>
+                              <button
+                                onClick={() => {
+                                  setSubcategoriaSeleccionada('')
+                                  setInputMarca('')
+                                }}
+                                className="ml-1 hover:opacity-70"
+                                type="button"
+                              >
+                                ✕
+                              </button>
+                            </Badge>
+                          ) : null
+                        })()}
+                      </div>
                     </div>
                   )}
+
+                  {/* Input de búsqueda/creación */}
+                  <div className="space-y-2">
+                    <Label htmlFor="marca">Buscar o crear marca</Label>
+                    <div className="relative">
+                      <Input
+                        ref={marcaRef}
+                        id="marca"
+                        type="text"
+                        placeholder="Escribe nombre de marca (Ej: Walmart)"
+                        value={inputMarca}
+                        onChange={(e) => handleInputMarcaChange(e.target.value)}
+                        onKeyDown={handleMarcaKeyDown}
+                        onFocus={() => {
+                          if (inputMarca && sugerenciasMarcas.length > 0) {
+                            setShowSugerenciasMarcas(true)
+                          }
+                        }}
+                        onBlur={() => {
+                          // Delay para permitir click en sugerencia
+                          setTimeout(() => setShowSugerenciasMarcas(false), 200)
+                        }}
+                      />
+
+                      {/* Sugerencias */}
+                      {showSugerenciasMarcas && sugerenciasMarcas.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-1 border rounded-md bg-white shadow-lg z-10 max-h-48 overflow-y-auto">
+                          {sugerenciasMarcas.map((marca) => (
+                            <button
+                              key={marca.id}
+                              onClick={() => handleSelectMarca(marca)}
+                              className="w-full text-left px-3 py-2 hover:bg-slate-100 flex items-center gap-2 text-sm"
+                              type="button"
+                            >
+                              <span className="text-green-600">✓</span>
+                              <span>{marca.emoji && `${marca.emoji} `}</span>
+                              <span>{marca.nombre}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Presiona <kbd className="px-2 py-1 bg-slate-100 rounded text-xs">ENTER</kbd> para crear nueva
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Presiona <kbd className="px-2 py-1 bg-slate-100 rounded text-xs">ENTER</kbd> para crear nueva
-                </p>
-              </div>
+              </>
             )}
 
             {/* Monto */}
