@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
@@ -15,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -30,7 +31,6 @@ interface Sobre {
   id: string
   nombre: string
   emoji?: string
-  color?: string
 }
 
 interface Billetera {
@@ -45,10 +45,9 @@ interface Categoria {
   id: string
   nombre: string
   emoji?: string
-  color?: string
 }
 
-interface Subcategoria {
+interface Marca {
   id: string
   nombre: string
   emoji?: string
@@ -76,85 +75,36 @@ export function CrearGastoDrawer({
   const [sobres, setSobres] = useState<Sobre[]>([])
   const [billeteras, setBilleteras] = useState<Billetera[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
-  const [todasSubcategorias, setTodasSubcategorias] = useState<Subcategoria[]>([])
-  const [subcategoriasFiltradas, setSubcategoriasFiltradas] = useState<Subcategoria[]>([])
+  const [marcas, setMarcas] = useState<Marca[]>([])
 
   const [sobreSeleccionado, setSobreSeleccionado] = useState<string>('')
   const [billeteraSeleccionada, setBilleteraSeleccionada] = useState<string>('')
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>('')
-  const [subcategoriaSeleccionada, setSubcategoriaSeleccionada] = useState<string>('')
+  const [marcaSeleccionada, setMarcaSeleccionada] = useState<string>('')
+  const [inputMarca, setInputMarca] = useState('')
+  const [suggestionsMarca, setSuggestionsMarca] = useState<Marca[]>([])
+  const [showSuggestionsMarca, setShowSuggestionsMarca] = useState(false)
   const [monto, setMonto] = useState('')
   const [comentario, setComentario] = useState('')
 
-  // Estados para autocomplete de marcas
-  const [inputMarca, setInputMarca] = useState('')
-  const [sugerenciasMarcas, setSugerenciasMarcas] = useState<Subcategoria[]>([])
-  const [showSugerenciasMarcas, setShowSugerenciasMarcas] = useState(false)
-
   const montoRef = useRef<HTMLInputElement>(null)
-  const marcaRef = useRef<HTMLInputElement>(null)
+  const inputMarcaRef = useRef<HTMLInputElement>(null)
   useInputFocus(montoRef, 350)
 
   const { crearGasto } = useCrearGasto()
 
-  // Cargar datos cuando se abre el drawer
+  // Cargar datos cuando se abre
   useEffect(() => {
     if (open) {
       fetchData()
-      // Reset preselected fields
       setSobreSeleccionado(preselectedSobreId || '')
       setCategoriaSeleccionada(preselectedCategoriaId || '')
-      setSubcategoriaSeleccionada('')
+      setMarcaSeleccionada('')
       setInputMarca('')
       setMonto('')
       setComentario('')
-      setSugerenciasMarcas([])
-      setShowSugerenciasMarcas(false)
     }
   }, [open, preselectedSobreId, preselectedCategoriaId])
-
-  // Cargar categorías del sobre cuando se selecciona
-  useEffect(() => {
-    const fetchCategoriasSobre = async () => {
-      if (!sobreSeleccionado) return
-
-      try {
-        const response = await fetch(`/api/sobres/${sobreSeleccionado}/categorias`)
-        if (response.ok) {
-          const data = await response.json()
-          setCategorias(data.categorias || [])
-        }
-      } catch (error) {
-        console.error('Error al cargar categorías del sobre:', error)
-      }
-    }
-
-    fetchCategoriasSobre()
-  }, [sobreSeleccionado])
-
-  // Cargar subcategorías cuando cambia la categoría seleccionada
-  useEffect(() => {
-    const fetchSubcategorias = async () => {
-      if (!categoriaSeleccionada) {
-        setSubcategoriasFiltradas([])
-        return
-      }
-
-      try {
-        const response = await fetch(`/api/subcategorias?categoriaId=${categoriaSeleccionada}`)
-        if (response.ok) {
-          const data = await response.json()
-          setSubcategoriasFiltradas(data.subcategorias || [])
-        }
-      } catch (error) {
-        console.error('Error al cargar subcategorías:', error)
-      }
-    }
-
-    fetchSubcategorias()
-    setSubcategoriaSeleccionada('')
-    setInputMarca('')
-  }, [categoriaSeleccionada])
 
   // Auto-select billetera si solo hay una
   useEffect(() => {
@@ -165,30 +115,28 @@ export function CrearGastoDrawer({
 
   const fetchData = async () => {
     try {
-      // Fetch sobres
-      const sobresResponse = await fetch('/api/sobres')
-      if (sobresResponse.ok) {
-        const sobresData = await sobresResponse.json()
-        const sobresList = sobresData.sobres || []
-        setSobres(sobresList)
-        if (sobresList.length > 0 && !sobreSeleccionado) {
-          setSobreSeleccionado(sobresList[0].id)
-        }
-      }
+      const [sobresRes, billeterasRes, categoriasRes, marcasRes] = await Promise.all([
+        fetch('/api/sobres'),
+        fetch('/api/billeteras'),
+        fetch('/api/categorias'),
+        fetch('/api/subcategorias'),
+      ])
 
-      // Fetch billeteras
-      const billeterasResponse = await fetch('/api/billeteras')
-      if (billeterasResponse.ok) {
-        const billeterasData = await billeterasResponse.json()
-        const billeterasList = billeterasData.billeteras || []
-        setBilleteras(billeterasList)
+      if (sobresRes.ok) {
+        const data = await sobresRes.json()
+        setSobres(data.sobres || [])
       }
-
-      // Fetch todas las subcategorías del usuario (para autocomplete)
-      const subcategoriasResponse = await fetch('/api/subcategorias')
-      if (subcategoriasResponse.ok) {
-        const subcategoriasData = await subcategoriasResponse.json()
-        setTodasSubcategorias(subcategoriasData.subcategorias || [])
+      if (billeterasRes.ok) {
+        const data = await billeterasRes.json()
+        setBilleteras(data.billeteras || [])
+      }
+      if (categoriasRes.ok) {
+        const data = await categoriasRes.json()
+        setCategorias(data.categorias || [])
+      }
+      if (marcasRes.ok) {
+        const data = await marcasRes.json()
+        setMarcas(data.subcategorias || [])
       }
     } catch (error) {
       console.error('Error al cargar datos:', error)
@@ -196,71 +144,75 @@ export function CrearGastoDrawer({
     }
   }
 
-  // Manejar cambios en el input de marca
+  // Manejar cambios en input de marca
   const handleInputMarcaChange = (value: string) => {
     setInputMarca(value)
 
-    if (!value.trim()) {
-      setSugerenciasMarcas([])
-      setShowSugerenciasMarcas(false)
+    if (!value.trim() || !categoriaSeleccionada) {
+      setSuggestionsMarca([])
+      setShowSuggestionsMarca(false)
       return
     }
 
-    // Filtrar subcategorías de la categoría actual que coincidan con la búsqueda
-    const filtered = subcategoriasFiltradas.filter((sub) =>
-      sub.nombre.toLowerCase().includes(value.toLowerCase())
-    )
+    const filtered = marcas.filter((marca) => {
+      const perteneceeACategoriaSeleccionada = marca.categoria_id === categoriaSeleccionada
+      const coincideConBusqueda = marca.nombre.toLowerCase().includes(value.toLowerCase())
+      return perteneceeACategoriaSeleccionada && coincideConBusqueda
+    })
 
-    setSugerenciasMarcas(filtered)
-    setShowSugerenciasMarcas(filtered.length > 0)
+    setSuggestionsMarca(filtered)
+    setShowSuggestionsMarca(filtered.length > 0)
   }
 
   // Click en sugerencia de marca
-  const handleSelectMarca = (subcategoria: Subcategoria) => {
-    setSubcategoriaSeleccionada(subcategoria.id)
-    setInputMarca(subcategoria.nombre)
-    setSugerenciasMarcas([])
-    setShowSugerenciasMarcas(false)
+  const handleSelectMarca = (marca: Marca) => {
+    setMarcaSeleccionada(marca.id)
+    setInputMarca('')
+    setSuggestionsMarca([])
+    setShowSuggestionsMarca(false)
   }
 
-  // Manejar ENTER en el input de marca
-  const handleMarcaKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+  // Remover marca seleccionada
+  const handleRemoveMarca = () => {
+    setMarcaSeleccionada('')
+    setInputMarca('')
+  }
+
+  // ENTER en input de marca
+  const handleKeyDownMarca = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'Enter') return
     e.preventDefault()
 
     const trimmedValue = inputMarca.trim()
-    if (!trimmedValue) return
+    if (!trimmedValue || !categoriaSeleccionada) return
 
-    // Buscar si ya existe una subcategoría con ese nombre
-    const existe = subcategoriasFiltradas.find(
-      (s) => s.nombre.toLowerCase() === trimmedValue.toLowerCase()
-    )
+    const existe = marcas.find((m) => m.nombre.toLowerCase() === trimmedValue.toLowerCase())
 
     if (existe) {
-      // Si existe, seleccionarla
-      setSubcategoriaSeleccionada(existe.id)
-      setInputMarca(existe.nombre)
+      handleSelectMarca(existe)
     } else {
-      // Si no existe, crearla
-      await crearNuevaMarca(trimmedValue)
+      await crearYAgregarMarca(trimmedValue)
     }
 
-    setSugerenciasMarcas([])
-    setShowSugerenciasMarcas(false)
+    setInputMarca('')
+    setSuggestionsMarca([])
+    setShowSuggestionsMarca(false)
+    inputMarcaRef.current?.focus()
   }
 
-  // Crear nueva marca/subcategoría
-  const crearNuevaMarca = async (nombre: string) => {
-    if (!categoriaSeleccionada) {
-      notify.error('Selecciona una categoría primero')
-      return
-    }
+  // Crear nueva marca
+  const crearYAgregarMarca = async (nombre: string) => {
+    if (!categoriaSeleccionada) return
 
+    setLoading(true)
     try {
       const response = await fetch('/api/subcategorias', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, categoriaId: categoriaSeleccionada }),
+        body: JSON.stringify({
+          nombre,
+          categoriaId: categoriaSeleccionada,
+        }),
       })
 
       if (!response.ok) {
@@ -271,15 +223,13 @@ export function CrearGastoDrawer({
       const data = await response.json()
       const nuevaMarca = data.subcategoria
 
-      // Actualizar listas
-      setTodasSubcategorias([...todasSubcategorias, nuevaMarca])
-      setSubcategoriasFiltradas([...subcategoriasFiltradas, nuevaMarca])
-      setSubcategoriaSeleccionada(nuevaMarca.id)
-      setInputMarca(nuevaMarca.nombre)
-
+      setMarcas([...marcas, nuevaMarca])
+      setMarcaSeleccionada(nuevaMarca.id)
       notify.success(`Marca "${nombre}" creada`)
     } catch (error: any) {
       notify.error(error.message || 'Error al crear marca')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -288,7 +238,6 @@ export function CrearGastoDrawer({
     setLoading(true)
 
     try {
-      // Validar campos requeridos
       if (!sobreSeleccionado) {
         notify.error('Selecciona un sobre')
         setLoading(false)
@@ -319,24 +268,16 @@ export function CrearGastoDrawer({
         fecha: new Date().toISOString(),
         sobreId: sobreSeleccionado,
         categoriaId: categoriaSeleccionada,
-        subcategoriaId: subcategoriaSeleccionada || undefined,
+        subcategoriaId: marcaSeleccionada || undefined,
       })
 
       notify.success('Gasto registrado correctamente')
 
-      // Check for warnings
       if (result.warning) {
         notify.warning(`${result.warning.type}: ${result.warning.message}`)
       }
 
-      // Reset form
-      setMonto('')
-      setComentario('')
-
-      // Close drawer
       onOpenChange(false)
-
-      // Callback
       onSuccess?.()
     } catch (err: any) {
       notify.error(err.message || 'Error al registrar gasto')
@@ -347,6 +288,11 @@ export function CrearGastoDrawer({
 
   const billeteraActual = billeteras.find((b) => b.id === billeteraSeleccionada)
   const sobreActual = sobres.find((s) => s.id === sobreSeleccionado)
+  const categoriaActual = categorias.find((c) => c.id === categoriaSeleccionada)
+  const marcasDelCategoria = categoriaSeleccionada
+    ? marcas.filter((m) => m.categoria_id === categoriaSeleccionada)
+    : []
+  const marcaActual = marcas.find((m) => m.id === marcaSeleccionada)
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -362,9 +308,7 @@ export function CrearGastoDrawer({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Sobre */}
             <div className="space-y-2">
-              <Label htmlFor="sobre">
-                Sobre <span className="text-red-500">*</span>
-              </Label>
+              <Label htmlFor="sobre">Sobre</Label>
               {sobres.length === 1 ? (
                 <div className="flex items-center gap-2 p-2 rounded-lg border bg-slate-50">
                   <Badge variant="outline">
@@ -379,8 +323,7 @@ export function CrearGastoDrawer({
                   <SelectContent>
                     {sobres.map((s) => (
                       <SelectItem key={s.id} value={s.id}>
-                        <span className="mr-2">{s.emoji || '📧'}</span>
-                        <span className="font-medium">{s.nombre}</span>
+                        {s.emoji} {s.nombre}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -390,9 +333,7 @@ export function CrearGastoDrawer({
 
             {/* Billetera */}
             <div className="space-y-2">
-              <Label htmlFor="billetera">
-                Billetera <span className="text-red-500">*</span>
-              </Label>
+              <Label htmlFor="billetera">Billetera</Label>
               {billeteras.length === 1 ? (
                 <div className="flex items-center gap-2 p-2 rounded-lg border bg-slate-50">
                   <Badge variant="outline">
@@ -407,28 +348,17 @@ export function CrearGastoDrawer({
                   <SelectContent>
                     {billeteras.map((b) => (
                       <SelectItem key={b.id} value={b.id}>
-                        <span className="mr-2">{b.emoji || '💳'}</span>
-                        <span className="font-medium">{b.nombre}</span>
-                        <span className="ml-2 text-xs text-muted-foreground">
-                          ${Number(b.saldo_real || 0).toFixed(2)}
-                        </span>
+                        {b.emoji || '💳'} {b.nombre} (${Number(b.saldo_real).toFixed(2)})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
-              {billeteraActual && (
-                <p className="text-xs text-muted-foreground">
-                  Saldo: ${Number(billeteraActual.saldo_real || 0).toFixed(2)}
-                </p>
-              )}
             </div>
 
             {/* Categoría */}
             <div className="space-y-2">
-              <Label htmlFor="categoria">
-                Categoría <span className="text-red-500">*</span>
-              </Label>
+              <Label htmlFor="categoria">Categoría</Label>
               <Select value={categoriaSeleccionada} onValueChange={setCategoriaSeleccionada}>
                 <SelectTrigger id="categoria">
                   <SelectValue placeholder="Seleccionar categoría" />
@@ -436,42 +366,78 @@ export function CrearGastoDrawer({
                 <SelectContent>
                   {categorias.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      <span className="mr-2">{c.emoji || '📁'}</span>
-                      <span className="font-medium">{c.nombre}</span>
+                      {c.emoji} {c.nombre}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Marca/Subcategoría con autocomplete */}
+            {/* Marca (en Card si categoría seleccionada) */}
             {categoriaSeleccionada && (
-              <div className="space-y-2">
-                <Label htmlFor="marca">Marca (opcional)</Label>
+              <Card className="p-4 space-y-3 border-blue-200 bg-blue-50">
+                <Label className="text-sm font-medium">Marca</Label>
+
+                {/* Marca seleccionada */}
+                {marcaSeleccionada && marcaActual && (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="default" className="gap-1">
+                      {marcaActual.emoji && <span>{marcaActual.emoji}</span>}
+                      <span>{marcaActual.nombre}</span>
+                    </Badge>
+                    <button
+                      onClick={handleRemoveMarca}
+                      className="ml-auto text-xs hover:text-red-600"
+                      type="button"
+                    >
+                      Cambiar
+                    </button>
+                  </div>
+                )}
+
+                {/* Marcas disponibles con scroll */}
+                {!marcaSeleccionada && marcasDelCategoria.length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Selecciona una marca:</Label>
+                    <div className="max-h-20 overflow-x-auto flex gap-2 pb-2">
+                      {marcasDelCategoria.map((marca) => (
+                        <button
+                          key={marca.id}
+                          onClick={() => handleSelectMarca(marca)}
+                          className="flex-shrink-0 px-3 py-1 rounded-full border border-blue-300 hover:bg-blue-100 text-sm transition"
+                          type="button"
+                        >
+                          {marca.emoji && <span className="mr-1">{marca.emoji}</span>}
+                          {marca.nombre}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Input para buscar/crear marca */}
                 <div className="relative">
                   <Input
-                    ref={marcaRef}
-                    id="marca"
+                    ref={inputMarcaRef}
                     type="text"
-                    placeholder="Escribe nombre de marca (Ej: Walmart)"
+                    placeholder="Busca o crea marca..."
                     value={inputMarca}
                     onChange={(e) => handleInputMarcaChange(e.target.value)}
-                    onKeyDown={handleMarcaKeyDown}
+                    onKeyDown={handleKeyDownMarca}
                     onFocus={() => {
-                      if (inputMarca && sugerenciasMarcas.length > 0) {
-                        setShowSugerenciasMarcas(true)
+                      if (inputMarca && suggestionsMarca.length > 0) {
+                        setShowSuggestionsMarca(true)
                       }
                     }}
                     onBlur={() => {
-                      // Delay para permitir click en sugerencia
-                      setTimeout(() => setShowSugerenciasMarcas(false), 200)
+                      setTimeout(() => setShowSuggestionsMarca(false), 200)
                     }}
+                    disabled={marcaSeleccionada !== ''}
                   />
 
-                  {/* Sugerencias */}
-                  {showSugerenciasMarcas && sugerenciasMarcas.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 border rounded-md bg-white shadow-lg z-10 max-h-48 overflow-y-auto">
-                      {sugerenciasMarcas.map((marca) => (
+                  {showSuggestionsMarca && suggestionsMarca.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 border rounded-md bg-white shadow-lg z-10">
+                      {suggestionsMarca.map((marca) => (
                         <button
                           key={marca.id}
                           onClick={() => handleSelectMarca(marca)}
@@ -479,24 +445,23 @@ export function CrearGastoDrawer({
                           type="button"
                         >
                           <span className="text-green-600">✓</span>
-                          <span>{marca.emoji && `${marca.emoji} `}</span>
+                          {marca.emoji && <span>{marca.emoji}</span>}
                           <span>{marca.nombre}</span>
                         </button>
                       ))}
                     </div>
                   )}
                 </div>
+
                 <p className="text-xs text-muted-foreground">
-                  Presiona <kbd className="px-2 py-1 bg-slate-100 rounded text-xs">ENTER</kbd> para crear nueva
+                  Presiona <kbd className="px-2 py-1 bg-slate-100 rounded text-xs">ENTER</kbd> para crear nueva marca
                 </p>
-              </div>
+              </Card>
             )}
 
             {/* Monto */}
             <div className="space-y-2">
-              <Label htmlFor="monto">
-                Monto <span className="text-red-500">*</span>
-              </Label>
+              <Label htmlFor="monto">Monto</Label>
               <Input
                 ref={montoRef}
                 id="monto"
@@ -527,7 +492,11 @@ export function CrearGastoDrawer({
           <Button
             onClick={handleSubmit}
             disabled={
-              loading || !sobreSeleccionado || !billeteraSeleccionada || !categoriaSeleccionada || !monto
+              loading ||
+              !sobreSeleccionado ||
+              !billeteraSeleccionada ||
+              !categoriaSeleccionada ||
+              !monto
             }
             className="w-full"
           >
