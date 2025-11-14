@@ -170,11 +170,12 @@ export async function POST(
     )
 
     // Actualizar tracking del participante en el sobre
-    const nuevoPresupuesto = participante.presupuesto_asignado + monto
+    const nuevoPresupuesto = Number(participante.presupuesto_asignado) + monto
     await updateParticipanteTracking(sobreId, session.user.id, nuevoPresupuesto)
 
     // **CRÍTICO**: Actualizar presupuesto_asignado del sobre
-    const nuevoPresupuestoSobre = sobre.presupuesto_asignado + monto
+    // FIX: Convertir Decimal string a Number antes de suma
+    const nuevoPresupuestoSobre = Number(sobre.presupuesto_asignado) + monto
     const sobreActualizado = await updateSobrePresupuesto(sobreId, nuevoPresupuestoSobre)
     console.log('[ASIGNACION DEBUG] Sobre actualizado:', {
       id: sobreActualizado?.id,
@@ -190,7 +191,8 @@ export async function POST(
       .reduce((sum: number, a: any) => sum + Number(a.monto_asignado || 0), 0)
 
     // Calcular nuevo saldo_proyectado: saldo_real - total asignaciones
-    const nuevoSaldoProyectado = billetera.saldo_real - totalAsignacionesBilletera
+    // FIX: Convertir Decimal string a Number antes de resta
+    const nuevoSaldoProyectado = Number(billetera.saldo_real) - totalAsignacionesBilletera
     const billeteraActualizada = await updateBilleteraSaldoProyectado(billeteraId, nuevoSaldoProyectado)
     console.log('[ASIGNACION DEBUG] Billetera actualizada:', {
       id: billeteraActualizada?.id,
