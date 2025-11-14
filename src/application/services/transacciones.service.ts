@@ -251,6 +251,9 @@ export async function crearTransaccion(
       }
     }
 
+    // Calcular warnings ANTES de crear la transacción
+    const warning = await calcularWarningTransaccion(billeteraId, tipo, monto, sobreId, userId)
+
     // Crear transacción
     const transaccion = await createTransaccion({
       monto,
@@ -272,9 +275,6 @@ export async function crearTransaccion(
     if (tipo === 'GASTO' && sobreId) {
       await actualizarGastadoSobre(sobreId)
     }
-
-    // Calcular warnings si aplica
-    const warning = await calcularWarningTransaccion(billeteraId, tipo, monto, sobreId, userId)
 
     return {
       success: true,
