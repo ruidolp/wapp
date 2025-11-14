@@ -142,6 +142,14 @@ export function DepositarRetirarDrawer({
                   ))}
                 </SelectContent>
               </Select>
+              {/* Mostrar saldo_proyectado de la billetera seleccionada */}
+              {billeteraId && billeteras.find(b => b.id === billeteraId) && (
+                <div className="text-sm text-muted-foreground">
+                  {t('balance.projected')}: <span className="font-semibold text-foreground">
+                    ${Number(billeteras.find(b => b.id === billeteraId)?.saldo_proyectado || 0).toFixed(2)}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Monto */}

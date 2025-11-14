@@ -90,6 +90,13 @@ export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: Bil
       <div className="p-4 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-foreground">{t('title')}</h2>
+          <Button
+            onClick={handleCreate}
+            className="shadow-lg"
+            size="lg"
+          >
+            ➕ Nueva Billetera
+          </Button>
         </div>
 
         <CardsList
@@ -143,16 +150,6 @@ export function BilleterasScreen({ contextualOpen, onContextualOpenChange }: Bil
         onDeposito={() => setDepositoOpen(true)}
       />
 
-      {/* Botón flotante "Nueva Billetera" - arriba a la derecha, siempre visible */}
-      <div className="fixed right-4 top-24 z-40">
-        <Button
-          onClick={handleCreate}
-          className="shadow-lg"
-          size="lg"
-        >
-          ➕ Nueva Billetera
-        </Button>
-      </div>
     </>
   )
 }
