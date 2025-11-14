@@ -247,3 +247,42 @@ export function useSobreAsignaciones(sobreId: string) {
     refetch: fetchAsignaciones,
   }
 }
+
+/**
+ * Hook para obtener categorías de un sobre con gastos y porcentajes
+ */
+export function useSobreCategories(sobreId: string) {
+  const [categorias, setCategorias] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchCategories = useCallback(async () => {
+    if (!sobreId) return
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/sobres/${sobreId}/categorias`)
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al obtener categorías')
+      }
+
+      const data = await response.json()
+      setCategorias(data.categorias || [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error desconocido')
+    } finally {
+      setLoading(false)
+    }
+  }, [sobreId])
+
+  return {
+    categorias,
+    loading,
+    error,
+    refetch: fetchCategories,
+  }
+}
