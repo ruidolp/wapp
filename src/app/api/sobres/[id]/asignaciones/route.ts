@@ -12,8 +12,13 @@ import {
   findAsignacionesBySobre,
   createAsignacion,
   updateParticipanteTracking,
+  updateSobrePresupuesto,
 } from '@/infrastructure/database/queries/sobres.queries'
-import { findBilleteraById, createBilleteraTransaccion } from '@/infrastructure/database/queries/billeteras.queries'
+import {
+  findBilleteraById,
+  createBilleteraTransaccion,
+  updateBilleteraSaldoProyectado,
+} from '@/infrastructure/database/queries/billeteras.queries'
 
 /**
  * GET /api/sobres/[id]/asignaciones
@@ -136,6 +141,24 @@ export async function POST(
       )
     }
 
+    // DEBUG: Log inicial
+    console.log('[ASIGNACION DEBUG] Iniciando asignación de presupuesto:', {
+      sobreId,
+      billeteraId,
+      monto,
+      sobreActual: {
+        id: sobre.id,
+        presupuesto_asignado: sobre.presupuesto_asignado,
+        nombre: sobre.nombre,
+      },
+      billeteraActual: {
+        id: billetera.id,
+        saldo_real: billetera.saldo_real,
+        saldo_proyectado: billetera.saldo_proyectado,
+        nombre: billetera.nombre,
+      },
+    })
+
     // Crear asignación
     const asignacion = await createAsignacion(
       sobreId,
@@ -150,6 +173,32 @@ export async function POST(
     const nuevoPresupuesto = participante.presupuesto_asignado + monto
     await updateParticipanteTracking(sobreId, session.user.id, nuevoPresupuesto)
 
+    // **CRÍTICO**: Actualizar presupuesto_asignado del sobre
+    const nuevoPresupuestoSobre = sobre.presupuesto_asignado + monto
+    const sobreActualizado = await updateSobrePresupuesto(sobreId, nuevoPresupuestoSobre)
+    console.log('[ASIGNACION DEBUG] Sobre actualizado:', {
+      id: sobreActualizado?.id,
+      presupuesto_asignado: sobreActualizado?.presupuesto_asignado,
+    })
+
+    // **CRÍTICO**: Obtener todas las asignaciones actuales del sobre para calcular saldo_proyectado
+    const asignacionesActuales = await findAsignacionesBySobre(sobreId)
+
+    // Sumar todas las asignaciones de ESTA billetera
+    const totalAsignacionesBilletera = asignacionesActuales
+      .filter((a: any) => a.billetera_id === billeteraId)
+      .reduce((sum: number, a: any) => sum + Number(a.monto_asignado || 0), 0)
+
+    // Calcular nuevo saldo_proyectado: saldo_real - total asignaciones
+    const nuevoSaldoProyectado = billetera.saldo_real - totalAsignacionesBilletera
+    const billeteraActualizada = await updateBilleteraSaldoProyectado(billeteraId, nuevoSaldoProyectado)
+    console.log('[ASIGNACION DEBUG] Billetera actualizada:', {
+      id: billeteraActualizada?.id,
+      saldo_real: billeteraActualizada?.saldo_real,
+      saldo_proyectado: billeteraActualizada?.saldo_proyectado,
+      totalAsignacionesBilletera,
+    })
+
     // Registrar en billeteras_transacciones (solo registra, no debita)
     await createBilleteraTransaccion(
       billeteraId,
@@ -163,11 +212,17 @@ export async function POST(
       `Asignado a sobre: ${sobre.nombre}`
     )
 
+    console.log('[ASIGNACION DEBUG] Asignación completada exitosamente')
+
     return NextResponse.json(
       {
         success: true,
         asignacion,
         message: `Se asignaron $${monto} a ${sobre.nombre}`,
+        debug: {
+          presupuesto_asignado_sobre: nuevoPresupuestoSobre,
+          saldo_proyectado_billetera: nuevoSaldoProyectado,
+        },
       },
       { status: 201 }
     )
